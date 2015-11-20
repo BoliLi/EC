@@ -7,6 +7,9 @@
 //
 
 #import "AppDelegate.h"
+#import "Global.h"
+#import "Equation.h"
+#import "ViewController.h"
 
 @interface AppDelegate ()
 
@@ -16,9 +19,12 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    gEquationList = [NSMutableArray array];
+    gDisplayViewList = [NSMutableArray array];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];
-    self.window.rootViewController = [[UIViewController alloc]init];
+    self.window.rootViewController = [[ViewController alloc]init];
     [self.window makeKeyAndVisible];
     return YES;
 }
