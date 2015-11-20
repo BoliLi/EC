@@ -1,0 +1,521 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A96222F11BFF0F690059FF51 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A96222F01BFF0F690059FF51 /* main.m */; };
+		A96222F41BFF0F690059FF51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A96222F31BFF0F690059FF51 /* AppDelegate.m */; };
+		A96222F71BFF0F690059FF51 /* EasyCalc.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A96222F51BFF0F690059FF51 /* EasyCalc.xcdatamodeld */; };
+		A96222F91BFF0F690059FF51 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A96222F81BFF0F690059FF51 /* Assets.xcassets */; };
+		A96222FC1BFF0F690059FF51 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A96222FA1BFF0F690059FF51 /* LaunchScreen.storyboard */; };
+		A96223071BFF0F690059FF51 /* EasyCalcTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A96223061BFF0F690059FF51 /* EasyCalcTests.m */; };
+		A96223121BFF0F690059FF51 /* EasyCalcUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = A96223111BFF0F690059FF51 /* EasyCalcUITests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A96223031BFF0F690059FF51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A96222E41BFF0F690059FF51 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A96222EB1BFF0F690059FF51;
+			remoteInfo = EasyCalc;
+		};
+		A962230E1BFF0F690059FF51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A96222E41BFF0F690059FF51 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A96222EB1BFF0F690059FF51;
+			remoteInfo = EasyCalc;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		A96222EC1BFF0F690059FF51 /* EasyCalc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyCalc.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A96222F01BFF0F690059FF51 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		A96222F21BFF0F690059FF51 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		A96222F31BFF0F690059FF51 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		A96222F61BFF0F690059FF51 /* EasyCalc.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = EasyCalc.xcdatamodel; sourceTree = "<group>"; };
+		A96222F81BFF0F690059FF51 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A96222FB1BFF0F690059FF51 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A96222FD1BFF0F690059FF51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A96223021BFF0F690059FF51 /* EasyCalcTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EasyCalcTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A96223061BFF0F690059FF51 /* EasyCalcTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EasyCalcTests.m; sourceTree = "<group>"; };
+		A96223081BFF0F690059FF51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A962230D1BFF0F690059FF51 /* EasyCalcUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EasyCalcUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A96223111BFF0F690059FF51 /* EasyCalcUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EasyCalcUITests.m; sourceTree = "<group>"; };
+		A96223131BFF0F690059FF51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A96222E91BFF0F690059FF51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A96222FF1BFF0F690059FF51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A962230A1BFF0F690059FF51 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A96222E31BFF0F690059FF51 = {
+			isa = PBXGroup;
+			children = (
+				A96222EE1BFF0F690059FF51 /* EasyCalc */,
+				A96223051BFF0F690059FF51 /* EasyCalcTests */,
+				A96223101BFF0F690059FF51 /* EasyCalcUITests */,
+				A96222ED1BFF0F690059FF51 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A96222ED1BFF0F690059FF51 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A96222EC1BFF0F690059FF51 /* EasyCalc.app */,
+				A96223021BFF0F690059FF51 /* EasyCalcTests.xctest */,
+				A962230D1BFF0F690059FF51 /* EasyCalcUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A96222EE1BFF0F690059FF51 /* EasyCalc */ = {
+			isa = PBXGroup;
+			children = (
+				A96222F21BFF0F690059FF51 /* AppDelegate.h */,
+				A96222F31BFF0F690059FF51 /* AppDelegate.m */,
+				A96222F81BFF0F690059FF51 /* Assets.xcassets */,
+				A96222FA1BFF0F690059FF51 /* LaunchScreen.storyboard */,
+				A96222FD1BFF0F690059FF51 /* Info.plist */,
+				A96222F51BFF0F690059FF51 /* EasyCalc.xcdatamodeld */,
+				A96222EF1BFF0F690059FF51 /* Supporting Files */,
+			);
+			path = EasyCalc;
+			sourceTree = "<group>";
+		};
+		A96222EF1BFF0F690059FF51 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				A96222F01BFF0F690059FF51 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		A96223051BFF0F690059FF51 /* EasyCalcTests */ = {
+			isa = PBXGroup;
+			children = (
+				A96223061BFF0F690059FF51 /* EasyCalcTests.m */,
+				A96223081BFF0F690059FF51 /* Info.plist */,
+			);
+			path = EasyCalcTests;
+			sourceTree = "<group>";
+		};
+		A96223101BFF0F690059FF51 /* EasyCalcUITests */ = {
+			isa = PBXGroup;
+			children = (
+				A96223111BFF0F690059FF51 /* EasyCalcUITests.m */,
+				A96223131BFF0F690059FF51 /* Info.plist */,
+			);
+			path = EasyCalcUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A96222EB1BFF0F690059FF51 /* EasyCalc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A96223161BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalc" */;
+			buildPhases = (
+				A96222E81BFF0F690059FF51 /* Sources */,
+				A96222E91BFF0F690059FF51 /* Frameworks */,
+				A96222EA1BFF0F690059FF51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EasyCalc;
+			productName = EasyCalc;
+			productReference = A96222EC1BFF0F690059FF51 /* EasyCalc.app */;
+			productType = "com.apple.product-type.application";
+		};
+		A96223011BFF0F690059FF51 /* EasyCalcTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A96223191BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalcTests" */;
+			buildPhases = (
+				A96222FE1BFF0F690059FF51 /* Sources */,
+				A96222FF1BFF0F690059FF51 /* Frameworks */,
+				A96223001BFF0F690059FF51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A96223041BFF0F690059FF51 /* PBXTargetDependency */,
+			);
+			name = EasyCalcTests;
+			productName = EasyCalcTests;
+			productReference = A96223021BFF0F690059FF51 /* EasyCalcTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A962230C1BFF0F690059FF51 /* EasyCalcUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A962231C1BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalcUITests" */;
+			buildPhases = (
+				A96223091BFF0F690059FF51 /* Sources */,
+				A962230A1BFF0F690059FF51 /* Frameworks */,
+				A962230B1BFF0F690059FF51 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A962230F1BFF0F690059FF51 /* PBXTargetDependency */,
+			);
+			name = EasyCalcUITests;
+			productName = EasyCalcUITests;
+			productReference = A962230D1BFF0F690059FF51 /* EasyCalcUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A96222E41BFF0F690059FF51 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0710;
+				ORGANIZATIONNAME = LiBoli;
+				TargetAttributes = {
+					A96222EB1BFF0F690059FF51 = {
+						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = 4YK74W9MY4;
+					};
+					A96223011BFF0F690059FF51 = {
+						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = 4YK74W9MY4;
+						TestTargetID = A96222EB1BFF0F690059FF51;
+					};
+					A962230C1BFF0F690059FF51 = {
+						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = 4YK74W9MY4;
+						TestTargetID = A96222EB1BFF0F690059FF51;
+					};
+				};
+			};
+			buildConfigurationList = A96222E71BFF0F690059FF51 /* Build configuration list for PBXProject "EasyCalc" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A96222E31BFF0F690059FF51;
+			productRefGroup = A96222ED1BFF0F690059FF51 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A96222EB1BFF0F690059FF51 /* EasyCalc */,
+				A96223011BFF0F690059FF51 /* EasyCalcTests */,
+				A962230C1BFF0F690059FF51 /* EasyCalcUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A96222EA1BFF0F690059FF51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A96222F91BFF0F690059FF51 /* Assets.xcassets in Resources */,
+				A96222FC1BFF0F690059FF51 /* LaunchScreen.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A96223001BFF0F690059FF51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A962230B1BFF0F690059FF51 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A96222E81BFF0F690059FF51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A96222F41BFF0F690059FF51 /* AppDelegate.m in Sources */,
+				A96222F11BFF0F690059FF51 /* main.m in Sources */,
+				A96222F71BFF0F690059FF51 /* EasyCalc.xcdatamodeld in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A96222FE1BFF0F690059FF51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A96223071BFF0F690059FF51 /* EasyCalcTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A96223091BFF0F690059FF51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A96223121BFF0F690059FF51 /* EasyCalcUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A96223041BFF0F690059FF51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A96222EB1BFF0F690059FF51 /* EasyCalc */;
+			targetProxy = A96223031BFF0F690059FF51 /* PBXContainerItemProxy */;
+		};
+		A962230F1BFF0F690059FF51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A96222EB1BFF0F690059FF51 /* EasyCalc */;
+			targetProxy = A962230E1BFF0F690059FF51 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		A96222FA1BFF0F690059FF51 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				A96222FB1BFF0F690059FF51 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		A96223141BFF0F690059FF51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		A96223151BFF0F690059FF51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A96223171BFF0F690059FF51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = EasyCalc/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalc;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		A96223181BFF0F690059FF51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = EasyCalc/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalc;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		A962231A1BFF0F690059FF51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = EasyCalcTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalcTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EasyCalc.app/EasyCalc";
+			};
+			name = Debug;
+		};
+		A962231B1BFF0F690059FF51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = EasyCalcTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalcTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EasyCalc.app/EasyCalc";
+			};
+			name = Release;
+		};
+		A962231D1BFF0F690059FF51 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = EasyCalcUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalcUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = EasyCalc;
+				USES_XCTRUNNER = YES;
+			};
+			name = Debug;
+		};
+		A962231E1BFF0F690059FF51 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = EasyCalcUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = LBL.EasyCalcUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = EasyCalc;
+				USES_XCTRUNNER = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A96222E71BFF0F690059FF51 /* Build configuration list for PBXProject "EasyCalc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A96223141BFF0F690059FF51 /* Debug */,
+				A96223151BFF0F690059FF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A96223161BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A96223171BFF0F690059FF51 /* Debug */,
+				A96223181BFF0F690059FF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		A96223191BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalcTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A962231A1BFF0F690059FF51 /* Debug */,
+				A962231B1BFF0F690059FF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		A962231C1BFF0F690059FF51 /* Build configuration list for PBXNativeTarget "EasyCalcUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A962231D1BFF0F690059FF51 /* Debug */,
+				A962231E1BFF0F690059FF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A96222F51BFF0F690059FF51 /* EasyCalc.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A96222F61BFF0F690059FF51 /* EasyCalc.xcdatamodel */,
+			);
+			currentVersion = A96222F61BFF0F690059FF51 /* EasyCalc.xcdatamodel */;
+			path = EasyCalc.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = A96222E41BFF0F690059FF51 /* Project object */;
+}
