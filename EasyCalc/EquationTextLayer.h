@@ -17,9 +17,6 @@
 @property int guid;
 @property NSUInteger c_idx;
 @property int roll;
-@property CGFloat expo_width;
-@property CGFloat base_width;
-@property int base_len;
 @property EquationBlock *expo;
 @property CGRect mainFrame;
 @property int is_base_expo;

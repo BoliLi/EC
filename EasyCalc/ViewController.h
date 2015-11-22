@@ -26,4 +26,6 @@
 @property CGFloat statusBarHeight;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
+-(void)handleSwipeRight: (UISwipeGestureRecognizer *)gesture;
+-(void)handleSwipeLeft: (UISwipeGestureRecognizer *)gesture;
 @end

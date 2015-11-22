@@ -11,6 +11,7 @@
 
 @class Equation;
 @class EquationBlock;
+@class EquationTextLayer;
 
 @interface RadicalBlock : CALayer
 @property EquationBlock *content;
@@ -20,9 +21,10 @@
 @property NSUInteger c_idx;
 @property int roll;
 @property int is_base_expo;
+@property EquationTextLayer *rootNum;
 
 -(id) init : (Equation *)e;
--(id) init : (CGPoint)inputPos : (Equation *)e;
+-(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt;
 -(void) updateFrame;
 -(void) destroy;
 @end

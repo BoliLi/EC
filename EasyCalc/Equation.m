@@ -110,10 +110,20 @@
         
         DisplayView *dspView = [[DisplayView alloc] initWithFrame:dspFrame];
         dspView.backgroundColor = [UIColor lightGrayColor];
-        UITapGestureRecognizer *gesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
-        gesture.numberOfTapsRequired = 1;
-        gesture.numberOfTouchesRequired = 1;
-        [dspView addGestureRecognizer:gesture];
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
+        tapGesture.numberOfTapsRequired = 1;
+        tapGesture.numberOfTouchesRequired = 1;
+        [dspView addGestureRecognizer:tapGesture];
+        
+        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleSwipeRight:)];
+        right.numberOfTouchesRequired = 1;
+        right.direction = UISwipeGestureRecognizerDirectionRight;
+        [dspView addGestureRecognizer:right];
+        
+        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleSwipeLeft:)];
+        left.numberOfTouchesRequired = 1;
+        left.direction = UISwipeGestureRecognizerDirectionLeft;
+        [dspView addGestureRecognizer:left];
 
         CALayer *clayer = [CALayer layer];
         clayer.contentsScale = [UIScreen mainScreen].scale;
@@ -342,7 +352,7 @@
             CGRect frame = bar.frame;
             frame.origin.x = parentBlock.mainFrame.origin.x;
             frame.origin.y = parentBlock.mainFrame.origin.y + parentBlock.numerFrame.size.height - (frame.size.height / 2.0);
-            if (frame.size.width < parentBlock.mainFrame.size.width) {
+            if ((int)frame.size.width != (int)parentBlock.mainFrame.size.width) {
                 frame.size.width = parentBlock.mainFrame.size.width;
                 bar.frame = frame;
                 [bar setNeedsDisplay];
@@ -385,6 +395,11 @@
                 curDenX += frame.size.width;
             } else
                 NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            if (block.rootNum != nil) {
+                CGFloat ML = RADICAL_MARGINE_L_PERC * block.frame.size.height;
+                CGRect f = block.rootNum.frame;
+                block.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - 4.0, frame.origin.y, f.size.width, f.size.height);
+            }
             
             frame.origin.x += RADICAL_MARGINE_L_PERC * block.frame.size.height;
             frame.origin.y += RADICAL_MARGINE_T;

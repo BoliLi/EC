@@ -21,6 +21,7 @@
 @synthesize roll;
 @synthesize is_base_expo;
 @synthesize ancestor;
+@synthesize rootNum;
 
 -(id) init : (Equation *)e {
     self = [super init];
@@ -40,7 +41,7 @@
     return self;
 }
 
--(id) init : (CGPoint)inputPos : (Equation *)e {
+-(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt {
     self = [super init];
     if (self) {
         self.ancestor = e;
@@ -71,13 +72,20 @@
         frame.size.width = margineL + e.curFontW + RADICAL_MARGINE_R;
         self.frame = frame;
         
+        if (rootCnt == 3) {
+            UIFont *orgFont = e.curFont;
+            e.curFont = e.superscriptFont;
+            self.rootNum = [[EquationTextLayer alloc] init:@"3" :CGPointMake(inputPos.x + margineL / 2.0 - 4.0, frame.origin.y) :e :TEXTLAYER_NUM];
+            [e.view.layer addSublayer: self.rootNum];
+            e.curFont = orgFont;
+        }
+        
         layer.roll = ROLL_NUMERATOR;
         layer.c_idx = 0;
         [self.content.children addObject:layer];
         [e.view.layer addSublayer: layer];
         e.curBlock = layer;
         e.curTextLayer = layer;
-        e.curParent = self.content;
         e.needNewLayer = NO;
         
         if (e.curFont == e.baseFont) {
@@ -103,6 +111,10 @@
 
 -(void) destroy {
     [self.content destroy];
+    if (self.rootNum != nil) {
+        [self.rootNum removeFromSuperlayer];
+        self.rootNum = nil;
+    }
     [self removeFromSuperlayer];
 }
 @end

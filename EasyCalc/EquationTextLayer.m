@@ -19,9 +19,6 @@
 @synthesize guid;
 @synthesize c_idx;
 @synthesize roll;
-@synthesize expo_width;
-@synthesize base_width;
-@synthesize base_len;
 @synthesize expo;
 @synthesize mainFrame;
 @synthesize is_base_expo;
@@ -55,7 +52,7 @@
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: str];
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
-        if (t == TEXTLAYER_NUM) {
+        if (t == TEXTLAYER_NUM || t == TEXTLAYER_PARENTH) {
             
         } else if (t == TEXTLAYER_OP) {
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize / 4.0, NULL);
