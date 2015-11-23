@@ -17,7 +17,6 @@
 @interface Equation : NSObject
 @property int guid_cnt;
 @property EquationBlock *root;
-@property CGPoint curPoint;
 @property id curParent;
 @property id curBlock;
 @property EquationTextLayer *curTextLayer;

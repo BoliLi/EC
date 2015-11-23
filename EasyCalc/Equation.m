@@ -19,7 +19,6 @@
 @implementation Equation
 @synthesize guid_cnt;
 @synthesize root;
-@synthesize curPoint;
 @synthesize curParent;
 @synthesize curBlock;
 @synthesize curTextLayer;

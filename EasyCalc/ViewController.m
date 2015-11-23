@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "Global.h"
+#import "Utils.h"
 #import "Equation.h"
 #import "EquationBlock.h"
 #import "EquationTextLayer.h"
@@ -974,19 +975,19 @@ static UIView *testview;
             } else
                 NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             
-            BOOL lookForLeftParen = NO;
+            int parenCnt = 0;
             while (block = [enumerator nextObject]) {
                 cnt++;
                 if ([block isMemberOfClass: [EquationTextLayer class]]) {
                     EquationTextLayer *layer = block;
-                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && lookForLeftParen == NO)
+                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && parenCnt == 0)
                         break;
                     
                     if ([layer.name isEqual: @")"])
-                        lookForLeftParen = YES;
+                        parenCnt++;
                     
                     if ([layer.name isEqual: @"("])
-                        lookForLeftParen = NO;
+                        parenCnt--;
                     
                     /* Move numerators */
                     layer.roll = ROLL_NUMERATOR;
@@ -1128,20 +1129,20 @@ static UIView *testview;
             newBlock.roll = E.curRoll;
             newBlock.parent = eBlock;
             
-            BOOL lookForLeftParen = NO;
+            int parenCnt = 0;
             for (int ii = (int)E.insertCIdx; ii >= 0; ii--) {
                 i = ii;
                 id block = [eBlock.children objectAtIndex:i];
                 if ([block isMemberOfClass: [EquationTextLayer class]]) {
                     EquationTextLayer *layer = block;
-                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && lookForLeftParen == NO)
+                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && parenCnt == 0)
                         break;
                     
                     if ([layer.name isEqual: @")"])
-                        lookForLeftParen = YES;
+                        parenCnt++;
                     
                     if ([layer.name isEqual: @"("])
-                        lookForLeftParen = NO;
+                        parenCnt--;
                     
                     layer.roll = ROLL_NUMERATOR;
                     frameW += layer.mainFrame.size.width;
@@ -2088,29 +2089,153 @@ static UIView *testview;
 - (void)handleDelBtnClick {
     CGFloat incrWidth = 0.0;
     if ([E.curBlock isMemberOfClass:[EquationBlock class]]) {
-        
+        id blk = ((EquationBlock *)E.curBlock).children.lastObject;
+        (void)findLastTLayer(E, blk);
     } else if ([E.curBlock isMemberOfClass:[RadicalBlock class]]) {
+        id blk = ((RadicalBlock *)E.curBlock).content.children.lastObject;
+        (void)findLastTLayer(E, blk);
     } else if ([E.curBlock isMemberOfClass:[FractionBarLayer class]]) {
+        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
     } else if ([E.curBlock isMemberOfClass:[EquationTextLayer class]]) {
-        NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:E.curTextLayer.string];
-        CGFloat orgWidth = [orgStr size].width;
-        [orgStr deleteCharactersInRange:NSMakeRange(orgStr.length - 1, 1)];
-        CGFloat newWidth = [orgStr size].width;
-        incrWidth = newWidth - orgWidth;
+        EquationTextLayer *layer = E.curBlock;
+        if (layer.expo != nil && E.curTextLayer == nil) {
+            id blk = layer.expo.children.lastObject;
+            (void)findLastTLayer(E, blk);
+        } else {
+            if (layer.type == TEXTLAYER_NUM) {
+                NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:layer.string];
+                if (orgStr.length == 1) {
+                    if (E.curMode == MODE_INPUT) {
+                        EquationBlock *eb = layer.parent;
+                        if ((layer.roll == ROLL_NUMERATOR && layer.c_idx == 0) || (layer.roll == ROLL_DENOMINATOR && [[eb.children objectAtIndex:layer.c_idx - 1] isMemberOfClass:[FractionBarLayer class]])) {
+                            CGFloat orgWidth = layer.mainFrame.size.width;
+                            
+                            if (layer.expo != nil) {
+                                [layer.expo destroy];
+                            }
+                            
+                            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"_"];
+                            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
+                            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+                            [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+                            
+                            layer.type = TEXTLAYER_EMPTY;
+                            layer.string = attStr;
+                            CGRect f = layer.frame;
+                            f.size = CGSizeMake([attStr size].width, [attStr size].height);
+                            layer.frame = f;
+                            
+                            incrWidth = [attStr size].width - orgWidth;
+                            [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
+                            [E adjustEveryThing:E.root];
+                            
+                            E.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
+                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                        } else {
+                            CGFloat orgWidth = layer.mainFrame.size.width;
+                            
+                            [eb.children removeLastObject];
+                            [layer destroy];
+                            
+                            [(EquationBlock *)E.curParent updateFrameWidth:-orgWidth :E.curRoll];
+                            [E adjustEveryThing:E.root];
+                            
+                            id blk = eb.children.lastObject;
+                            if ([blk isMemberOfClass:[EquationBlock class]]) {
+                                EquationBlock *eb = blk;
+                                E.view.inpOrg = CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y);
+                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, eb.mainFrame.size.height);
+                                E.curTextLayer = nil;
+                            } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
+                                EquationTextLayer *l = blk;
+                                E.view.inpOrg = CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width, l.mainFrame.origin.y);
+                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, l.mainFrame.size.height);
+                                if (l.expo != nil) {
+                                    E.curTextLayer = nil;
+                                } else {
+                                    E.curTextLayer = l;
+                                }
+                            } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
+                                RadicalBlock *rb = blk;
+                                E.view.inpOrg = CGPointMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y);
+                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, rb.frame.size.height);
+                                E.curTextLayer = nil;
+                            } else {
+                                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            }
+                            E.curBlock = blk;
+                        }
+                    } else if (E.curMode == MODE_INSERT) {
+                        EquationBlock *eb = layer.parent;
+                        CGFloat orgWidth = layer.mainFrame.size.width;
+                        
+                        [eb.children removeLastObject];
+                        [layer destroy];
+                        
+                        [(EquationBlock *)E.curParent updateFrameWidth:-orgWidth :E.curRoll];
+                        [E adjustEveryThing:E.root];
+                        
+                        id blk = eb.children.lastObject;
+                        if ([blk isMemberOfClass:[EquationBlock class]]) {
+                            EquationBlock *eb = blk;
+                            E.view.inpOrg = CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y);
+                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, eb.mainFrame.size.height);
+                            E.curTextLayer = nil;
+                        } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
+                            EquationTextLayer *l = blk;
+                            E.view.inpOrg = CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width, l.mainFrame.origin.y);
+                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, l.mainFrame.size.height);
+                            if (l.expo != nil) {
+                                E.curTextLayer = nil;
+                            } else {
+                                E.curTextLayer = l;
+                            }
+                        } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
+                            RadicalBlock *rb = blk;
+                            E.view.inpOrg = CGPointMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y);
+                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, rb.frame.size.height);
+                            E.curTextLayer = nil;
+                        } else if ([blk isMemberOfClass:[FractionBarLayer class]]) {
+                        } else {
+                            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                        }
+                        E.curBlock = blk;
+                    } else {
+                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    }
+                } else {
+                    CGFloat orgWidth = [orgStr size].width;
+                    [orgStr deleteCharactersInRange:NSMakeRange(orgStr.length - 1, 1)];
+                    CGFloat newWidth = [orgStr size].width;
+                    incrWidth = newWidth - orgWidth;
+                    
+                    CGRect frame = layer.frame;
+                    frame.size.width = [orgStr size].width;
+                    layer.frame = frame;
+                    layer.string = orgStr;
+                    [layer updateFrameBaseOnBase];
+                    
+                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
+                    [E adjustEveryThing:E.root];
+                    
+                    E.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
+                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                }
+            } else if (layer.type == TEXTLAYER_EMPTY) {
+                
+            } else if (layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
+            } else {
+                
+            }
+            NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:E.curTextLayer.string];
+            
+        }
         
-        CGRect frame = E.curTextLayer.frame;
-        frame.size.width = [orgStr size].width;
-        E.curTextLayer.frame = frame;
-        E.curTextLayer.string = orgStr;
-        [E.curTextLayer updateFrameBaseOnBase];
-        
-        [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
-        [E adjustEveryThing:E.root];
     } else {
         
     }
-    
-    
+
 }
 
 -(void)btnClicked: (UIButton *)btn {

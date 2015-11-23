@@ -218,9 +218,6 @@
             return;
         }
         CGRect frame = self.denomFrame;
-        if (frame.size.height >= newH) { // If the frame is already heigher than newH, then nothing needs to be update.
-            return;
-        }
         // Both numerator and denominator need update
         CGFloat orgHeight = frame.size.height;
         frame.origin.y -= newH - orgHeight;
@@ -244,39 +241,98 @@
         NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
+-(BOOL) updateNumerTB {
+    CGFloat orgTop = self.numerTopHalf;
+    CGFloat orgBtm = self.numerBtmHalf;
+    self.numerTopHalf = self.numerBtmHalf = 0.0;
+    for (id b in self.children) {
+        if([b isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock * eb = b;
+            CGFloat newH = eb.mainFrame.size.height;
+            if ((int)self.numerTopHalf < (int)(newH / 2.0))
+                self.numerTopHalf = newH / 2.0;
+            
+            if ((int)self.numerBtmHalf < (int)(newH / 2.0))
+                self.numerBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[RadicalBlock class]]) {
+            RadicalBlock * rb = b;
+            CGFloat newH = rb.frame.size.height;
+            if ((int)self.numerTopHalf < (int)(newH / 2.0))
+                self.numerTopHalf = newH / 2.0;
+            
+            if ((int)self.numerBtmHalf < (int)(newH / 2.0))
+                self.numerBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *layer = b;
+            CGFloat top = layer.mainFrame.size.height - layer.frame.size.height / 2.0;
+            CGFloat btm = layer.frame.size.height / 2.0;
+            if ((int)self.numerTopHalf < (int)top)
+                self.numerTopHalf = top;
+            
+            if ((int)self.numerBtmHalf < (int)btm)
+                self.numerBtmHalf = btm;
+        } else if([b isMemberOfClass:[FractionBarLayer class]]) {
+            break;
+        } else {
+            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+    
+    return ((int)orgTop != (int)self.numerTopHalf) || ((int)orgBtm != (int)self.numerBtmHalf);
+}
+
+-(BOOL) updateDenomTB {
+    CGFloat orgTop = self.denomTopHalf;
+    CGFloat orgBtm = self.denomBtmHalf;
+    self.denomTopHalf = self.denomBtmHalf = 0.0;
+    for (int i = self.children.count - 1; i != 0; i--) {
+        id b = [self.children objectAtIndex:i];
+        if([b isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock * eb = b;
+            CGFloat newH = eb.mainFrame.size.height;
+            if ((int)self.denomTopHalf < (int)(newH / 2.0))
+                self.denomTopHalf = newH / 2.0;
+            
+            if ((int)self.denomBtmHalf < (int)(newH / 2.0))
+                self.denomBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[RadicalBlock class]]) {
+            RadicalBlock * rb = b;
+            CGFloat newH = rb.frame.size.height;
+            if ((int)self.denomTopHalf < (int)(newH / 2.0))
+                self.denomTopHalf = newH / 2.0;
+            
+            if ((int)self.denomBtmHalf < (int)(newH / 2.0))
+                self.denomBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *layer = b;
+            CGFloat top = layer.mainFrame.size.height - layer.frame.size.height / 2.0;
+            CGFloat btm = layer.frame.size.height / 2.0;
+            if ((int)self.denomTopHalf < (int)top)
+                self.denomTopHalf = top;
+            
+            if ((int)self.denomBtmHalf < (int)btm)
+                self.denomBtmHalf = btm;
+        } else if([b isMemberOfClass:[FractionBarLayer class]]) {
+            break;
+        } else {
+            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+    
+    return ((int)orgTop != (int)self.denomTopHalf) || ((int)orgBtm != (int)self.denomBtmHalf);
+}
+
 -(void) updateFrameHeightS1 : (id)child {
     if([child isMemberOfClass:[EquationBlock class]]) {
         EquationBlock *eBlock = child;
         int r = eBlock.roll;
-        CGFloat newH = eBlock.mainFrame.size.height;
-        bool needUpdate = NO;
         if (r == ROLL_NUMERATOR) {
-            if ((int)self.numerTopHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.numerTopHalf = newH / 2.0;
-            }
-            
-            if ((int)self.numerBtmHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.numerBtmHalf = newH / 2.0;
-            }
-            
-            if (needUpdate) {
+            if ([self updateNumerTB]) {
                 [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
             }
             
         } else if (r == ROLL_DENOMINATOR) {
-            if ((int)self.denomTopHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.denomTopHalf = newH / 2.0;
-            }
-            
-            if ((int)self.denomBtmHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.denomBtmHalf = newH / 2.0;
-            }
-            
-            if (needUpdate) {
+            if ([self updateDenomTB]) {
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
@@ -284,34 +340,12 @@
     } else if([child isMemberOfClass:[RadicalBlock class]]) {
         RadicalBlock *rBlock = child;
         int r = rBlock.roll;
-        CGFloat newH = rBlock.frame.size.height;
-        bool needUpdate = NO;
         if (r == ROLL_NUMERATOR) {
-            if ((int)self.numerTopHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.numerTopHalf = newH / 2.0;
-            }
-            
-            if ((int)self.numerBtmHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.numerBtmHalf = newH / 2.0;
-            }
-            
-            if (needUpdate) {
+            if ([self updateNumerTB]) {
                 [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
             }
         } else if (r == ROLL_DENOMINATOR) {
-            if ((int)self.denomTopHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.denomTopHalf = newH / 2.0;
-            }
-            
-            if ((int)self.denomBtmHalf < (int)(newH / 2.0)) {
-                needUpdate = YES;
-                self.denomBtmHalf = newH / 2.0;
-            }
-            
-            if (needUpdate) {
+            if ([self updateDenomTB]) {
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
@@ -319,35 +353,12 @@
     } else if([child isMemberOfClass:[EquationTextLayer class]]) {
         EquationTextLayer *layer = child;
         int r = layer.roll;
-        bool needUpdate = NO;
-        CGFloat top = layer.mainFrame.size.height - layer.frame.size.height / 2.0;
-        CGFloat btm = layer.frame.size.height / 2.0;
         if (r == ROLL_NUMERATOR) {
-            if ((int)self.numerTopHalf < (int)top) {
-                needUpdate = YES;
-                self.numerTopHalf = top;
-            }
-            
-            if ((int)self.numerBtmHalf < (int)btm) {
-                needUpdate = YES;
-                self.numerBtmHalf = btm;
-            }
-            
-            if (needUpdate) {
+            if ([self updateNumerTB]) {
                 [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
             }
         } else if (r == ROLL_DENOMINATOR) {
-            if ((int)self.denomTopHalf < (int)top) {
-                needUpdate = YES;
-                self.denomTopHalf = top;
-            }
-            
-            if ((int)self.denomBtmHalf < (int)btm) {
-                needUpdate = YES;
-                self.denomBtmHalf = btm;
-            }
-            
-            if (needUpdate) {
+            if ([self updateDenomTB]) {
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
