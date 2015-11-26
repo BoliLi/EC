@@ -10,4 +10,5 @@
 #define Utils_h
 
 EquationTextLayer *findLastTLayer(Equation *e, id blk);
+void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint);
 #endif /* Utils_h */
