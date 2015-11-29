@@ -32,6 +32,7 @@ static UIView *testview;
 @synthesize scnWidth;
 @synthesize scnHeight;
 @synthesize statusBarHeight;
+@synthesize testeb;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture {
     //NSUInteger touchNum = [gesture numberOfTouches];
@@ -1070,6 +1071,9 @@ static UIView *testview;
         E.curRoll = ROLL_DENOMINATOR;
         
         EquationBlock *eBlock = E.curParent;
+        
+        testeb = eBlock;
+        
         /* Add a bar into eBlock */
         FractionBarLayer *barLayer = [[FractionBarLayer alloc] init:E];
         NSLog(@"%s%i~Bar id: %i~~~~~~", __FUNCTION__, __LINE__, barLayer.guid);
@@ -2030,6 +2034,10 @@ static UIView *testview;
         [self handleParenthBtnClick:@")"];
     } else if([[btn currentTitle]  isEqual: @"<-"]) {
         [self handleDelBtnClick];
+    } else if([[btn currentTitle]  isEqual: @"·"]) {
+        [E removeElement:E.curBlock];
+    } else if([[btn currentTitle]  isEqual: @"%"]) {
+        NSLog(@"[%s%i]~%@~~~~~~~~~~", __FUNCTION__, __LINE__, testeb);
     } else
         NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }

@@ -24,6 +24,7 @@
 @property CGFloat scnWidth;
 @property CGFloat scnHeight;
 @property CGFloat statusBarHeight;
+@property (weak) EquationBlock *testeb;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
 -(void)handleSwipeRight: (UISwipeGestureRecognizer *)gesture;

@@ -42,4 +42,5 @@
 -(void) dumpEverything : (EquationBlock *)eb;
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point;
 -(void) adjustEveryThing : (EquationBlock *)parentBlock;
+-(void)removeElement:(id)blk;
 @end
