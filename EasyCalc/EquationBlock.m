@@ -28,8 +28,6 @@
 @synthesize numerBtmHalf;
 @synthesize denomTopHalf;
 @synthesize denomBtmHalf;
-@synthesize numerStatus;
-@synthesize denomStatus;
 @synthesize is_base_expo;
 
 -(id) init : (Equation *)e {

@@ -90,13 +90,8 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 return;
             } else {
                 e.curMode = MODE_INSERT;
-                if (bar.c_idx == 0) {
-                    e.insertCIdx = CIDX_0_NUMER;
-                    blk = bar;
-                } else {
-                    e.insertCIdx = bar.c_idx - 1;
-                    blk = [eBlock.children objectAtIndex: e.insertCIdx];
-                }
+                e.insertCIdx = bar.c_idx;
+                blk = [eBlock.children objectAtIndex: e.insertCIdx - 1];
             }
             
             e.curRoll = ROLL_NUMERATOR;
@@ -216,7 +211,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         
     } else if ([b isMemberOfClass: [EquationTextLayer class]]) {
         EquationTextLayer *layer = b;
-        NSLog(@"%s%i~~%i~~~~~~~~~", __FUNCTION__, __LINE__, layer.guid);
         
         if (layer.is_base_expo == IS_BASE) {
             e.curFont = e.baseFont;
@@ -284,7 +278,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             e.curMode = MODE_INPUT;
         } else {
             e.curMode = MODE_INSERT;
-            e.insertCIdx = layer.c_idx;
+            e.insertCIdx = layer.c_idx + 1;
         }
         e.curRoll = layer.roll;
         e.curParent = block;
@@ -305,7 +299,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             e.curMode = MODE_INPUT;
         } else {
             e.curMode = MODE_INSERT;
-            e.insertCIdx = block.c_idx;
+            e.insertCIdx = block.c_idx + 1;
         }
         e.curParent = block.parent;
         e.curRoll = block.roll;
@@ -359,7 +353,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 e.curMode = MODE_INPUT;
             } else {
                 e.curMode = MODE_INSERT;
-                e.insertCIdx = block.c_idx;
+                e.insertCIdx = block.c_idx + 1;
             }
             e.curParent = block.parent;
             e.curRoll = block.roll;

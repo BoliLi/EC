@@ -25,8 +25,6 @@
 @property CGFloat numerBtmHalf;
 @property CGFloat denomTopHalf;
 @property CGFloat denomBtmHalf;
-@property int numerStatus;
-@property int denomStatus;
 @property int is_base_expo;
 
 -(id) init : (Equation *)e;

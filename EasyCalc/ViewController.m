@@ -325,12 +325,7 @@ static UIView *testview;
                 tLayer1.name = @"×";
                 tLayer1.roll = E.curRoll;
                 tLayer1.parent = block;
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    tLayer1.c_idx = 0;
-                    E.insertCIdx = 0;
-                } else {
-                    tLayer1.c_idx = E.insertCIdx + 1;
-                }
+                tLayer1.c_idx = E.insertCIdx;
                 [E.view.layer addSublayer:tLayer1];
                 [block.children insertObject:tLayer1 atIndex:tLayer1.c_idx];
                 
@@ -342,12 +337,7 @@ static UIView *testview;
                 incrWidth += tLayer1.frame.size.width;
                 E.insertCIdx += 2;
             } else {
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    tLayer.c_idx = 0;
-                    E.insertCIdx = 0;
-                } else {
-                    tLayer.c_idx = E.insertCIdx + 1;
-                }
+                tLayer.c_idx = E.insertCIdx;
                 [block.children insertObject:tLayer atIndex:tLayer.c_idx];
                 /*Update c_idx*/
                 [block updateCIdx];
@@ -489,7 +479,6 @@ static UIView *testview;
     /* Update frame info of current block */
     [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
     [E adjustEveryThing:E.root];
-    NSLog(@"[%s%i]~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, E.root.mainFrame.size.width, E.root.numerFrame.size.width);
     
     E.needX = YES;
     
@@ -547,12 +536,7 @@ static UIView *testview;
         } else if(E.curMode == MODE_INSERT) {
             EquationBlock *block = E.curParent;
             
-            if (E.insertCIdx == CIDX_0_NUMER) {
-                tLayer.c_idx = 0;
-                E.insertCIdx = 0;
-            } else {
-                tLayer.c_idx = E.insertCIdx + 1;
-            }
+            tLayer.c_idx = E.insertCIdx;
             [block.children insertObject:tLayer atIndex:tLayer.c_idx];
             /*Update c_idx*/
             [block updateCIdx];
@@ -626,7 +610,6 @@ static UIView *testview;
         //dumpObj(E.root);
         //NSLog(@"%s%i~%f~%@~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, E.curRoll == ROLL_NUMERATOR?@"N":@"D");
         [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
-        NSLog(@"[%s%i]~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, E.root.mainFrame.size.width, E.root.numerFrame.size.width);
         [E adjustEveryThing:E.root];
         
         /* Move cursor */
@@ -819,7 +802,7 @@ static UIView *testview;
             E.curParent = eBlock;
 //            NSLog(@"%s%i~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, __LINE__, eBlock.mainFrame.origin.x, eBlock.mainFrame.origin.y, eBlock.mainFrame.size.width, eBlock.mainFrame.size.height, eBlock.numerFrame.origin.x, eBlock.numerFrame.origin.y, eBlock.numerFrame.size.width, eBlock.numerFrame.size.height, eBlock.denomFrame.origin.x, eBlock.denomFrame.origin.y, eBlock.denomFrame.size.width, eBlock.denomFrame.size.height);
         } else if(E.curMode == MODE_INSERT) {
-            if (E.insertCIdx == CIDX_0_NUMER) { // No division while no numerator
+            if (E.insertCIdx == 0) { // No division while no numerator
                 return;
             }
             NSUInteger i = 0, cnt = 0;
@@ -834,7 +817,7 @@ static UIView *testview;
             newBlock.parent = eBlock;
             
             int parenCnt = 0;
-            for (int ii = (int)E.insertCIdx; ii >= 0; ii--) {
+            for (int ii = (int)E.insertCIdx - 1; ii >= 0; ii--) {
                 i = ii;
                 id block = [eBlock.children objectAtIndex:i];
                 if ([block isMemberOfClass: [EquationTextLayer class]]) {
@@ -1087,7 +1070,7 @@ static UIView *testview;
         frame.size.height = E.curFontH / 2.0;
         frame.origin.y = eBlock.numerFrame.origin.y + eBlock.numerFrame.size.height - (frame.size.height / 2.0);
         frame.size.width = eBlock.mainFrame.size.width;
-        NSLog(@"[%s%i]~%.1f~~~~~~~~~~", __FUNCTION__, __LINE__, frame.size.width);
+        
         barLayer.frame = frame;
         barLayer.delegate = self;
         barLayer.c_idx = eBlock.children.count;
@@ -1099,7 +1082,6 @@ static UIView *testview;
         EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :eBlock.denomFrame.origin :E :TEXTLAYER_EMPTY];
         layer.parent = eBlock;
         eBlock.denomFrame = layer.frame;
-        NSLog(@"[%s%i]~%.1f~~~~~~~~~~", __FUNCTION__, __LINE__, layer.frame.size.width);
         layer.c_idx = eBlock.children.count;
         [eBlock.children addObject:layer];
         [E.view.layer addSublayer: layer];
@@ -1191,24 +1173,14 @@ static UIView *testview;
             tLayer1.roll = E.curRoll;
             tLayer1.parent = eBlock;
             [E.view.layer addSublayer:tLayer1];
-            if (E.insertCIdx == CIDX_0_NUMER) {
-                E.insertCIdx = 0;
-                [eBlock.children insertObject:tLayer1 atIndex: E.insertCIdx++];
-                [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
-            } else {
-                [eBlock.children insertObject:tLayer1 atIndex: ++E.insertCIdx];
-                [eBlock.children insertObject:newRBlock atIndex: ++E.insertCIdx];
-            }
+            
+            [eBlock.children insertObject:tLayer1 atIndex: E.insertCIdx++];
+            [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
             
             newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
             incrWidth += tLayer1.frame.size.width;
         } else {
-            if (E.insertCIdx == CIDX_0_NUMER) {
-                E.insertCIdx = 0;
-                [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
-            } else {
-                [eBlock.children insertObject:newRBlock atIndex: ++E.insertCIdx];
-            }
+            [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
         }
         
         /*Update c_idx*/
@@ -1383,25 +1355,15 @@ static UIView *testview;
                 tLayer1.name = @"×";
                 tLayer1.parent = eb;
                 [E.view.layer addSublayer:tLayer1];
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    E.insertCIdx = 0;
-                    [eb.children insertObject:tLayer1 atIndex: E.insertCIdx++];
-                    [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
-                } else {
-                    [eb.children insertObject:tLayer1 atIndex: ++E.insertCIdx];
-                    [eb.children insertObject:baseLayer atIndex: ++E.insertCIdx];
-                }
+                
+                [eb.children insertObject:tLayer1 atIndex: E.insertCIdx++];
+                [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
                 
                 baseLayer.frame = CGRectOffset(baseLayer.frame, tLayer1.frame.size.width, 0);
                 [baseLayer updateFrameBaseOnBase];
                 incrWidth += tLayer1.frame.size.width;
             } else {
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    E.insertCIdx = 0;
-                    [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
-                } else {
-                    [eb.children insertObject:baseLayer atIndex: ++E.insertCIdx];
-                }
+                [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
             }
             
             /*Update c_idx*/
@@ -1632,12 +1594,7 @@ static UIView *testview;
                 tLayer1.name = @"×";
                 tLayer1.roll = E.curRoll;
                 tLayer1.parent = block;
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    tLayer1.c_idx = 0;
-                    E.insertCIdx = 0;
-                } else {
-                    tLayer1.c_idx = E.insertCIdx + 1;
-                }
+                tLayer1.c_idx = E.insertCIdx;
                 [E.view.layer addSublayer:tLayer1];
                 [block.children insertObject:tLayer1 atIndex:tLayer1.c_idx];
                 
@@ -1649,12 +1606,7 @@ static UIView *testview;
                 incrWidth += tLayer1.frame.size.width;
                 E.insertCIdx += 2;
             } else {
-                if (E.insertCIdx == CIDX_0_NUMER) {
-                    tLayer.c_idx = 0;
-                    E.insertCIdx = 0;
-                } else {
-                    tLayer.c_idx = E.insertCIdx + 1;
-                }
+                tLayer.c_idx = E.insertCIdx;
                 [block.children insertObject:tLayer atIndex:tLayer.c_idx];
                 /*Update c_idx*/
                 [block updateCIdx];
@@ -2051,7 +2003,6 @@ static UIView *testview;
         CGPoint points[] = {CGPointMake(0, row), CGPointMake(scnWidth, row), CGPointMake(0, row * 2), CGPointMake(scnWidth, row * 2), CGPointMake(0, row * 3), CGPointMake(scnWidth, row * 3), CGPointMake(0, row * 4), CGPointMake(col * 4, row * 4), CGPointMake(col, 0), CGPointMake(col, scnHeight / 2), CGPointMake(col * 2, 0), CGPointMake(col * 2, scnHeight / 2), CGPointMake(col * 3, 0), CGPointMake(col * 3, scnHeight / 2), CGPointMake(col * 4, 0), CGPointMake(col * 4, scnHeight / 2)};
         CGContextStrokeLineSegments(ctx, points, 16);
     } else if ([layer.name isEqual: @"cursorLayer"]) {
-        NSLog(@"[%s%i]~~~~~~~~~~~", __FUNCTION__, __LINE__);
         CGContextSetGrayStrokeColor(ctx, 0.0, 1.0);
         CGContextSetLineWidth(ctx, layer.frame.size.width);
         
