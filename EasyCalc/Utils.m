@@ -269,6 +269,19 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 e.needX = YES;
                 e.curTextLayer = nil;
             }
+        } else if (layer.type == TEXTLAYER_PARENTH) {
+            if ([layer.name isEqual:@"("]) {
+                e.needX = NO;
+            } else {
+                e.needX = YES;
+            }
+            CGFloat x = layer.frame.origin.x + layer.frame.size.width;
+            CGFloat y = layer.frame.origin.y;
+            e.view.inpOrg = CGPointMake(x, y);
+            CGFloat tmp = layer.frame.size.height;
+            e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, e.view.inpOrg.y, CURSOR_W, tmp);
+            e.needNewLayer = YES;
+            e.curTextLayer = layer;
         } else
             NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         

@@ -25,6 +25,7 @@
 @property CGFloat scnHeight;
 @property CGFloat statusBarHeight;
 @property (weak) EquationBlock *testeb;
+@property NSTimer *delBtnLongPressTmr;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
 -(void)handleSwipeRight: (UISwipeGestureRecognizer *)gesture;

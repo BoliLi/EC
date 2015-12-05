@@ -420,6 +420,7 @@
         if (eb.roll == ROLL_ROOT) {
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
             EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
@@ -437,6 +438,7 @@
             CGFloat orgWidth = rb.frame.size.width;
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
             EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
@@ -461,6 +463,7 @@
             CGFloat orgWidth = parLayer.mainFrame.size.width;
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
             EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
@@ -485,6 +488,7 @@
             if (parent.children.count == 1) {
                 CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
                 EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                l.roll = ROLL_NUMERATOR;
                 l.parent = parent;
                 l.c_idx = 0;
                 [eb destroy];
@@ -492,7 +496,7 @@
                 [parent.children addObject:l];
                 [e.view.layer addSublayer: l];
                 
-                [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+                [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
                 [e adjustEveryThing:e.root];
                 
@@ -504,6 +508,7 @@
                                *  */
                     CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
                     EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    l.roll = eb.roll;
                     l.parent = parent;
                     l.c_idx = eb.c_idx;
                     [eb destroy];
@@ -511,17 +516,18 @@
                     [parent.children addObject:l];
                     [e.view.layer addSublayer: l];
                     
-                    [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+                    [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                     [parent updateFrameHeightS1:l];
                     [e adjustEveryThing:e.root];
                     
                     cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
                 } else if(eb.c_idx == 0 && [[parent.children objectAtIndex:eb.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                     /* Case:  *
-                     ---
-                     @ @ */
+                             ---
+                             @ @ */
                     CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - e.curFontH);
                     EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    l.roll = eb.roll;
                     l.parent = parent;
                     l.c_idx = 0;
                     [eb destroy];
@@ -529,22 +535,22 @@
                     [parent.children insertObject:l atIndex:0];
                     [e.view.layer addSublayer: l];
                     
-                    [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+                    [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                     [parent updateFrameHeightS1:l];
                     [e adjustEveryThing:e.root];
                     
                     cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
                 } else {
                     /* Case:  @ @
-                     ---
-                     @ @ */
+                              ---
+                              @ @ */
                     
                     if (eb.c_idx == 0) {
                         [eb destroy];
                         [parent.children removeObjectAtIndex:0];
                         [parent updateCIdx];
                         
-                        [parent updateFrameWidth:-orgWidth :e.curRoll];
+                        [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
                         [e adjustEveryThing:e.root];
                         
@@ -564,7 +570,7 @@
                         [parent.children removeObjectAtIndex:eb.c_idx];
                         [parent updateCIdx];
                         
-                        [parent updateFrameWidth:-orgWidth :e.curRoll];
+                        [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:[parent.children objectAtIndex:eb.c_idx]];
                         [e adjustEveryThing:e.root];
                         
@@ -585,7 +591,7 @@
                         [parent updateCIdx];
                         
                         id b = [parent.children objectAtIndex:eb.c_idx - 1];
-                        [parent updateFrameWidth:-orgWidth :e.curRoll];
+                        [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:b];
                         [e adjustEveryThing:e.root];
                         
@@ -623,7 +629,16 @@
         if (parent.children.count == 1) {
             if (l.type == TEXTLAYER_EMPTY) {
                 if (parent.roll == ROLL_ROOT) {
-                    return;  // Do nothing
+                    if (l.expo != nil) {
+                        [l.expo destroy];
+                        l.expo = nil;
+                        [l updateFrameBaseOnBase];
+                        
+                        parent.mainFrame = parent.numerFrame = l.frame;
+                        parent.denomFrame = CGRectMake(0, 0, 0, 0);
+                        parent.numerTopHalf = parent.numerBtmHalf = l.frame.size.height / 2.0;
+                        parent.denomTopHalf = parent.denomBtmHalf = 0.0;
+                    }
                 } else if (parent.roll == ROLL_ROOT_ROOT) {
                     [e removeElement:parent.parent];
                 } else if (parent.roll == ROLL_EXPO_ROOT) {
@@ -641,6 +656,7 @@
             } else {
                 CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
                 EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                el.roll = l.roll;
                 el.parent = parent;
                 el.c_idx = 0;
                 [l destroy];
@@ -648,7 +664,7 @@
                 [parent.children addObject:el];
                 [e.view.layer addSublayer: el];
                 
-                [parent updateFrameWidth:el.frame.size.width - orgWidth :e.curRoll];
+                [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                 [parent updateFrameHeightS1:el];
                 [e adjustEveryThing:e.root];
                 
@@ -758,6 +774,7 @@
                 } else {
                     CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
                     EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    el.roll = l.roll;
                     el.parent = parent;
                     el.c_idx = l.c_idx;
                     [l destroy];
@@ -765,7 +782,7 @@
                     [parent.children addObject:el];
                     [e.view.layer addSublayer: el];
                     
-                    [parent updateFrameWidth:el.frame.size.width - orgWidth :e.curRoll];
+                    [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                     [parent updateFrameHeightS1:el];
                     [e adjustEveryThing:e.root];
                     
@@ -780,15 +797,15 @@
                 } else {
                     CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
                     EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    el.roll = l.roll;
                     el.parent = parent;
                     el.c_idx = l.c_idx;
                     [l destroy];
                     [parent.children removeObjectAtIndex:0];
-                    [parent updateCIdx];
                     [parent.children insertObject:el atIndex:0];
                     [e.view.layer addSublayer: el];
                     
-                    [parent updateFrameWidth:el.frame.size.width - orgWidth :e.curRoll];
+                    [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                     [parent updateFrameHeightS1:el];
                     [e adjustEveryThing:e.root];
                     
@@ -803,7 +820,7 @@
                     [parent.children removeObjectAtIndex:0];
                     [parent updateCIdx];
                     
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
                     [e adjustEveryThing:e.root];
                     
@@ -823,7 +840,7 @@
                     [parent.children removeObjectAtIndex:l.c_idx];
                     [parent updateCIdx];
                     
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:l.c_idx]];
                     [e adjustEveryThing:e.root];
                     
@@ -844,7 +861,7 @@
                     [parent updateCIdx];
                     
                     id b = [parent.children objectAtIndex:l.c_idx - 1];
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:b];
                     [e adjustEveryThing:e.root];
                     
@@ -878,6 +895,7 @@
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - e.curFontH);
             EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            l.roll = ROLL_NUMERATOR;
             l.parent = parent;
             l.c_idx = 0;
             [rb destroy];
@@ -885,7 +903,7 @@
             [parent.children addObject:l];
             [e.view.layer addSublayer: l];
             
-            [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+            [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
             [parent updateFrameHeightS1:l];
             [e adjustEveryThing:e.root];
             
@@ -897,6 +915,7 @@
                            *  */
                 CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - e.curFontH);
                 EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                l.roll = rb.roll;
                 l.parent = parent;
                 l.c_idx = rb.c_idx;
                 [rb destroy];
@@ -904,7 +923,7 @@
                 [parent.children addObject:l];
                 [e.view.layer addSublayer: l];
                 
-                [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+                [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
                 [e adjustEveryThing:e.root];
                 
@@ -915,6 +934,7 @@
                          @ @ */
                 CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - e.curFontH);
                 EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                l.roll = rb.roll;
                 l.parent = parent;
                 l.c_idx = 0;
                 [rb destroy];
@@ -922,7 +942,7 @@
                 [parent.children insertObject:l atIndex:0];
                 [e.view.layer addSublayer: l];
                 
-                [parent updateFrameWidth:l.frame.size.width - orgWidth :e.curRoll];
+                [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
                 [e adjustEveryThing:e.root];
                 
@@ -936,7 +956,7 @@
                     [parent.children removeObjectAtIndex:0];
                     [parent updateCIdx];
                     
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
                     [e adjustEveryThing:e.root];
                     
@@ -956,7 +976,7 @@
                     [parent.children removeObjectAtIndex:rb.c_idx];
                     [parent updateCIdx];
                     
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:rb.c_idx]];
                     [e adjustEveryThing:e.root];
                     
@@ -977,7 +997,7 @@
                     [parent updateCIdx];
                     
                     id b = [parent.children objectAtIndex:rb.c_idx - 1];
-                    [parent updateFrameWidth:-orgWidth :e.curRoll];
+                    [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:b];
                     [e adjustEveryThing:e.root];
                     

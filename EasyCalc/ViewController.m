@@ -33,6 +33,7 @@ static UIView *testview;
 @synthesize scnHeight;
 @synthesize statusBarHeight;
 @synthesize testeb;
+@synthesize delBtnLongPressTmr;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture {
     //NSUInteger touchNum = [gesture numberOfTouches];
@@ -249,6 +250,11 @@ static UIView *testview;
         int k = i / 4;
         bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
         [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+        if (i == 3) {
+            UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(btnDelLongPress:)];
+            longPress.minimumPressDuration = 1; //定义按的时间
+            [bn addGestureRecognizer:longPress];
+        }
         [keyboardView addSubview:bn];
     }
     
@@ -1472,7 +1478,7 @@ static UIView *testview;
             CGFloat inc = E.curTextLayer.mainFrame.size.width - orgW;
             [(EquationBlock *)E.curParent updateFrameWidth:inc :E.curRoll];
             [(EquationBlock *)E.curParent updateFrameHeightS1:E.curTextLayer];
-            NSLog(@"[%s%i]~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, E.curTextLayer.mainFrame.size.width, E.root.numerFrame.size.width);
+            [E adjustEveryThing:E.root];
             
             E.curTextLayer = layer;
             E.curBlock = layer;
@@ -1765,103 +1771,28 @@ static UIView *testview;
             if (layer.type == TEXTLAYER_NUM) {
                 NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:layer.string];
                 if (orgStr.length == 1) {
-                    if (E.curMode == MODE_INPUT) {
-                        EquationBlock *eb = layer.parent;
-                        if ((layer.roll == ROLL_NUMERATOR && layer.c_idx == 0) || (layer.roll == ROLL_DENOMINATOR && [[eb.children objectAtIndex:layer.c_idx - 1] isMemberOfClass:[FractionBarLayer class]])) {
-                            CGFloat orgWidth = layer.mainFrame.size.width;
-                            
-                            if (layer.expo != nil) {
-                                [layer.expo destroy];
-                            }
-                            
-                            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"_"];
-                            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
-                            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-                            [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
-                            
-                            layer.type = TEXTLAYER_EMPTY;
-                            layer.string = attStr;
-                            CGRect f = layer.frame;
-                            f.size = CGSizeMake([attStr size].width, [attStr size].height);
-                            layer.frame = f;
-                            
-                            incrWidth = [attStr size].width - orgWidth;
-                            [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
-                            [E adjustEveryThing:E.root];
-                            
-                            E.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
-                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
-                        } else {
-                            CGFloat orgWidth = layer.mainFrame.size.width;
-                            
-                            [eb.children removeLastObject];
-                            [layer destroy];
-                            
-                            [(EquationBlock *)E.curParent updateFrameWidth:-orgWidth :E.curRoll];
-                            [E adjustEveryThing:E.root];
-                            
-                            id blk = eb.children.lastObject;
-                            if ([blk isMemberOfClass:[EquationBlock class]]) {
-                                EquationBlock *eb = blk;
-                                E.view.inpOrg = CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y);
-                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, eb.mainFrame.size.height);
-                                E.curTextLayer = nil;
-                            } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
-                                EquationTextLayer *l = blk;
-                                E.view.inpOrg = CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width, l.mainFrame.origin.y);
-                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, l.mainFrame.size.height);
-                                if (l.expo != nil) {
-                                    E.curTextLayer = nil;
-                                } else {
-                                    E.curTextLayer = l;
-                                }
-                            } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
-                                RadicalBlock *rb = blk;
-                                E.view.inpOrg = CGPointMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y);
-                                E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, rb.frame.size.height);
-                                E.curTextLayer = nil;
-                            } else {
-                                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                            }
-                            E.curBlock = blk;
-                        }
-                    } else if (E.curMode == MODE_INSERT) {
-                        EquationBlock *eb = layer.parent;
-                        CGFloat orgWidth = layer.mainFrame.size.width;
+                    if (layer.expo != nil) {
+                        CGFloat orgWidth = [orgStr size].width;
+                        [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
+                        [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+                        CGFloat newWidth = [orgStr size].width;
+                        incrWidth = newWidth - orgWidth;
                         
-                        [eb.children removeLastObject];
-                        [layer destroy];
+                        CGRect frame = layer.frame;
+                        frame.size.width = [orgStr size].width;
+                        layer.frame = frame;
+                        layer.string = orgStr;
+                        [layer updateFrameBaseOnBase];
                         
-                        [(EquationBlock *)E.curParent updateFrameWidth:-orgWidth :E.curRoll];
+                        [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :layer.roll];
                         [E adjustEveryThing:E.root];
                         
-                        id blk = eb.children.lastObject;
-                        if ([blk isMemberOfClass:[EquationBlock class]]) {
-                            EquationBlock *eb = blk;
-                            E.view.inpOrg = CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y);
-                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, eb.mainFrame.size.height);
-                            E.curTextLayer = nil;
-                        } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
-                            EquationTextLayer *l = blk;
-                            E.view.inpOrg = CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width, l.mainFrame.origin.y);
-                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, l.mainFrame.size.height);
-                            if (l.expo != nil) {
-                                E.curTextLayer = nil;
-                            } else {
-                                E.curTextLayer = l;
-                            }
-                        } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
-                            RadicalBlock *rb = blk;
-                            E.view.inpOrg = CGPointMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y);
-                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, rb.frame.size.height);
-                            E.curTextLayer = nil;
-                        } else if ([blk isMemberOfClass:[FractionBarLayer class]]) {
-                        } else {
-                            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                        }
-                        E.curBlock = blk;
+                        E.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
+                        E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                        
+                        layer.type = TEXTLAYER_EMPTY;
                     } else {
-                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                        [E removeElement:layer];
                     }
                 } else {
                     CGFloat orgWidth = [orgStr size].width;
@@ -1881,64 +1812,55 @@ static UIView *testview;
                     E.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
                     E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                 }
-            } else if (layer.type == TEXTLAYER_EMPTY) {
-                EquationBlock *eb = layer.parent;
-                if (layer.roll == ROLL_NUMERATOR && layer.c_idx == 0) {
-                    if (eb.roll == ROLL_EXPO_ROOT) {
-                        EquationTextLayer *l = eb.parent;
-                        CGFloat orgWidth = eb.mainFrame.size.width;
-                        
-                        [eb destroy];
-                        l.expo = nil;
-                        
-                        [(EquationBlock *)l.parent updateFrameWidth:-orgWidth :l.roll];
-                        [E adjustEveryThing:E.root];
-                        
-                        cfgEqnBySlctBlk(E, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
-                    } else if (eb.roll == ROLL_ROOT_ROOT) {
-                        RadicalBlock *rb = eb.parent;
-                        EquationBlock *eb = rb.parent;
-                        CGFloat orgWidth = rb.frame.size.width;
-                        
-                        if (rb.c_idx == eb.children.count - 1) {
-                            [eb.children removeLastObject];
-                        } else {
-                            [eb.children removeObjectAtIndex:rb.c_idx];
-                            [eb updateCIdx];
-                        }
-                        
-                        [rb destroy];
-                        
-                        [(EquationBlock *)eb updateFrameWidth:-orgWidth :rb.roll];
-                        [E adjustEveryThing:E.root];
-                        
-                        if (rb.c_idx == 0) {
-                            
-                        } else {
-                            id blk = [eb.children objectAtIndex:rb.c_idx - 1];
-                            if ([blk isMemberOfClass:[EquationBlock class]]) {
-                                
-                            } else {
-                                
-                            }
-                        }
-                        
-                    } else {
-                        return; //eb.roll == ROLL_ROOT nothing to do
-                    }
-                }
-            } else if (layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
+            } else if (layer.type == TEXTLAYER_EMPTY || layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
+                [E removeElement:layer];
             } else {
-                
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
-            NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:E.curTextLayer.string];
-            
+        }
+    } else {
+        if (![E.curParent isMemberOfClass:[EquationBlock class]]) {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
         }
         
-    } else {
+        EquationBlock *eb = E.curParent;
         
+        if (E.insertCIdx == 0) {
+            
+        } else if ([[eb.children objectAtIndex:E.insertCIdx - 1] isMemberOfClass:[FractionBarLayer class]]) {
+            id blk = [eb.children objectAtIndex:E.insertCIdx - 2];
+            if ([blk isMemberOfClass:[EquationBlock class]]) {
+                (void)findLastTLayer(E, blk);
+            } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
+                (void)findLastTLayer(E, blk);
+            } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
+                (void)findLastTLayer(E, blk);
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
     }
+}
 
+-(void)delBlock:(NSTimer *)timer{
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    [self handleDelBtnClick];
+}
+
+-(void)btnDelLongPress:(UILongPressGestureRecognizer *)gestureRecognizer{
+    if ([gestureRecognizer state] == UIGestureRecognizerStateBegan) {
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        delBtnLongPressTmr = [NSTimer scheduledTimerWithTimeInterval:0.2f target:self selector:@selector(delBlock:) userInfo:nil repeats:YES];
+    } else if (gestureRecognizer.state == UIGestureRecognizerStateEnded) {
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        if ([delBtnLongPressTmr isValid] == YES) {
+            [delBtnLongPressTmr invalidate];
+            delBtnLongPressTmr = nil;
+        }
+    }
 }
 
 -(void)btnClicked: (UIButton *)btn {
