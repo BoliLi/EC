@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A9589E2C1C13E847007F2C8B /* UIView+Easing.m in Sources */ = {isa = PBXBuildFile; fileRef = A9589E2B1C13E847007F2C8B /* UIView+Easing.m */; };
 		A96222F11BFF0F690059FF51 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A96222F01BFF0F690059FF51 /* main.m */; };
 		A96222F41BFF0F690059FF51 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = A96222F31BFF0F690059FF51 /* AppDelegate.m */; };
 		A96222F71BFF0F690059FF51 /* EasyCalc.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A96222F51BFF0F690059FF51 /* EasyCalc.xcdatamodeld */; };
@@ -43,6 +44,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A9589E2A1C13E847007F2C8B /* UIView+Easing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Easing.h"; sourceTree = "<group>"; };
+		A9589E2B1C13E847007F2C8B /* UIView+Easing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Easing.m"; sourceTree = "<group>"; };
 		A96222EC1BFF0F690059FF51 /* EasyCalc.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EasyCalc.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A96222F01BFF0F690059FF51 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		A96222F21BFF0F690059FF51 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -125,6 +128,8 @@
 		A96222EE1BFF0F690059FF51 /* EasyCalc */ = {
 			isa = PBXGroup;
 			children = (
+				A9589E2A1C13E847007F2C8B /* UIView+Easing.h */,
+				A9589E2B1C13E847007F2C8B /* UIView+Easing.m */,
 				A96222F21BFF0F690059FF51 /* AppDelegate.h */,
 				A96222F31BFF0F690059FF51 /* AppDelegate.m */,
 				A96222F81BFF0F690059FF51 /* Assets.xcassets */,
@@ -316,6 +321,7 @@
 				A96222F41BFF0F690059FF51 /* AppDelegate.m in Sources */,
 				A96223321BFF15840059FF51 /* Global.m in Sources */,
 				A98122791C021F47002A1A75 /* Utils.m in Sources */,
+				A9589E2C1C13E847007F2C8B /* UIView+Easing.m in Sources */,
 				A96222F11BFF0F690059FF51 /* main.m in Sources */,
 				A962232D1BFF128C0059FF51 /* EquationBlock.m in Sources */,
 				A96223301BFF12A20059FF51 /* Equation.m in Sources */,

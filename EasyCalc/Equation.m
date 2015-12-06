@@ -106,6 +106,57 @@
         expoCharWidth = strSize.width;
         expoCharHight = strSize.height;
         
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"0"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"1"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"2"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"3"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"4"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"5"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"6"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"7"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"9"];
+//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        strSize = [attStr size];
+//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+        
         curFontW = baseCharWidth;
         curFontH = baseCharHight;
         
@@ -116,12 +167,12 @@
         tapGesture.numberOfTouchesRequired = 1;
         [dspView addGestureRecognizer:tapGesture];
         
-        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleSwipeRight:)];
+        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeRight:)];
         right.numberOfTouchesRequired = 1;
         right.direction = UISwipeGestureRecognizerDirectionRight;
         [dspView addGestureRecognizer:right];
         
-        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleSwipeLeft:)];
+        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeLeft:)];
         left.numberOfTouchesRequired = 1;
         left.direction = UISwipeGestureRecognizerDirectionLeft;
         [dspView addGestureRecognizer:left];

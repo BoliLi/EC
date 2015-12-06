@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "UIView+Easing.h"
 #import "Global.h"
 #import "Utils.h"
 #import "Equation.h"
@@ -24,7 +25,8 @@ static UIView *testview;
 
 @implementation ViewController
 @synthesize buttonFont;
-@synthesize keyboardView;
+@synthesize mainKbView;
+@synthesize secondKbView;
 @synthesize kbConView;
 @synthesize dspConView;
 @synthesize borderLayer;
@@ -160,7 +162,7 @@ static UIView *testview;
     }
 }
 
--(void)handleSwipeRight: (UISwipeGestureRecognizer *)gesture {
+-(void)handleDspViewSwipeRight: (UISwipeGestureRecognizer *)gesture {
     NSLog(@"[%s%i]~~~~~~~~~~~", __FUNCTION__, __LINE__);
     DisplayView *orgView = E.view;
     gCurEqIdx--;
@@ -181,7 +183,7 @@ static UIView *testview;
     }];
 }
 
--(void)handleSwipeLeft: (UISwipeGestureRecognizer *)gesture {
+-(void)handleDspViewSwipeLeft: (UISwipeGestureRecognizer *)gesture {
     NSLog(@"[%s%i]~~~~~~~~~~~", __FUNCTION__, __LINE__);
     DisplayView *orgView = E.view;
     gCurEqIdx++;
@@ -197,6 +199,44 @@ static UIView *testview;
     [E.view.cursor addAnimation:anim forKey:nil];
     [UIView transitionFromView:orgView toView:E.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
         // What to do when its finished.
+    }];
+}
+
+-(void)handleKbViewSwipeRight: (UISwipeGestureRecognizer *)gesture {
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    mainKbView.frame = CGRectMake(-scnWidth, 0, scnWidth, scnHeight / 2);
+    mainKbView.alpha = 1.0;
+    mainKbView.hidden = NO;
+    [kbConView addSubview:mainKbView];
+    
+    [UIView animateWithDuration:.5 animations:^{
+        
+        [mainKbView setEasingFunction:CreateCAMediaTimingFunction(0.175, 0.885, 0.52, 1.25) forKeyPath:@"center"];
+        secondKbView.alpha = 0.0;
+        mainKbView.frame = CGRectOffset(mainKbView.frame, scnWidth, 0);
+        
+    } completion:^(BOOL finished) {
+        [mainKbView removeEasingFunctionForKeyPath:@"center"];
+        
+    }];
+}
+
+-(void)handleKbViewSwipeLeft: (UISwipeGestureRecognizer *)gesture {
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    secondKbView.frame = CGRectMake(scnWidth, 0, scnWidth, scnHeight / 2);
+    secondKbView.alpha = 1.0;
+    secondKbView.hidden = NO;
+    [kbConView addSubview:secondKbView];
+    
+    [UIView animateWithDuration:.5 animations:^{
+        
+        [secondKbView setEasingFunction:CreateCAMediaTimingFunction(0.175, 0.885, 0.52, 1.25) forKeyPath:@"center"];
+        mainKbView.alpha = 0.0;
+        secondKbView.frame = CGRectOffset(secondKbView.frame, -scnWidth, 0);
+        
+    } completion:^(BOOL finished) {
+        [secondKbView removeEasingFunctionForKeyPath:@"center"];
+        
     }];
 }
 
@@ -216,16 +256,52 @@ static UIView *testview;
     CGRect cursorFrame = CGRectMake(1, (scnHeight / 2) - statusBarHeight - 30.0, 0.0, 0.0); //Size will update in Equation init
     CGPoint rootPos = CGPointMake(1, (scnHeight / 2) - statusBarHeight - 30.0);
     for (int i = 0; i < 16; i++) {
-        [gEquationList addObject:[[Equation alloc] init:rootPos :dspFrame :cursorFrame :self]];
+        E = [[Equation alloc] init:rootPos :dspFrame :cursorFrame :self];
+        [gEquationList addObject:E];
+        //[dspConView addSubview:E.view];
     }
     E = gEquationList.firstObject;
 
     [dspConView addSubview:E.view];
 
-    keyboardView = [[UIView alloc] initWithFrame:CGRectMake(0, scnHeight / 2, scnWidth, scnHeight / 2)];
-    keyboardView.tag = 2;
-    keyboardView.backgroundColor = [UIColor clearColor];
-    [self.view addSubview:keyboardView];
+    kbConView = [[UIView alloc] initWithFrame:CGRectMake(0, scnHeight / 2, scnWidth, scnHeight / 2)];
+    kbConView.tag = 2;
+    kbConView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:kbConView];
+    
+    secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
+    secondKbView.backgroundColor = [UIColor whiteColor];
+    
+    UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeRight:)];
+    right.numberOfTouchesRequired = 1;
+    right.direction = UISwipeGestureRecognizerDirectionRight;
+    [secondKbView addGestureRecognizer:right];
+    
+    buttonFont = [UIFont systemFontOfSize: 20];
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    CGFloat btnHeight = scnHeight / 10;
+    CGFloat btnWidth = scnWidth / 5;
+    for (int i = 0; i < 25; i++) {
+        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
+        bn.tag = i + 10;
+        bn.titleLabel.font = buttonFont;
+        bn.showsTouchWhenHighlighted = YES;
+        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
+        int j = i % 5;
+        int k = i / 5;
+        bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
+        [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+        [secondKbView addSubview:bn];
+    }
+    
+    mainKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
+    mainKbView.backgroundColor = [UIColor whiteColor];
+    [kbConView addSubview:mainKbView];
+    
+    UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeLeft:)];
+    left.numberOfTouchesRequired = 1;
+    left.direction = UISwipeGestureRecognizerDirectionLeft;
+    [mainKbView addGestureRecognizer:left];
     
     borderLayer = [CALayer layer];
     borderLayer.contentsScale = [UIScreen mainScreen].scale;
@@ -233,13 +309,10 @@ static UIView *testview;
     borderLayer.backgroundColor = [UIColor clearColor].CGColor;
     borderLayer.frame = CGRectMake(0, 0, scnWidth, scnHeight / 2);
     borderLayer.delegate = self;
-    [keyboardView.layer addSublayer: borderLayer];
+    [mainKbView.layer addSublayer: borderLayer];
     [borderLayer setNeedsDisplay];
     
-    buttonFont = [UIFont systemFontOfSize: 20];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"DUMP", @"DEBUG", @"Root", @"<-", @"7", @"8", @"9", @"÷", @"4", @"5", @"6", @"×", @"1", @"2", @"3", @"-", @"%", @"0", @"·", @"+", @"x^", @"(", @")", @"=", nil];
-    CGFloat btnHeight = scnHeight / 10;
-    CGFloat btnWidth = scnWidth / 5;
+    btnTitleArr = [NSArray arrayWithObjects:@"DUMP", @"DEBUG", @"Root", @"<-", @"7", @"8", @"9", @"÷", @"4", @"5", @"6", @"×", @"1", @"2", @"3", @"-", @"%", @"0", @"·", @"+", @"x^", @"(", @")", @"=", nil];
     for (int i = 0; i < 20; i++) {
         UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
         bn.tag = i + 10;
@@ -255,7 +328,7 @@ static UIView *testview;
             longPress.minimumPressDuration = 1; //定义按的时间
             [bn addGestureRecognizer:longPress];
         }
-        [keyboardView addSubview:bn];
+        [mainKbView addSubview:bn];
     }
     
     for (int i = 20; i < 23; i++) {
@@ -267,7 +340,7 @@ static UIView *testview;
         int k = i % 4;
         bn.frame = CGRectMake(4 * btnWidth, k * btnHeight, btnWidth, btnHeight);
         [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-        [keyboardView addSubview:bn];
+        [mainKbView addSubview:bn];
     }
     
     UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -277,7 +350,7 @@ static UIView *testview;
     [bn setTitle:[btnTitleArr objectAtIndex: 23] forState:UIControlStateNormal];
     bn.frame = CGRectMake(4 * btnWidth, 3 * btnHeight, btnWidth, 2 * btnHeight);
     [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-    [keyboardView addSubview:bn];
+    [mainKbView addSubview:bn];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -1909,7 +1982,46 @@ static UIView *testview;
     } else if([[btn currentTitle]  isEqual: @"<-"]) {
         [self handleDelBtnClick];
     } else if([[btn currentTitle]  isEqual: @"·"]) {
-        [E removeElement:E.curBlock];
+        NSLog(@"[%s%i]~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        DisplayView *orgView = E.view;
+        
+        gCurEqIdx = 0;
+        E = [gEquationList objectAtIndex:gCurEqIdx];
+        [E.view.cursor removeAllAnimations];
+        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+        anim.fromValue = [NSNumber numberWithBool:YES];
+        anim.toValue = [NSNumber numberWithBool:NO];
+        anim.duration = 0.5;
+        anim.autoreverses = YES;
+        anim.repeatCount = HUGE_VALF;
+        [E.view.cursor addAnimation:anim forKey:nil];
+        E.view.frame = CGRectOffset(E.view.frame, scnWidth, 0.0);
+        [dspConView addSubview:E.view];
+        //orgView.center = CGPointMake(0., CGRectGetMidY(self.view.bounds));
+        
+        // Animate!
+        [UIView animateWithDuration:.5 animations:^{
+            
+            [E.view setEasingFunction:CreateCAMediaTimingFunction(0.175, 0.885, 0.52, 1.25) forKeyPath:@"center"];
+            
+            E.view.frame = CGRectMake(0, 0, scnWidth, (scnHeight / 2) - statusBarHeight);
+            
+        } completion:^(BOOL finished) {
+            
+            [E.view removeEasingFunctionForKeyPath:@"center"];
+            
+        }];
+//        gCurEqIdx = 0;
+//        E = [gEquationList objectAtIndex:gCurEqIdx];
+//        [E.view.cursor removeAllAnimations];
+//        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+//        anim.fromValue = [NSNumber numberWithBool:YES];
+//        anim.toValue = [NSNumber numberWithBool:NO];
+//        anim.duration = 0.5;
+//        anim.autoreverses = YES;
+//        anim.repeatCount = HUGE_VALF;
+//        [E.view.cursor addAnimation:anim forKey:nil];
+//        [dspConView addSubview:E.view];
     } else if([[btn currentTitle]  isEqual: @"%"]) {
         NSLog(@"[%s%i]~%@~~~~~~~~~~", __FUNCTION__, __LINE__, testeb);
     } else

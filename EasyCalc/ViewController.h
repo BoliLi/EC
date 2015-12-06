@@ -17,7 +17,8 @@
 @interface ViewController : UIViewController
 @property UIFont *buttonFont;
 @property UIView *dspConView;
-@property UIView *keyboardView;
+@property UIView *mainKbView;
+@property UIView *secondKbView;
 @property UIView *kbConView;
 @property CALayer *borderLayer;
 @property Equation *E;
@@ -28,6 +29,6 @@
 @property NSTimer *delBtnLongPressTmr;
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
--(void)handleSwipeRight: (UISwipeGestureRecognizer *)gesture;
--(void)handleSwipeLeft: (UISwipeGestureRecognizer *)gesture;
+-(void)handleDspViewSwipeRight: (UISwipeGestureRecognizer *)gesture;
+-(void)handleDspViewSwipeLeft: (UISwipeGestureRecognizer *)gesture;
 @end
