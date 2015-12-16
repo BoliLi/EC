@@ -22,8 +22,8 @@
 @synthesize guid_cnt;
 @synthesize root;
 @synthesize curParent;
-@synthesize curBlock;
-@synthesize curTextLayer;
+@synthesize curBlk;
+@synthesize curTxtLyr;
 @synthesize curRoll;
 @synthesize curMode;
 @synthesize baseFont;
@@ -36,9 +36,8 @@
 @synthesize curFontH;
 @synthesize curFontW;
 @synthesize insertCIdx;
-@synthesize needX;
 @synthesize view;
-@synthesize needNewLayer;
+@synthesize txtInsIdx;
 
 -(id) init {
     self = [super init];
@@ -46,8 +45,8 @@
         guid_cnt = 0;
         curRoll = ROLL_NUMERATOR;
         curMode = MODE_INPUT;
-        needX = NO;
-        needNewLayer = YES;
+        curTxtLyr = curBlk = nil;
+        txtInsIdx = 0;
         
         baseFont = [UIFont systemFontOfSize: 20];
         superscriptFont = [UIFont systemFontOfSize:8];
@@ -88,74 +87,18 @@
         guid_cnt = 0;
         curRoll = ROLL_NUMERATOR;
         curMode = MODE_INPUT;
-        needX = NO;
+        curTxtLyr = curBlk = nil;
+        txtInsIdx = 0;
         
         baseFont = [UIFont systemFontOfSize: 20];
         superscriptFont = [UIFont systemFontOfSize:10];
         curFont = baseFont;
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        CGSize strSize = [attStr size];
-        baseCharWidth = strSize.width;
-        baseCharHight = strSize.height;
-        attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        strSize = [attStr size];
-        expoCharWidth = strSize.width;
-        expoCharHight = strSize.height;
         
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"0"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"1"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"2"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"3"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"4"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"5"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"6"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"7"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
-//        attStr = [[NSMutableAttributedString alloc] initWithString: @"9"];
-//        ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-//        strSize = [attStr size];
-//        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
+        baseCharWidth = gBaseCharWidthTbl[8];
+        baseCharHight = baseFont.lineHeight;
+        
+        expoCharWidth = gExpoCharWidthTbl[8];
+        expoCharHight = superscriptFont.lineHeight;
         
         curFontW = baseCharWidth;
         curFontH = baseCharHight;
@@ -210,8 +153,8 @@
         layer.c_idx = 0;
         [root.children addObject:layer];
         [dspView.layer addSublayer:layer];
-        curTextLayer = layer;
-        curBlock = layer;
+        curTxtLyr = layer;
+        curBlk = layer;
 
         dspView.cursor = clayer;
         dspView.inpOrg = clayer.frame.origin;
@@ -610,10 +553,8 @@
                         e.insertCIdx = 0;
                         e.curRoll = eb.roll;
                         e.curParent = parent;
-                        e.needNewLayer = YES;
-                        e.needX = NO;
-                        e.curTextLayer = nil;
-                        e.curBlock = nil;
+                        e.curTxtLyr = nil;
+                        e.curBlk = nil;
                         e.view.inpOrg = p;
                         e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                     } else if ([[parent.children objectAtIndex:eb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
@@ -630,10 +571,8 @@
                         e.insertCIdx = eb.c_idx;
                         e.curRoll = eb.roll;
                         e.curParent = parent;
-                        e.needNewLayer = YES;
-                        e.needX = NO;
-                        e.curTextLayer = nil;
-                        e.curBlock = nil;
+                        e.curTxtLyr = nil;
+                        e.curBlk = nil;
                         e.view.inpOrg = p;
                         e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                     } else {
@@ -880,10 +819,8 @@
                     e.insertCIdx = 0;
                     e.curRoll = l.roll;
                     e.curParent = parent;
-                    e.needNewLayer = YES;
-                    e.needX = NO;
-                    e.curTextLayer = nil;
-                    e.curBlock = nil;
+                    e.curTxtLyr = nil;
+                    e.curBlk = nil;
                     e.view.inpOrg = p;
                     e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                 } else if ([[parent.children objectAtIndex:l.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
@@ -900,10 +837,8 @@
                     e.insertCIdx = l.c_idx;
                     e.curRoll = l.roll;
                     e.curParent = parent;
-                    e.needNewLayer = YES;
-                    e.needX = NO;
-                    e.curTextLayer = nil;
-                    e.curBlock = nil;
+                    e.curTxtLyr = nil;
+                    e.curBlk = nil;
                     e.view.inpOrg = p;
                     e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                 } else {
@@ -1016,10 +951,8 @@
                     e.insertCIdx = 0;
                     e.curRoll = rb.roll;
                     e.curParent = parent;
-                    e.needNewLayer = YES;
-                    e.needX = NO;
-                    e.curTextLayer = nil;
-                    e.curBlock = nil;
+                    e.curTxtLyr = nil;
+                    e.curBlk = nil;
                     e.view.inpOrg = p;
                     e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                 } else if ([[parent.children objectAtIndex:rb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
@@ -1036,10 +969,8 @@
                     e.insertCIdx = rb.c_idx;
                     e.curRoll = rb.roll;
                     e.curParent = parent;
-                    e.needNewLayer = YES;
-                    e.needX = NO;
-                    e.curTextLayer = nil;
-                    e.curBlock = nil;
+                    e.curTxtLyr = nil;
+                    e.curBlk = nil;
                     e.view.inpOrg = p;
                     e.view.cursor.frame = CGRectMake(p.x, p.y, CURSOR_W, e.curFontH);
                 } else {

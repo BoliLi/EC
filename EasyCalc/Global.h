@@ -49,8 +49,9 @@
 #define CURSOR_W 3.0
 
 extern NSMutableArray *gEquationList;
-extern NSMutableArray *gDisplayViewList;
 extern int gCurEqIdx;
+extern CGFloat gBaseCharWidthTbl[11];
+extern CGFloat gExpoCharWidthTbl[11];
 
 @interface NSMutableArray (Reverse)
 - (void)reverse;
@@ -58,4 +59,6 @@ extern int gCurEqIdx;
 
 
 void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock);
+void initCharWidthTbl(void);
+CGFloat getCharWidth(int base_expo, NSString *s);
 #endif /* Global_h */

@@ -18,8 +18,8 @@
 @property int guid_cnt;
 @property EquationBlock *root;
 @property id curParent;
-@property id curBlock;
-@property EquationTextLayer *curTextLayer;
+@property id curBlk;
+@property EquationTextLayer *curTxtLyr;
 @property int curRoll;
 @property int curMode;
 @property UIFont *baseFont;
@@ -32,9 +32,8 @@
 @property CGFloat curFontH;
 @property CGFloat curFontW;
 @property NSUInteger insertCIdx;
-@property BOOL needX;
 @property DisplayView *view;
-@property BOOL needNewLayer;
+@property int txtInsIdx;
 
 -(id) init;
 -(id) init : (CGPoint)rootPos : (CGRect)dspFrame : (CGRect)cursorFrame : (ViewController *)vc;

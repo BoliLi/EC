@@ -21,9 +21,16 @@
 @property CGRect mainFrame;
 @property int is_base_expo;
 @property int type;
+@property int charCnt;
+@property NSMutableArray *strLenTbl;
 
 -(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
+-(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t;
+-(CGFloat) addNumChar:(NSString *)str;
+-(CGFloat) insertNumChar:(NSString *)str at:(int)idx;
+-(CGFloat) delNumCharAt:(int)idx;
+-(int) getTxtInsIdx: (CGPoint) p;
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;
 -(void) destroy;

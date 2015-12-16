@@ -9,6 +9,8 @@
 #ifndef Utils_h
 #define Utils_h
 
-EquationTextLayer *findLastTLayer(Equation *e, id blk);
+EquationTextLayer *findLastTxtLayer(Equation *e, id blk);
+EquationTextLayer *findPrevTxtLayer(Equation *e, id blk);
 void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint);
+bool rectContainsRect(CGRect rect1, CGRect rect2);
 #endif /* Utils_h */

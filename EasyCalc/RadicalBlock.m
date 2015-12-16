@@ -84,9 +84,8 @@
         layer.c_idx = 0;
         [self.content.children addObject:layer];
         [e.view.layer addSublayer: layer];
-        e.curBlock = layer;
-        e.curTextLayer = layer;
-        e.needNewLayer = NO;
+        e.curBlk = layer;
+        e.curTxtLyr = layer;
         
         if (e.curFont == e.baseFont) {
             is_base_expo = IS_BASE;

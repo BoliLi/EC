@@ -58,10 +58,8 @@ static UIView *testview;
                 CGFloat y = E.root.numerFrame.origin.y + E.root.numerFrame.size.height - E.curFontH / 2.0;
                 E.view.inpOrg = CGPointMake(x, y);
                 E.curMode = MODE_DUMP_ROOT;
-                E.curTextLayer = nil;
-                E.curBlock = E.root;
-                E.needNewLayer = YES;
-                E.needX = YES;
+                E.curTxtLyr = nil;
+                E.curBlk = E.root;
                 E.curRoll = ROLL_NUMERATOR;
                 NSLog(@"%s%i~Tapped outside fraction. Root block has denominator.~CIDX: %lu~Mode: %i~Roll: %i~~", __FUNCTION__, __LINE__, (unsigned long)E.insertCIdx, E.curMode, E.curRoll);
             } else {
@@ -77,9 +75,7 @@ static UIView *testview;
                         E.view.inpOrg = CGPointMake(x, y);
                         CGFloat tmp = layer.frame.size.height;
                         E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, tmp);
-                        E.curTextLayer = nil;
-                        E.needNewLayer = YES;
-                        E.needX = NO;
+                        E.curTxtLyr = nil;
                     } else if (layer.type == TEXTLAYER_NUM) {
                         if (layer.expo == nil) {
                             CGFloat x = layer.frame.origin.x + layer.frame.size.width;
@@ -87,18 +83,15 @@ static UIView *testview;
                             E.view.inpOrg = CGPointMake(x, y);
                             CGFloat tmp = layer.frame.size.height;
                             E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, tmp);
-                            E.curTextLayer = layer;
-                            E.needNewLayer = NO;
+                            E.curTxtLyr = layer;
                         } else {
                             CGFloat x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
                             CGFloat y = layer.frame.origin.y;
                             E.view.inpOrg = CGPointMake(x, y);
                             CGFloat tmp = layer.mainFrame.size.height;
                             E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
-                            E.curTextLayer = nil;
-                            E.needNewLayer = YES;
+                            E.curTxtLyr = nil;
                         }
-                        E.needX = YES;
                     } else if (layer.type == TEXTLAYER_EMPTY) {
                         if (layer.expo == nil) {
                             CGFloat x = layer.frame.origin.x;
@@ -106,33 +99,28 @@ static UIView *testview;
                             E.view.inpOrg = CGPointMake(x, y);
                             CGFloat tmp = layer.frame.size.height;
                             E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, tmp);
-                            E.curTextLayer = layer;
-                            E.needNewLayer = NO;
+                            E.curTxtLyr = layer;
                         } else {
                             CGFloat x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
                             CGFloat y = layer.frame.origin.y;
                             E.view.inpOrg = CGPointMake(x, y);
                             CGFloat tmp = layer.mainFrame.size.height;
                             E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
-                            E.curTextLayer = nil;
-                            E.needNewLayer = YES;
+                            E.curTxtLyr = nil;
                         }
-                        E.needX = YES;
                     } else
                         NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     E.curRoll = layer.roll;
                     E.curParent = layer.parent;
-                    E.curBlock = layer;
-                    NSLog(@"%s%i~Tapped outside fraction. Last obj is text layer.~Id: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, E.curTextLayer.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
+                    E.curBlk = layer;
+                    NSLog(@"%s%i~Tapped outside fraction. Last obj is text layer.~Id: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, E.curTxtLyr.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
                 } else if ([block isMemberOfClass: [EquationBlock class]]) {
                     EquationBlock *b = block;
                     E.curMode = MODE_INPUT;
                     E.curParent = b.parent;
                     E.curRoll = b.roll;
-                    E.curTextLayer = nil;
-                    E.curBlock = b;
-                    E.needNewLayer = YES;
-                    E.needX = YES;
+                    E.curTxtLyr = nil;
+                    E.curBlk = b;
                     CGFloat x = b.bar.frame.origin.x + b.bar.frame.size.width;
                     CGFloat y = b.numerFrame.origin.y + b.numerFrame.size.height - E.curFontH / 2.0;
                     E.view.inpOrg = CGPointMake(x, y);
@@ -144,10 +132,8 @@ static UIView *testview;
                     E.curMode = MODE_INPUT;
                     E.curParent = b.parent;
                     E.curRoll = b.roll;
-                    E.curTextLayer = nil;
-                    E.curBlock = b;
-                    E.needNewLayer = YES;
-                    E.needX = YES;
+                    E.curTxtLyr = nil;
+                    E.curBlk = b;
                     CGFloat x = b.frame.origin.x + b.frame.size.width;
                     CGFloat y = b.frame.origin.y + b.frame.size.height / 2.0 - E.curFontH / 2.0;
                     E.view.inpOrg = CGPointMake(x, y);
@@ -243,10 +229,12 @@ static UIView *testview;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    initCharWidthTbl();
+    
     scnWidth = [UIScreen mainScreen].bounds.size.width;
     scnHeight = [UIScreen mainScreen].bounds.size.height;
     statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
-
+    
     dspConView = [[UIView alloc] initWithFrame:CGRectMake(0, statusBarHeight, scnWidth, (scnHeight / 2) - statusBarHeight)];
     dspConView.tag = 1;
     dspConView.backgroundColor = [UIColor clearColor];
@@ -261,7 +249,7 @@ static UIView *testview;
         //[dspConView addSubview:E.view];
     }
     E = gEquationList.firstObject;
-
+    
     [dspConView addSubview:E.view];
 
     kbConView = [[UIView alloc] initWithFrame:CGRectMake(0, scnHeight / 2, scnWidth, scnHeight / 2)];
@@ -360,12 +348,11 @@ static UIView *testview;
 
 - (void)handleNumBtnClick : (NSString *)num {
     CGFloat incrWidth = 0.0;
+    CGFloat cursorOffset = 0.0;
     
-    if (E.needNewLayer) {
-        E.needNewLayer = NO;
+    if (E.curTxtLyr == nil) {
         
         EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:num :E.view.inpOrg :E :TEXTLAYER_NUM];
-        tLayer.name = @"num";
         
         if ([E.curParent isMemberOfClass: [EquationBlock class]]) {
             NSLog(@"%s%i~Input Num %@ with new text layer.~ID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, num, tLayer.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
@@ -379,50 +366,18 @@ static UIView *testview;
         
         if(E.curMode == MODE_INPUT) {
             EquationBlock *block = E.curParent;
-            if (E.needX) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = block;
-                tLayer1.c_idx = block.children.count;
-                [block.children addObject:tLayer1];
-                [E.view.layer addSublayer:tLayer1];
-                tLayer.c_idx = block.children.count;
-                [block.children addObject:tLayer];
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-            } else {
-                tLayer.c_idx = block.children.count;
-                [block.children addObject:tLayer];
-            }
-            
+
+            tLayer.c_idx = block.children.count;
+            [block.children addObject:tLayer];
         } else if(E.curMode == MODE_INSERT) {
             //NSLog(@"%s%i~~~%lu~~~~~~~~", __FUNCTION__, __LINE__, (unsigned long)E.insertCIdx);
             EquationBlock *block = E.curParent;
-            if (E.needX) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = block;
-                tLayer1.c_idx = E.insertCIdx;
-                [E.view.layer addSublayer:tLayer1];
-                [block.children insertObject:tLayer1 atIndex:tLayer1.c_idx];
-                
-                tLayer.c_idx = tLayer1.c_idx + 1;
-                [block.children insertObject:tLayer atIndex:tLayer.c_idx];
-                /*Update c_idx*/
-                [block updateCIdx];
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-                E.insertCIdx += 2;
-            } else {
-                tLayer.c_idx = E.insertCIdx;
-                [block.children insertObject:tLayer atIndex:tLayer.c_idx];
-                /*Update c_idx*/
-                [block updateCIdx];
-                E.insertCIdx += 1;
-            }
-            
+
+            tLayer.c_idx = E.insertCIdx;
+            [block.children insertObject:tLayer atIndex:tLayer.c_idx];
+            /*Update c_idx*/
+            [block updateCIdx];
+            E.insertCIdx += 1;
         } else if(E.curMode == MODE_DUMP_ROOT) {
             EquationBlock *block = [[EquationBlock alloc] init:E];
             block.roll = ROLL_ROOT;
@@ -436,17 +391,7 @@ static UIView *testview;
             E.root.c_idx = 0;
             [block.children addObject:E.root];
 
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.roll = E.curRoll;
-            tLayer1.parent = block;
-            tLayer1.c_idx = 1;
-            [E.view.layer addSublayer:tLayer1];
-            [block.children addObject:tLayer1];
-
-            tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-            incrWidth += tLayer1.frame.size.width;
-            tLayer.c_idx = 2;
+            tLayer.c_idx = 1;
             [block.children addObject:tLayer];
             E.root = block;
             E.curParent = block;
@@ -466,17 +411,7 @@ static UIView *testview;
             eBlock.c_idx = 0;
             [newBlock.children addObject:eBlock];
 
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.roll = E.curRoll;
-            tLayer1.parent = newBlock;
-            tLayer1.c_idx = 1;
-            [E.view.layer addSublayer:tLayer1];
-            [newBlock.children addObject:tLayer1];
-
-            tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-            incrWidth += tLayer1.frame.size.width;
-            tLayer.c_idx = 2;
+            tLayer.c_idx = 1;
             [newBlock.children addObject:tLayer];
             rBlock.content = newBlock;
             E.curParent = newBlock;
@@ -495,18 +430,8 @@ static UIView *testview;
             eBlock.parent = newBlock;
             eBlock.c_idx = 0;
             [newBlock.children addObject:eBlock];
-            
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.roll = E.curRoll;
-            tLayer1.parent = newBlock;
-            tLayer1.c_idx = 1;
-            [E.view.layer addSublayer:tLayer1];
-            [newBlock.children addObject:tLayer1];
-            
-            tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-            incrWidth += tLayer1.frame.size.width;
-            tLayer.c_idx = 2;
+
+            tLayer.c_idx = 1;
             [newBlock.children addObject:tLayer];
             layer.expo = newBlock;
             E.curParent = newBlock;
@@ -517,40 +442,24 @@ static UIView *testview;
         
         tLayer.parent = E.curParent;
         [E.view.layer addSublayer:tLayer];
-        E.curTextLayer = tLayer;
-        E.curBlock = tLayer;
+        E.curTxtLyr = tLayer;
+        E.curBlk = tLayer;
+        
+        cursorOffset = tLayer.mainFrame.size.width;
     } else {
-        NSLog(@"%s%i~Input Num %@ with exist text layer.~ID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, num, E.curTextLayer.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
-        if (E.curTextLayer.type == TEXTLAYER_EMPTY) {
-            E.curTextLayer.type = TEXTLAYER_NUM;
-            CGFloat orgW = E.curTextLayer.mainFrame.size.width;
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: num];
-            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-            CGSize newStrSize = [attStr size];
-            E.curTextLayer.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, newStrSize.width, newStrSize.height);
-            E.curTextLayer.mainFrame = E.curTextLayer.frame;
-            E.curTextLayer.backgroundColor = [UIColor clearColor].CGColor;
-            E.curTextLayer.string = attStr;
-            [E.curTextLayer updateFrameBaseOnBase];
-            incrWidth += E.curTextLayer.mainFrame.size.width - orgW;
+        NSLog(@"%s%i~Input Num %@ with exist text layer.~ID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, num, E.curTxtLyr.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
+        if (E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+            CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
+            cursorOffset = [E.curTxtLyr addNumChar:num];
+            incrWidth += E.curTxtLyr.mainFrame.size.width - orgW;
         } else {
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: num];
-            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-            /* Update text info */
-            NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:E.curTextLayer.string];
-            CGSize newStrSize = [attStr size];
-            incrWidth = newStrSize.width;
-            [orgStr appendAttributedString:attStr];
-            
-            CGSize strSize = [orgStr size];
-            CGRect frame = E.curTextLayer.frame;
-            frame.size.width = strSize.width;
-            frame.size.height = strSize.height;
-            E.curTextLayer.frame = frame;
-            E.curTextLayer.string = orgStr;
-            [E.curTextLayer updateFrameBaseOnBase];
+            CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
+            if (E.txtInsIdx == E.curTxtLyr.charCnt) {
+                cursorOffset = [E.curTxtLyr addNumChar:num];
+            } else {
+                cursorOffset = [E.curTxtLyr insertNumChar:num at:E.txtInsIdx++];
+            }
+            incrWidth += E.curTxtLyr.mainFrame.size.width - orgW;
         }
         
     }
@@ -559,43 +468,46 @@ static UIView *testview;
     [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
     [E adjustEveryThing:E.root];
     
-    E.needX = YES;
-    
     /* Move cursor */
-    CGFloat cursorOrgX = 0.0;
-    CGFloat cursorOrgY = 0.0;
-    
-    cursorOrgX = E.curTextLayer.frame.origin.x + E.curTextLayer.frame.size.width;
-    cursorOrgY = E.curTextLayer.frame.origin.y;
+    CGFloat cursorOrgX = E.curTxtLyr.frame.origin.x + cursorOffset;
+    CGFloat cursorOrgY = E.curTxtLyr.frame.origin.y;
     
     E.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, E.curFontH);
     E.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
 }
 
 - (void)handleOpBtnClick : (NSString *)op {
-    E.needX = NO;
+    
+    
     if ([op isEqual: @"×"] || [op isEqual: @"+"] || [op isEqual: @"-"]) {
-        if (E.curTextLayer != nil) {
-            if (E.curTextLayer.type == TEXTLAYER_EMPTY) {
-                if (E.curTextLayer.expo == nil) {
-                    NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                    return;
-                } else if ([E.curTextLayer.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
-                    EquationTextLayer *l = E.curTextLayer.expo.children.firstObject;
-                    if (l.type == TEXTLAYER_EMPTY) {
-                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                        return;
-                    }
+        CGFloat incrWidth = 0.0;
+        
+        if (E.curTxtLyr != nil && E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+            if (E.curTxtLyr.expo == nil) {
+                EquationBlock *cb = E.curParent;
+                [E.curTxtLyr destroy];
+                [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
+                [cb updateCIdx];
+                incrWidth -= E.curTxtLyr.mainFrame.size.width;
+            } else if ([E.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = E.curTxtLyr.expo.children.firstObject;
+                if (l.type == TEXTLAYER_EMPTY) {
+                    EquationBlock *cb = E.curParent;
+                    [E.curTxtLyr destroy];
+                    [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
+                    [cb updateCIdx];
+                    incrWidth -= E.curTxtLyr.mainFrame.size.width;
+                } else {
+                    E.curMode = MODE_INSERT;
+                    E.insertCIdx = E.curTxtLyr.c_idx;
                 }
+            } else {
+                E.curMode = MODE_INSERT;
+                E.insertCIdx = E.curTxtLyr.c_idx;
             }
         }
         
-        CGFloat incrWidth = 0.0;
-        NSString *str = @" ";
-        str = [str stringByAppendingString:op];
-        str = [str stringByAppendingString:@" "];
-        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:str :E.view.inpOrg :E :TEXTLAYER_OP];
-        tLayer.name = op;
+        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:op :E.view.inpOrg :E :TEXTLAYER_OP];
         
         if ([E.curParent isMemberOfClass: [EquationBlock class]]) {
             NSLog(@"%s%i~Input Op %@.~ID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, op, tLayer.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
@@ -605,7 +517,7 @@ static UIView *testview;
             NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
         
-        incrWidth = tLayer.frame.size.width;
+        incrWidth += tLayer.frame.size.width;
         
         if(E.curMode == MODE_INPUT) {
             EquationBlock *block = E.curParent;
@@ -681,9 +593,8 @@ static UIView *testview;
         
         tLayer.parent = E.curParent;
         [E.view.layer addSublayer:tLayer];
-        E.curTextLayer = nil;
-        E.curBlock = tLayer;
-        E.needNewLayer = YES;
+        E.curTxtLyr = nil;
+        E.curBlk = tLayer;
         
         //Update frame info of current block */
         //dumpObj(E.root);
@@ -700,10 +611,10 @@ static UIView *testview;
         E.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     } else { //Handle "÷"
         
-//        if (E.curTextLayer != nil && E.curTextLayer.type == TEXTLAYER_EMPTY) {
-//            if (E.curTextLayer.expo != nil) {
-//                if ([E.curTextLayer.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
-//                    EquationTextLayer *l = E.curTextLayer.expo.children.firstObject;
+//        if (E.curTxtLyr != nil && E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+//            if (E.curTxtLyr.expo != nil) {
+//                if ([E.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
+//                    EquationTextLayer *l = E.curTxtLyr.expo.children.firstObject;
 //                    if (l.type != TEXTLAYER_EMPTY) {
 //                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 //                        return;
@@ -1164,9 +1075,8 @@ static UIView *testview;
         layer.c_idx = eBlock.children.count;
         [eBlock.children addObject:layer];
         [E.view.layer addSublayer: layer];
-        E.curTextLayer = layer;
-        E.curBlock = layer;
-        E.needNewLayer = NO;
+        E.curTxtLyr = layer;
+        E.curBlk = layer;
 //        NSLog(@"%s%i~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, __LINE__, eBlock.mainFrame.origin.x, eBlock.mainFrame.origin.y, eBlock.mainFrame.size.width, eBlock.mainFrame.size.height, eBlock.numerFrame.origin.x, eBlock.numerFrame.origin.y, eBlock.numerFrame.size.width, eBlock.numerFrame.size.height, eBlock.denomFrame.origin.x, eBlock.denomFrame.origin.y, eBlock.denomFrame.size.width, eBlock.denomFrame.size.height);
         [E adjustEveryThing:E.root];
 //        NSLog(@"%s%i~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, __LINE__, eBlock.mainFrame.origin.x, eBlock.mainFrame.origin.y, eBlock.mainFrame.size.width, eBlock.mainFrame.size.height, eBlock.numerFrame.origin.x, eBlock.numerFrame.origin.y, eBlock.numerFrame.size.width, eBlock.numerFrame.size.height, eBlock.denomFrame.origin.x, eBlock.denomFrame.origin.y, eBlock.denomFrame.size.width, eBlock.denomFrame.size.height);
@@ -1183,33 +1093,30 @@ static UIView *testview;
 }
 
 - (void)handleRootBtnClick: (int)rootCnt {
-    EquationTextLayer *orgLayer = E.curTextLayer;
     CGFloat incrWidth = 0.0;
     
-    if (orgLayer != nil) {
-        if (orgLayer.type == TEXTLAYER_EMPTY) {
-            if (orgLayer.expo == nil) {
+    if (E.curTxtLyr != nil && E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+        if (E.curTxtLyr.expo == nil) {
+            EquationBlock *cb = E.curParent;
+            [E.curTxtLyr destroy];
+            [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
+            [cb updateCIdx];
+            incrWidth -= E.curTxtLyr.mainFrame.size.width;
+        } else if ([E.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = E.curTxtLyr.expo.children.firstObject;
+            if (l.type == TEXTLAYER_EMPTY) {
                 EquationBlock *cb = E.curParent;
-                [orgLayer destroy];
-                [cb.children removeObjectAtIndex:orgLayer.c_idx];
+                [E.curTxtLyr destroy];
+                [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
                 [cb updateCIdx];
-                incrWidth -= orgLayer.mainFrame.size.width;
-            } else if ([orgLayer.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
-                EquationTextLayer *l = orgLayer.expo.children.firstObject;
-                if (l.type == TEXTLAYER_EMPTY) {
-                    EquationBlock *cb = E.curParent;
-                    [orgLayer destroy];
-                    [cb.children removeObjectAtIndex:orgLayer.c_idx];
-                    [cb updateCIdx];
-                    incrWidth -= orgLayer.mainFrame.size.width;
-                } else {
-                    NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                    return;
-                }
+                incrWidth -= E.curTxtLyr.mainFrame.size.width;
             } else {
-                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
+                E.curMode = MODE_INSERT;
+                E.insertCIdx = E.curTxtLyr.c_idx;
             }
+        } else {
+            E.curMode = MODE_INSERT;
+            E.insertCIdx = E.curTxtLyr.c_idx;
         }
     }
     
@@ -1219,7 +1126,7 @@ static UIView *testview;
     incrWidth += newRBlock.frame.size.width;
     
 //    if (orgLayer != nil && orgLayer.type == TEXTLAYER_EMPTY) {
-//        EquationBlock *cb = E.curBlock;
+//        EquationBlock *cb = E.curBlk;
 //        [orgLayer destroy];
 //        [cb.children removeObjectAtIndex:orgLayer.c_idx];
 //        [cb updateCIdx];
@@ -1229,38 +1136,13 @@ static UIView *testview;
     
     if(E.curMode == MODE_INPUT) {
         EquationBlock *eBlock = E.curParent;
-        if (E.needX) {
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.roll = E.curRoll;
-            tLayer1.parent = eBlock;
-            tLayer1.c_idx = eBlock.children.count;
-            [eBlock.children addObject:tLayer1];
-            [E.view.layer addSublayer:tLayer1];
-            newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
-            incrWidth += tLayer1.frame.size.width;
-            E.needX = FALSE;
-        }
         
         newRBlock.c_idx = eBlock.children.count;
         [eBlock.children addObject:newRBlock];
     } else if(E.curMode == MODE_INSERT) {
         EquationBlock *eBlock = E.curParent;
-        if (E.needX) {
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.roll = E.curRoll;
-            tLayer1.parent = eBlock;
-            [E.view.layer addSublayer:tLayer1];
-            
-            [eBlock.children insertObject:tLayer1 atIndex: E.insertCIdx++];
-            [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
-            
-            newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
-            incrWidth += tLayer1.frame.size.width;
-        } else {
-            [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
-        }
+
+        [eBlock.children insertObject:newRBlock atIndex: E.insertCIdx++];
         
         /*Update c_idx*/
         [eBlock updateCIdx];
@@ -1278,17 +1160,7 @@ static UIView *testview;
         E.root.roll = E.curRoll;
         [eBlock.children addObject:E.root];
         
-        EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-        tLayer1.name = @"×";
-        tLayer1.roll = E.curRoll;
-        tLayer1.parent = eBlock;
-        tLayer1.c_idx = 1;
-        [eBlock.children addObject: tLayer1];
-        [E.view.layer addSublayer: tLayer1];
-        newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
-        incrWidth += tLayer1.frame.size.width;
-        
-        newRBlock.c_idx = 2;
+        newRBlock.c_idx = 1;
         newRBlock.roll = E.curRoll;
         [eBlock.children addObject: newRBlock];
         E.root = eBlock;
@@ -1307,17 +1179,7 @@ static UIView *testview;
         eBlock.c_idx = 0;
         [newBlock.children addObject:eBlock];
 
-        EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-        tLayer1.name = @"×";
-        tLayer1.roll = E.curRoll;
-        tLayer1.parent = newBlock;
-        tLayer1.c_idx = 1;
-        [E.view.layer addSublayer:tLayer1];
-        [newBlock.children addObject:tLayer1];
-        incrWidth += tLayer1.frame.size.width;
-
-        newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
-        newRBlock.c_idx = 2;
+        newRBlock.c_idx = 1;
         [newBlock.children addObject:newRBlock];
         rBlock.content = newBlock;
         E.curParent = newBlock;
@@ -1335,18 +1197,8 @@ static UIView *testview;
         eBlock.parent = newBlock;
         eBlock.c_idx = 0;
         [newBlock.children addObject:eBlock];
-        
-        EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-        tLayer1.name = @"×";
-        tLayer1.roll = E.curRoll;
-        tLayer1.parent = newBlock;
-        tLayer1.c_idx = 1;
-        [E.view.layer addSublayer:tLayer1];
-        [newBlock.children addObject:tLayer1];
-        incrWidth += tLayer1.frame.size.width;
-        
-        newRBlock.frame = CGRectOffset(newRBlock.frame, tLayer1.frame.size.width, 0);
-        newRBlock.c_idx = 2;
+
+        newRBlock.c_idx = 1;
         [newBlock.children addObject:newRBlock];
         layer.expo = newBlock;
         E.curParent = newBlock;
@@ -1363,7 +1215,6 @@ static UIView *testview;
     [(EquationBlock *)E.curParent updateFrameHeightS1:newRBlock];
     [E adjustEveryThing:E.root];
     
-    E.needX = NO;
     E.curMode = MODE_INPUT;
     E.curRoll = ROLL_NUMERATOR;
     E.curParent = newRBlock.content;
@@ -1378,7 +1229,7 @@ static UIView *testview;
         return;
     }
     
-    if (E.needNewLayer) {
+    if (E.curTxtLyr == nil) {
         CGPoint pos = E.view.inpOrg;
         CGFloat incrWidth = 0.0;
         
@@ -1412,39 +1263,14 @@ static UIView *testview;
         
         if(E.curMode == MODE_INPUT) {
             EquationBlock *eb = E.curParent;
-            if (E.needX) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.parent = eb;
-                tLayer1.c_idx = eb.children.count;
-                [eb.children addObject:tLayer1];
-                [E.view.layer addSublayer:tLayer1];
-                baseLayer.frame = CGRectOffset(baseLayer.frame, tLayer1.frame.size.width, 0);
-                [baseLayer updateFrameBaseOnBase];
-                incrWidth += tLayer1.frame.size.width;
-                E.needX = NO;
-            }
-            
+
             baseLayer.c_idx = eb.children.count;
             [eb.children addObject:baseLayer];
         } else if(E.curMode == MODE_INSERT) {
             EquationBlock *eb = E.curParent;
-            if (E.needX) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.parent = eb;
-                [E.view.layer addSublayer:tLayer1];
-                
-                [eb.children insertObject:tLayer1 atIndex: E.insertCIdx++];
-                [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
-                
-                baseLayer.frame = CGRectOffset(baseLayer.frame, tLayer1.frame.size.width, 0);
-                [baseLayer updateFrameBaseOnBase];
-                incrWidth += tLayer1.frame.size.width;
-            } else {
-                [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
-            }
-            
+
+            [eb.children insertObject:baseLayer atIndex: E.insertCIdx++];
+
             /*Update c_idx*/
             [eb updateCIdx];
         } else if(E.curMode == MODE_DUMP_ROOT) {
@@ -1461,17 +1287,7 @@ static UIView *testview;
             E.root.roll = E.curRoll;
             [eBlock.children addObject:E.root];
             
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.parent = eBlock;
-            tLayer1.c_idx = 1;
-            [eBlock.children addObject: tLayer1];
-            [E.view.layer addSublayer: tLayer1];
-            baseLayer.frame = CGRectOffset(baseLayer.frame, tLayer1.frame.size.width, 0);
-            [baseLayer updateFrameBaseOnBase];
-            incrWidth += tLayer1.frame.size.width;
-            
-            baseLayer.c_idx = 2;
+            baseLayer.c_idx = 1;
             [eBlock.children addObject: baseLayer];
             E.root = eBlock;
             E.curMode = MODE_INPUT;
@@ -1489,18 +1305,8 @@ static UIView *testview;
             eBlock.parent = newBlock;
             eBlock.c_idx = 0;
             [newBlock.children addObject:eBlock];
-            
-            EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-            tLayer1.name = @"×";
-            tLayer1.parent = newBlock;
-            tLayer1.c_idx = 1;
-            [E.view.layer addSublayer:tLayer1];
-            [newBlock.children addObject:tLayer1];
-            incrWidth += tLayer1.frame.size.width;
-            
-            baseLayer.frame = CGRectOffset(baseLayer.frame, tLayer1.frame.size.width, 0);
-            [baseLayer updateFrameBaseOnBase];
-            baseLayer.c_idx = 2;
+
+            baseLayer.c_idx = 1;
             [newBlock.children addObject:baseLayer];
             rBlock.content = newBlock;
             E.curParent = newBlock;
@@ -1512,20 +1318,18 @@ static UIView *testview;
         [(EquationBlock *)E.curParent updateFrameHeightS1:baseLayer];
         [E adjustEveryThing:E.root];
         
-        E.curTextLayer = baseLayer;
-        E.curBlock = baseLayer;
-        E.needX = NO;
+        E.curTxtLyr = baseLayer;
+        E.curBlk = baseLayer;
         E.view.inpOrg = baseLayer.frame.origin;
         E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
-        E.needNewLayer = NO;
     } else {
         E.curFont = E.superscriptFont;
         
-        if (E.curTextLayer.expo == nil) {
-            CGFloat orgW = E.curTextLayer.mainFrame.size.width;
+        if (E.curTxtLyr.expo == nil) {
+            CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
             CGFloat x = E.view.inpOrg.x;
-            if (E.curTextLayer.type == TEXTLAYER_EMPTY) {
-                x += E.curTextLayer.frame.size.width;
+            if (E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+                x += E.curTxtLyr.frame.size.width;
             }
             
             CGFloat y = (E.view.inpOrg.y + E.baseCharHight * 0.45) - E.expoCharHight;
@@ -1534,8 +1338,8 @@ static UIView *testview;
             
             EquationBlock *eBlock = [[EquationBlock alloc] init:E.view.inpOrg :E];
             eBlock.roll = ROLL_EXPO_ROOT;
-            eBlock.parent = E.curTextLayer;
-            E.curTextLayer.expo = eBlock;
+            eBlock.parent = E.curTxtLyr;
+            E.curTxtLyr.expo = eBlock;
             
             EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :E.view.inpOrg :E :TEXTLAYER_EMPTY];
             layer.parent = eBlock;
@@ -1545,23 +1349,21 @@ static UIView *testview;
             layer.c_idx = 0;
             [eBlock.children addObject:layer];
             [E.view.layer addSublayer: layer];
-            [E.curTextLayer updateFrameBaseOnExpo];
+            [E.curTxtLyr updateFrameBaseOnExpo];
             
-            NSLog(@"[%s%i]~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, E.curTextLayer.mainFrame.size.width, E.root.numerFrame.size.width);
-            CGFloat inc = E.curTextLayer.mainFrame.size.width - orgW;
+            NSLog(@"[%s%i]~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, E.curTxtLyr.mainFrame.size.width, E.root.numerFrame.size.width);
+            CGFloat inc = E.curTxtLyr.mainFrame.size.width - orgW;
             [(EquationBlock *)E.curParent updateFrameWidth:inc :E.curRoll];
-            [(EquationBlock *)E.curParent updateFrameHeightS1:E.curTextLayer];
+            [(EquationBlock *)E.curParent updateFrameHeightS1:E.curTxtLyr];
             [E adjustEveryThing:E.root];
             
-            E.curTextLayer = layer;
-            E.curBlock = layer;
-            E.needNewLayer = NO;
+            E.curTxtLyr = layer;
+            E.curBlk = layer;
             E.curParent = eBlock;
             E.curRoll = ROLL_NUMERATOR;
             E.curMode = MODE_INPUT;
-            E.needX = NO;
         } else {
-            EquationBlock *exp = E.curTextLayer.expo;
+            EquationBlock *exp = E.curTxtLyr.expo;
             id lastObj = exp.children.lastObject;
             if ([lastObj isMemberOfClass:[EquationTextLayer class]]) {
                 EquationTextLayer *layer = lastObj;
@@ -1569,27 +1371,25 @@ static UIView *testview;
                 if (layer.type == TEXTLAYER_EMPTY) {
                     E.view.inpOrg = layer.frame.origin;
                     tmp = E.expoCharHight;
-                    E.needNewLayer = NO;
+                    E.curTxtLyr = layer;
                 } else {
                     CGFloat x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
                     CGFloat y = layer.mainFrame.origin.y;
                     E.view.inpOrg = CGPointMake(x, y);
                     tmp = layer.mainFrame.size.height;
                     
-                    if (layer.type == TEXTLAYER_OP) {
-                        E.needNewLayer = YES;
+                    if (layer.type == TEXTLAYER_NUM) {
+                        E.curTxtLyr = layer;
                     } else {
-                        E.needNewLayer = NO;
+                        E.curTxtLyr = nil;
                         
                     }
                 }
                 E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, tmp);
-                E.curTextLayer = layer;
-                E.curBlock = layer;
+                E.curBlk = layer;
                 E.curParent = exp;
                 E.curRoll = layer.roll;
                 E.curMode = MODE_INPUT;
-                E.needX = NO;
             } else if ([lastObj isMemberOfClass:[EquationBlock class]]) {
                 EquationBlock *eb = lastObj;
                 CGFloat x = eb.mainFrame.origin.x + eb.mainFrame.size.width;
@@ -1597,13 +1397,11 @@ static UIView *testview;
                 E.view.inpOrg = CGPointMake(x, y);
                 CGFloat tmp = eb.mainFrame.size.height;
                 E.view.cursor.frame = CGRectMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y, CURSOR_W, tmp);
-                E.needNewLayer = YES;
-                E.curTextLayer = nil;
-                E.curBlock = eb;
+                E.curTxtLyr = nil;
+                E.curBlk = eb;
                 E.curParent = exp;
                 E.curRoll = eb.roll;
                 E.curMode = MODE_INPUT;
-                E.needX = YES;
             } else if ([lastObj isMemberOfClass:[RadicalBlock class]]) {
                 RadicalBlock *rb = lastObj;
                 CGFloat x = rb.frame.origin.x + rb.frame.size.width;
@@ -1611,13 +1409,11 @@ static UIView *testview;
                 E.view.inpOrg = CGPointMake(x, y);
                 CGFloat tmp = rb.frame.size.height;
                 E.view.cursor.frame = CGRectMake(rb.frame.origin.x, rb.frame.origin.y, CURSOR_W, tmp);
-                E.needNewLayer = YES;
-                E.curTextLayer = nil;
-                E.curBlock = rb;
+                E.curTxtLyr = nil;
+                E.curBlk = rb;
                 E.curParent = exp;
                 E.curRoll = rb.roll;
                 E.curMode = MODE_INPUT;
-                E.needX = YES;
             }
         }
         
@@ -1627,223 +1423,164 @@ static UIView *testview;
 - (void)handleParenthBtnClick : (NSString *)parenth {
     CGFloat incrWidth = 0.0;
     
-    if (E.curTextLayer != nil && E.curTextLayer.type == TEXTLAYER_EMPTY) {
-        E.curTextLayer.type = TEXTLAYER_PARENTH;
-        CGFloat orgW = E.curTextLayer.mainFrame.size.width;
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: parenth];
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        CGSize newStrSize = [attStr size];
-        E.curTextLayer.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, newStrSize.width, newStrSize.height);
-        E.curTextLayer.mainFrame = E.curTextLayer.frame;
-        E.curTextLayer.backgroundColor = [UIColor clearColor].CGColor;
-        E.curTextLayer.string = attStr;
-        [E.curTextLayer updateFrameBaseOnBase];
-        incrWidth += E.curTextLayer.mainFrame.size.width - orgW;
-    } else {
-        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:parenth :E.view.inpOrg :E :TEXTLAYER_PARENTH];
-        tLayer.name = parenth;
-        incrWidth = tLayer.frame.size.width;
-        if(E.curMode == MODE_INPUT) {
-            EquationBlock *block = E.curParent;
-            
-            if (E.needX && [parenth isEqual:@"("]) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = block;
-                tLayer1.c_idx = block.children.count;
-                [block.children addObject:tLayer1];
-                [E.view.layer addSublayer:tLayer1];
-                tLayer.c_idx = block.children.count;
-                [block.children addObject:tLayer];
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
+    if (E.curTxtLyr != nil && E.curTxtLyr.type == TEXTLAYER_EMPTY) {
+        if (E.curTxtLyr.expo == nil) {
+            EquationBlock *cb = E.curParent;
+            [E.curTxtLyr destroy];
+            [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
+            [cb updateCIdx];
+            incrWidth -= E.curTxtLyr.mainFrame.size.width;
+        } else if ([E.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = E.curTxtLyr.expo.children.firstObject;
+            if (l.type == TEXTLAYER_EMPTY) {
+                EquationBlock *cb = E.curParent;
+                [E.curTxtLyr destroy];
+                [cb.children removeObjectAtIndex:E.curTxtLyr.c_idx];
+                [cb updateCIdx];
+                incrWidth -= E.curTxtLyr.mainFrame.size.width;
             } else {
-                tLayer.c_idx = block.children.count;
-                [block.children addObject:tLayer];
-            }
-            
-        } else if(E.curMode == MODE_INSERT) {
-            //NSLog(@"%s%i~~~%lu~~~~~~~~", __FUNCTION__, __LINE__, (unsigned long)E.insertCIdx);
-            EquationBlock *block = E.curParent;
-            
-            if (E.needX && [parenth isEqual:@"("]) {
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = block;
-                tLayer1.c_idx = E.insertCIdx;
-                [E.view.layer addSublayer:tLayer1];
-                [block.children insertObject:tLayer1 atIndex:tLayer1.c_idx];
-                
-                tLayer.c_idx = tLayer1.c_idx + 1;
-                [block.children insertObject:tLayer atIndex:tLayer.c_idx];
-                /*Update c_idx*/
-                [block updateCIdx];
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-                E.insertCIdx += 2;
-            } else {
-                tLayer.c_idx = E.insertCIdx;
-                [block.children insertObject:tLayer atIndex:tLayer.c_idx];
-                /*Update c_idx*/
-                [block updateCIdx];
-                E.insertCIdx += 1;
-            }
-            
-        } else if(E.curMode == MODE_DUMP_ROOT) {
-            if ([parenth isEqual:@"("]) {
-                EquationBlock *block = [[EquationBlock alloc] init:E];
-                block.roll = ROLL_ROOT;
-                block.parent = nil;
-                block.numerFrame = E.root.mainFrame;
-                block.numerTopHalf = E.root.mainFrame.size.height / 2.0;
-                block.numerBtmHalf = E.root.mainFrame.size.height / 2.0;
-                block.mainFrame = block.numerFrame;
-                E.root.roll = ROLL_NUMERATOR;
-                E.root.parent = block;
-                E.root.c_idx = 0;
-                [block.children addObject:E.root];
-                
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = block;
-                tLayer1.c_idx = 1;
-                [E.view.layer addSublayer:tLayer1];
-                [block.children addObject:tLayer1];
-                
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-                tLayer.c_idx = 2;
-                [block.children addObject:tLayer];
-                E.root = block;
-                E.curParent = block;
-                E.curMode = MODE_INPUT;
-            } else {
-                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
-            }
-            
-        } else if(E.curMode == MODE_DUMP_RADICAL) {
-            if ([parenth isEqual:@"("]) {
-                RadicalBlock *rBlock = E.curParent;
-                EquationBlock *eBlock = rBlock.content;
-                EquationBlock *newBlock = [[EquationBlock alloc] init:E];
-                newBlock.roll = ROLL_ROOT_ROOT;
-                newBlock.parent = rBlock;
-                newBlock.numerFrame = eBlock.mainFrame;
-                newBlock.numerTopHalf = eBlock.mainFrame.size.height / 2.0;
-                newBlock.numerBtmHalf = eBlock.mainFrame.size.height / 2.0;
-                newBlock.mainFrame = newBlock.numerFrame;
-                eBlock.roll = ROLL_NUMERATOR;
-                eBlock.parent = newBlock;
-                eBlock.c_idx = 0;
-                [newBlock.children addObject:eBlock];
-                
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = newBlock;
-                tLayer1.c_idx = 1;
-                [E.view.layer addSublayer:tLayer1];
-                [newBlock.children addObject:tLayer1];
-                
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-                tLayer.c_idx = 2;
-                [newBlock.children addObject:tLayer];
-                rBlock.content = newBlock;
-                E.curParent = newBlock;
-                E.curMode = MODE_INPUT;
-            } else {
-                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
-            }
-        } else if(E.curMode == MODE_DUMP_EXPO) {
-            if ([parenth isEqual:@"("]) {
-                EquationTextLayer *layer = E.curParent;
-                EquationBlock *eBlock = layer.expo;
-                EquationBlock *newBlock = [[EquationBlock alloc] init:E];
-                newBlock.roll = ROLL_EXPO_ROOT;
-                newBlock.parent = layer;
-                newBlock.numerFrame = eBlock.mainFrame;
-                newBlock.numerTopHalf = eBlock.mainFrame.size.height / 2.0;
-                newBlock.numerBtmHalf = eBlock.mainFrame.size.height / 2.0;
-                newBlock.mainFrame = newBlock.numerFrame;
-                eBlock.roll = ROLL_NUMERATOR;
-                eBlock.parent = newBlock;
-                eBlock.c_idx = 0;
-                [newBlock.children addObject:eBlock];
-                
-                EquationTextLayer *tLayer1 = [[EquationTextLayer alloc] init:@" × " :E.view.inpOrg :E :TEXTLAYER_OP];
-                tLayer1.name = @"×";
-                tLayer1.roll = E.curRoll;
-                tLayer1.parent = newBlock;
-                tLayer1.c_idx = 1;
-                [E.view.layer addSublayer:tLayer1];
-                [newBlock.children addObject:tLayer1];
-                
-                tLayer.frame = CGRectOffset(tLayer.frame, tLayer1.frame.size.width, 0);
-                incrWidth += tLayer1.frame.size.width;
-                tLayer.c_idx = 2;
-                [newBlock.children addObject:tLayer];
-                layer.expo = newBlock;
-                E.curParent = newBlock;
-                E.curMode = MODE_INPUT;
-            } else {
-                NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
+                E.curMode = MODE_INSERT;
+                E.insertCIdx = E.curTxtLyr.c_idx;
             }
         } else {
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            E.curMode = MODE_INSERT;
+            E.insertCIdx = E.curTxtLyr.c_idx;
+        }
+    }
+
+    EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:parenth :E.view.inpOrg :E :TEXTLAYER_PARENTH];
+    incrWidth += tLayer.frame.size.width;
+    if(E.curMode == MODE_INPUT) {
+        EquationBlock *block = E.curParent;
+        
+        tLayer.c_idx = block.children.count;
+        [block.children addObject:tLayer];
+    } else if(E.curMode == MODE_INSERT) {
+        //NSLog(@"%s%i~~~%lu~~~~~~~~", __FUNCTION__, __LINE__, (unsigned long)E.insertCIdx);
+        EquationBlock *block = E.curParent;
+        
+        tLayer.c_idx = E.insertCIdx;
+        [block.children insertObject:tLayer atIndex:tLayer.c_idx];
+        /*Update c_idx*/
+        [block updateCIdx];
+        E.insertCIdx += 1;
+    } else if(E.curMode == MODE_DUMP_ROOT) {
+        if ([parenth isEqual:@"("]) {
+            EquationBlock *block = [[EquationBlock alloc] init:E];
+            block.roll = ROLL_ROOT;
+            block.parent = nil;
+            block.numerFrame = E.root.mainFrame;
+            block.numerTopHalf = E.root.mainFrame.size.height / 2.0;
+            block.numerBtmHalf = E.root.mainFrame.size.height / 2.0;
+            block.mainFrame = block.numerFrame;
+            E.root.roll = ROLL_NUMERATOR;
+            E.root.parent = block;
+            E.root.c_idx = 0;
+            [block.children addObject:E.root];
+
+            tLayer.c_idx = 1;
+            [block.children addObject:tLayer];
+            E.root = block;
+            E.curParent = block;
+            E.curMode = MODE_INPUT;
+        } else {
+            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return;
         }
         
-        tLayer.parent = E.curParent;
-        [E.view.layer addSublayer:tLayer];
-        E.curTextLayer = tLayer;
+    } else if(E.curMode == MODE_DUMP_RADICAL) {
+        if ([parenth isEqual:@"("]) {
+            RadicalBlock *rBlock = E.curParent;
+            EquationBlock *eBlock = rBlock.content;
+            EquationBlock *newBlock = [[EquationBlock alloc] init:E];
+            newBlock.roll = ROLL_ROOT_ROOT;
+            newBlock.parent = rBlock;
+            newBlock.numerFrame = eBlock.mainFrame;
+            newBlock.numerTopHalf = eBlock.mainFrame.size.height / 2.0;
+            newBlock.numerBtmHalf = eBlock.mainFrame.size.height / 2.0;
+            newBlock.mainFrame = newBlock.numerFrame;
+            eBlock.roll = ROLL_NUMERATOR;
+            eBlock.parent = newBlock;
+            eBlock.c_idx = 0;
+            [newBlock.children addObject:eBlock];
+
+            tLayer.c_idx = 1;
+            [newBlock.children addObject:tLayer];
+            rBlock.content = newBlock;
+            E.curParent = newBlock;
+            E.curMode = MODE_INPUT;
+        } else {
+            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    } else if(E.curMode == MODE_DUMP_EXPO) {
+        if ([parenth isEqual:@"("]) {
+            EquationTextLayer *layer = E.curParent;
+            EquationBlock *eBlock = layer.expo;
+            EquationBlock *newBlock = [[EquationBlock alloc] init:E];
+            newBlock.roll = ROLL_EXPO_ROOT;
+            newBlock.parent = layer;
+            newBlock.numerFrame = eBlock.mainFrame;
+            newBlock.numerTopHalf = eBlock.mainFrame.size.height / 2.0;
+            newBlock.numerBtmHalf = eBlock.mainFrame.size.height / 2.0;
+            newBlock.mainFrame = newBlock.numerFrame;
+            eBlock.roll = ROLL_NUMERATOR;
+            eBlock.parent = newBlock;
+            eBlock.c_idx = 0;
+            [newBlock.children addObject:eBlock];
+
+            tLayer.c_idx = 1;
+            [newBlock.children addObject:tLayer];
+            layer.expo = newBlock;
+            E.curParent = newBlock;
+            E.curMode = MODE_INPUT;
+        } else {
+            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    } else {
+        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
     }
+    
+    tLayer.parent = E.curParent;
+    [E.view.layer addSublayer:tLayer];
     
     /* Update frame info of current block */
     [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
     [E adjustEveryThing:E.root];
     
-    E.needX = [parenth isEqual:@"("] ? NO : YES;
-    E.needNewLayer = YES;
-    
     /* Move cursor */
-    CGFloat cursorOrgX = E.curTextLayer.frame.origin.x + E.curTextLayer.frame.size.width;
-    CGFloat cursorOrgY = E.curTextLayer.frame.origin.y;
+    CGFloat cursorOrgX = tLayer.frame.origin.x + tLayer.frame.size.width;
+    CGFloat cursorOrgY = tLayer.frame.origin.y;
     
     E.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, E.curFontH);
     E.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     
-    E.curBlock = E.curTextLayer;
-    E.curTextLayer = nil;
+    E.curBlk = tLayer;
+    E.curTxtLyr = nil;
 }
 
 - (void)handleDelBtnClick {
     CGFloat incrWidth = 0.0;
-    if ([E.curBlock isMemberOfClass:[EquationBlock class]]) {
-        id blk = ((EquationBlock *)E.curBlock).children.lastObject;
-        (void)findLastTLayer(E, blk);
-    } else if ([E.curBlock isMemberOfClass:[RadicalBlock class]]) {
-        id blk = ((RadicalBlock *)E.curBlock).content.children.lastObject;
-        (void)findLastTLayer(E, blk);
-    } else if ([E.curBlock isMemberOfClass:[FractionBarLayer class]]) {
+    if ([E.curBlk isMemberOfClass:[EquationBlock class]]) {
+        id blk = ((EquationBlock *)E.curBlk).children.lastObject;
+        (void)findLastTxtLayer(E, blk);
+    } else if ([E.curBlk isMemberOfClass:[RadicalBlock class]]) {
+        id blk = ((RadicalBlock *)E.curBlk).content.children.lastObject;
+        (void)findLastTxtLayer(E, blk);
+    } else if ([E.curBlk isMemberOfClass:[FractionBarLayer class]]) {
         NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         return;
-    } else if ([E.curBlock isMemberOfClass:[EquationTextLayer class]]) {
-        EquationTextLayer *layer = E.curBlock;
-        if (layer.expo != nil && E.curTextLayer == nil) {
+    } else if ([E.curBlk isMemberOfClass:[EquationTextLayer class]]) {
+        EquationTextLayer *layer = E.curBlk;
+        if (layer.expo != nil && E.curTxtLyr == nil) {
             id blk = layer.expo.children.lastObject;
-            (void)findLastTLayer(E, blk);
+            (void)findLastTxtLayer(E, blk);
         } else {
             if (layer.type == TEXTLAYER_NUM) {
                 NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:layer.string];
-                if (orgStr.length == 1) {
+                if (orgStr.length == 1 && E.txtInsIdx == 1) {
                     if (layer.expo != nil) {
                         CGFloat orgWidth = [orgStr size].width;
                         [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
@@ -1867,26 +1604,17 @@ static UIView *testview;
                     } else {
                         [E removeElement:layer];
                     }
+                } else if (E.txtInsIdx == 0) {
+                    (void)findPrevTxtLayer(E, layer);
                 } else {
-                    CGFloat orgWidth = [orgStr size].width;
-                    [orgStr deleteCharactersInRange:NSMakeRange(orgStr.length - 1, 1)];
-                    CGFloat newWidth = [orgStr size].width;
-                    incrWidth = newWidth - orgWidth;
-                    
-                    CGRect frame = layer.frame;
-                    frame.size.width = [orgStr size].width;
-                    layer.frame = frame;
-                    layer.string = orgStr;
-                    [layer updateFrameBaseOnBase];
-                    
-                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
-                    [E adjustEveryThing:E.root];
-                    
-                    E.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
-                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                    [layer delNumCharAt:E.txtInsIdx--];
                 }
             } else if (layer.type == TEXTLAYER_EMPTY || layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
-                [E removeElement:layer];
+                if (E.txtInsIdx == 0) {
+                    (void)findPrevTxtLayer(E, layer);
+                } else {
+                    [E removeElement:layer];
+                }
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
@@ -1904,11 +1632,11 @@ static UIView *testview;
         } else if ([[eb.children objectAtIndex:E.insertCIdx - 1] isMemberOfClass:[FractionBarLayer class]]) {
             id blk = [eb.children objectAtIndex:E.insertCIdx - 2];
             if ([blk isMemberOfClass:[EquationBlock class]]) {
-                (void)findLastTLayer(E, blk);
+                (void)findLastTxtLayer(E, blk);
             } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
-                (void)findLastTLayer(E, blk);
+                (void)findLastTxtLayer(E, blk);
             } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
-                (void)findLastTLayer(E, blk);
+                (void)findLastTxtLayer(E, blk);
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
@@ -1983,8 +1711,6 @@ static UIView *testview;
         [self handleDelBtnClick];
     } else if([[btn currentTitle]  isEqual: @"·"]) {
         NSLog(@"[%s%i]~~~~~~~~~~~", __FUNCTION__, __LINE__);
-        DisplayView *orgView = E.view;
-        
         gCurEqIdx = 0;
         E = [gEquationList objectAtIndex:gCurEqIdx];
         [E.view.cursor removeAllAnimations];
