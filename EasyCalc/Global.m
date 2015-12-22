@@ -62,7 +62,7 @@ void initCharWidthTbl(void) {
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         CGSize strSize = [attStr size];
-        gBaseCharWidthTbl[i] = strSize.width;
+        gExpoCharWidthTbl[i] = strSize.width;
         NSLog(@"%s%i>~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
     }
     
@@ -77,8 +77,6 @@ void initCharWidthTbl(void) {
 CGFloat getCharWidth(int base_expo, NSString *s) {
     if (base_expo == IS_BASE) {
         if ([s isEqual:@"0"]) {
-            return gBaseCharWidthTbl[0];
-        } else if ([s isEqual:@"0"]) {
             return gBaseCharWidthTbl[0];
         } else if ([s isEqual:@"1"]) {
             return gBaseCharWidthTbl[1];
@@ -106,8 +104,6 @@ CGFloat getCharWidth(int base_expo, NSString *s) {
         }
     } else {
         if ([s isEqual:@"0"]) {
-            return gExpoCharWidthTbl[0];
-        } else if ([s isEqual:@"0"]) {
             return gExpoCharWidthTbl[0];
         } else if ([s isEqual:@"1"]) {
             return gExpoCharWidthTbl[1];

@@ -444,7 +444,7 @@ static UIView *testview;
         [E.view.layer addSublayer:tLayer];
         E.curTxtLyr = tLayer;
         E.curBlk = tLayer;
-        
+        E.txtInsIdx = 1;
         cursorOffset = tLayer.mainFrame.size.width;
     } else {
         NSLog(@"%s%i~Input Num %@ with exist text layer.~ID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, num, E.curTxtLyr.guid, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
@@ -452,13 +452,15 @@ static UIView *testview;
             CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
             cursorOffset = [E.curTxtLyr addNumChar:num];
             incrWidth += E.curTxtLyr.mainFrame.size.width - orgW;
+            E.txtInsIdx = 1;
         } else {
             CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
-            if (E.txtInsIdx == E.curTxtLyr.charCnt) {
+            if (E.txtInsIdx == E.curTxtLyr.strLenTbl.count - 1) {
                 cursorOffset = [E.curTxtLyr addNumChar:num];
             } else {
-                cursorOffset = [E.curTxtLyr insertNumChar:num at:E.txtInsIdx++];
+                cursorOffset = [E.curTxtLyr insertNumChar:num at:E.txtInsIdx];
             }
+            E.txtInsIdx++;
             incrWidth += E.curTxtLyr.mainFrame.size.width - orgW;
         }
         
@@ -1327,10 +1329,7 @@ static UIView *testview;
         
         if (E.curTxtLyr.expo == nil) {
             CGFloat orgW = E.curTxtLyr.mainFrame.size.width;
-            CGFloat x = E.view.inpOrg.x;
-            if (E.curTxtLyr.type == TEXTLAYER_EMPTY) {
-                x += E.curTxtLyr.frame.size.width;
-            }
+            CGFloat x = E.curTxtLyr.frame.origin.x + orgW;
             
             CGFloat y = (E.view.inpOrg.y + E.baseCharHight * 0.45) - E.expoCharHight;
             E.view.inpOrg = CGPointMake(x, y);
@@ -1564,11 +1563,48 @@ static UIView *testview;
 - (void)handleDelBtnClick {
     CGFloat incrWidth = 0.0;
     if ([E.curBlk isMemberOfClass:[EquationBlock class]]) {
-        id blk = ((EquationBlock *)E.curBlk).children.lastObject;
-        (void)findLastTxtLayer(E, blk);
+        EquationBlock *eb = E.curBlk;
+        if (E.insertCIdx == eb.c_idx) {
+            id pre = getPrevBlk(E, eb);
+            if (eb.c_idx == 0) {
+                if (pre != nil) {
+                    if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                    } else {
+                        (void)locaLastTxtLyr(E, pre);
+                    }
+                } else {
+                    return;
+                }
+            } else {
+                if (pre != nil) {
+                    if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                        EquationTextLayer *l = pre;
+                        if (l.expo != nil) {
+                            (void)locaLastTxtLyr(E, l);
+                        } else {
+                            if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) {
+                                [E removeElement:l];
+                            } else {
+                                [l delNumCharAt:l.strLenTbl.count - 1];
+                            }
+                        }
+                    } else {
+                        (void)locaLastTxtLyr(E, pre);
+                    }
+                } else {
+                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    return;
+                }
+            }
+        } else if (E.insertCIdx == eb.c_idx + 1) {
+            (void)locaLastTxtLyr(E, eb);
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
     } else if ([E.curBlk isMemberOfClass:[RadicalBlock class]]) {
         id blk = ((RadicalBlock *)E.curBlk).content.children.lastObject;
-        (void)findLastTxtLayer(E, blk);
+        (void)locaLastTxtLyr(E, blk);
     } else if ([E.curBlk isMemberOfClass:[FractionBarLayer class]]) {
         NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         return;
@@ -1576,7 +1612,7 @@ static UIView *testview;
         EquationTextLayer *layer = E.curBlk;
         if (layer.expo != nil && E.curTxtLyr == nil) {
             id blk = layer.expo.children.lastObject;
-            (void)findLastTxtLayer(E, blk);
+            (void)locaLastTxtLyr(E, blk);
         } else {
             if (layer.type == TEXTLAYER_NUM) {
                 NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:layer.string];
@@ -1607,42 +1643,32 @@ static UIView *testview;
                 } else if (E.txtInsIdx == 0) {
                     (void)findPrevTxtLayer(E, layer);
                 } else {
-                    [layer delNumCharAt:E.txtInsIdx--];
+                    CGFloat orgW = layer.mainFrame.size.width;
+                    CGFloat offset = [layer delNumCharAt:E.txtInsIdx--];
+                    incrWidth += layer.mainFrame.size.width - orgW;
+                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
+                    [E adjustEveryThing:E.root];
+                    E.view.inpOrg = CGPointMake(layer.frame.origin.x + offset, layer.frame.origin.y);
+                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                 }
-            } else if (layer.type == TEXTLAYER_EMPTY || layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
+            } else if (layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
                 if (E.txtInsIdx == 0) {
                     (void)findPrevTxtLayer(E, layer);
                 } else {
                     [E removeElement:layer];
+                }
+            } else if (layer.type == TEXTLAYER_EMPTY) {
+                if ([layer isExpoEmpty]) {
+                    [E removeElement:layer];
+                } else {
+                    (void)findPrevTxtLayer(E, layer);
                 }
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
         }
     } else {
-        if (![E.curParent isMemberOfClass:[EquationBlock class]]) {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return;
-        }
-        
-        EquationBlock *eb = E.curParent;
-        
-        if (E.insertCIdx == 0) {
-            
-        } else if ([[eb.children objectAtIndex:E.insertCIdx - 1] isMemberOfClass:[FractionBarLayer class]]) {
-            id blk = [eb.children objectAtIndex:E.insertCIdx - 2];
-            if ([blk isMemberOfClass:[EquationBlock class]]) {
-                (void)findLastTxtLayer(E, blk);
-            } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
-                (void)findLastTxtLayer(E, blk);
-            } else if ([blk isMemberOfClass:[RadicalBlock class]]) {
-                (void)findLastTxtLayer(E, blk);
-            } else {
-                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            }
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-        }
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
 }
 

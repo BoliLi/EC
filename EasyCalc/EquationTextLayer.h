@@ -21,7 +21,6 @@
 @property CGRect mainFrame;
 @property int is_base_expo;
 @property int type;
-@property int charCnt;
 @property NSMutableArray *strLenTbl;
 
 -(id) init : (Equation *)e;
@@ -33,5 +32,6 @@
 -(int) getTxtInsIdx: (CGPoint) p;
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;
+-(BOOL) isExpoEmpty;
 -(void) destroy;
 @end

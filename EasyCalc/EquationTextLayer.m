@@ -23,7 +23,6 @@
 @synthesize mainFrame;
 @synthesize is_base_expo;
 @synthesize type;
-@synthesize charCnt;
 @synthesize strLenTbl;
 
 -(id) init : (Equation *)e {
@@ -33,7 +32,6 @@
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = ++e.guid_cnt;
         self.roll = e.curRoll;
-        self.charCnt = 0;
         self.strLenTbl = [NSMutableArray array];
         [self.strLenTbl addObject:@0.0];
         if (e.curFont == e.baseFont) {
@@ -54,7 +52,6 @@
         self.roll = e.curRoll;
         self.type = t;
         self.name = str;
-        self.charCnt = 0;
         self.strLenTbl = [NSMutableArray array];
         [self.strLenTbl addObject:@0.0];
         
@@ -65,14 +62,13 @@
         }
         
         NSMutableAttributedString *attStr;
-        
+        CGSize newStrSize;
         if (t == TEXTLAYER_NUM) {
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
-            
-            [self.strLenTbl addObject:@(getCharWidth(is_base_expo, str))];
-            self.charCnt++;
+            newStrSize = [attStr size];
+            [self.strLenTbl addObject:@(newStrSize.width)];
         } else if (t == TEXTLAYER_OP) {
 //            NSString *s = @" ";
 //            s = [s stringByAppendingString:str];
@@ -81,7 +77,8 @@
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
-            
+            newStrSize = [attStr size];
+            [self.strLenTbl addObject:@(newStrSize.width)];
 //            ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize / 4.0, NULL);
 //            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
 //            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(2, 1)];
@@ -90,15 +87,17 @@
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
             [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,str.length)];
+            newStrSize = [attStr size];
         } else if (t == TEXTLAYER_PARENTH) {
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
+            newStrSize = [attStr size];
+            [self.strLenTbl addObject:@(newStrSize.width)];
         } else {
             NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
         
-        CGSize newStrSize = [attStr size];
         self.frame = CGRectMake(org.x, org.y, newStrSize.width, newStrSize.height);
         self.mainFrame = self.frame;
         self.backgroundColor = [UIColor clearColor].CGColor;
@@ -124,8 +123,6 @@
     [self updateFrameBaseOnBase];
     
     [self.strLenTbl addObject:@(strSize.width)];
-    
-    self.charCnt++;
     
     self.type = t;
     
@@ -164,13 +161,11 @@
     CGFloat charW = getCharWidth(self.is_base_expo, str);
     [self.strLenTbl addObject:@(preStrLen + charW)];
     
-    self.charCnt++;
-    
     return [self.strLenTbl.lastObject doubleValue];
 }
 
 -(CGFloat) insertNumChar:(NSString *)str at:(int)idx {
-    if (self.charCnt == 0) {
+    if (self.strLenTbl.count == 1) {
         return 0.0;
     }
     
@@ -196,19 +191,19 @@
     CGFloat preStrLen = [[self.strLenTbl objectAtIndex:idx] doubleValue];
     CGFloat charW = getCharWidth(self.is_base_expo, str);
     [self.strLenTbl insertObject:@(preStrLen + charW) atIndex:idx + 1];
-    self.charCnt++;
     
     for (int i = idx + 2; i < self.strLenTbl.count; i++) {
         NSNumber *len = [self.strLenTbl objectAtIndex:i];
         CGFloat orgLen = [len doubleValue];
         len = @(orgLen + charW);
+        [self.strLenTbl replaceObjectAtIndex:i withObject:len];
     }
     
     return [[self.strLenTbl objectAtIndex:idx + 1] doubleValue];
 }
 
 -(CGFloat) delNumCharAt:(int)idx {
-    if (self.charCnt <= 1) {
+    if (self.strLenTbl.count - 1 <= 1) {
         return 0.0;
     }
     
@@ -229,19 +224,22 @@
     [self updateFrameBaseOnBase];
 
     [self.strLenTbl removeObjectAtIndex:idx];
-    self.charCnt--;
     
     for (int i = idx; i < self.strLenTbl.count; i++) {
         NSNumber *len = [self.strLenTbl objectAtIndex:i];
         CGFloat orgLen = [len doubleValue];
         len = @(orgLen - charW);
+        [self.strLenTbl replaceObjectAtIndex:i withObject:len];
     }
     
     return [[self.strLenTbl objectAtIndex:idx - 1] doubleValue];
 }
 
--(int) getTxtInsIdx: (CGPoint) p {
+-(int) getTxtInsIdx1: (CGPoint) p {
     NSMutableArray *arr = self.strLenTbl;
+    for (NSNumber *v in arr) {
+        NSLog(@"%s%i>~%f~~~~~~~~~~", __FUNCTION__, __LINE__, [v doubleValue]);
+    }
     int target = (int)(p.x - self.frame.origin.x);
     int mid, left = 0, right = arr.count - 1;
     
@@ -271,6 +269,40 @@
     }
 }
 
+-(int) getTxtInsIdx: (CGPoint) p {
+    NSMutableArray *arr = self.strLenTbl;
+    for (NSNumber *v in arr) {
+        NSLog(@"%s%i>~%f~~~~~~~~~~", __FUNCTION__, __LINE__, [v doubleValue]);
+    }
+    CGFloat target = p.x - self.frame.origin.x;
+    int mid, left = 0, right = arr.count - 1;
+    
+    while(left <= right) {
+        mid = (left + right) / 2;
+        CGFloat value = [[arr objectAtIndex:mid] doubleValue];
+        if(value == target)
+            return mid;
+        if(value > target)
+            right = mid - 1;
+        else
+            left = mid + 1;
+    }
+    
+    if (left == arr.count) {
+        return right;
+    } else if(right < 0) {
+        return left;
+    } else {
+        CGFloat leftV = [[arr objectAtIndex:right] doubleValue];
+        CGFloat rightV = [[arr objectAtIndex:left] doubleValue];
+        if (fabsf(leftV - target) < fabsf(target - rightV)) {
+            return right;
+        } else {
+            return left;
+        }
+    }
+}
+
 -(void) updateFrameBaseOnBase {
     if (self.expo != nil) {
         CGRect frame = self.expo.mainFrame;
@@ -286,6 +318,21 @@
 -(void) updateFrameBaseOnExpo {
     CGRect frame = self.expo.mainFrame;
     self.mainFrame = CGRectUnion(frame, self.frame);
+}
+
+-(BOOL) isExpoEmpty {
+    if (self.expo == nil) {
+        return YES;
+    }
+    
+    if ([self.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]] && self.expo.children.count == 1) {
+        EquationTextLayer *l = self.expo.children.firstObject;
+        if (l.type == TEXTLAYER_EMPTY) {
+            return YES;
+        }
+    }
+    
+    return false;
 }
 
 -(void) destroy {
