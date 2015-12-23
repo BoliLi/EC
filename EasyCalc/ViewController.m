@@ -1749,67 +1749,113 @@ static UIView *testview;
                 }
             }
         } else if (E.insertCIdx == curLayer.c_idx + 1) {
-            if (layer.expo != nil && E.curTxtLyr == nil) {
-                id blk = layer.expo.children.lastObject;
+            if (curLayer.expo != nil && E.curTxtLyr == nil) {
+                id blk = curLayer.expo.children.lastObject;
                 (void)locaLastTxtLyr(E, blk);
-            } else {
-                if (layer.type == TEXTLAYER_NUM) {
-                    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:layer.string];
+            } else if (curLayer.expo != nil && E.curTxtLyr != nil) {
+                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number
+                } else if (curLayer.strLenTbl.count == 1 && E.txtInsIdx == 0) { // Empty layer
+                    
+                } else { // Number
+                    
+                }
+            } else { // expo == nil
+                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number/Op/Paren
+                } else if (curLayer.strLenTbl.count == 1 && E.txtInsIdx == 0) { // Empty layer
+                    
+                } else { // Number
+                    
+                }
+                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) {
+                    if (curLayer.expo != nil) {
+                        NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:curLayer.string];
+                        CGFloat orgWidth = [orgStr size].width;
+                        [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
+                        [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+                        CGFloat newWidth = [orgStr size].width;
+                        incrWidth = newWidth - orgWidth;
+                        
+                        CGRect frame = curLayer.frame;
+                        frame.size.width = [orgStr size].width;
+                        curLayer.frame = frame;
+                        curLayer.string = orgStr;
+                        [curLayer updateFrameBaseOnBase];
+                        
+                        [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :curLayer.roll];
+                        [E adjustEveryThing:E.root];
+                        
+                        E.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
+                        E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                        
+                        curLayer.type = TEXTLAYER_EMPTY;
+                    } else {
+                        [E removeElement:curLayer];
+                    }
+                } else {
+                    CGFloat orgW = curLayer.mainFrame.size.width;
+                    CGFloat offset = [curLayer delNumCharAt:E.txtInsIdx--];
+                    incrWidth += curLayer.mainFrame.size.width - orgW;
+                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
+                    [E adjustEveryThing:E.root];
+                    E.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
+                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                }
+                if (curLayer.type == TEXTLAYER_NUM) {
+                    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:curLayer.string];
                     if (orgStr.length == 1 && E.txtInsIdx == 1) {
-                        if (layer.expo != nil) {
+                        if (curLayer.expo != nil) {
                             CGFloat orgWidth = [orgStr size].width;
                             [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
                             [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
                             CGFloat newWidth = [orgStr size].width;
                             incrWidth = newWidth - orgWidth;
                             
-                            CGRect frame = layer.frame;
+                            CGRect frame = curLayer.frame;
                             frame.size.width = [orgStr size].width;
-                            layer.frame = frame;
-                            layer.string = orgStr;
-                            [layer updateFrameBaseOnBase];
+                            curLayer.frame = frame;
+                            curLayer.string = orgStr;
+                            [curLayer updateFrameBaseOnBase];
                             
-                            [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :layer.roll];
+                            [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :curLayer.roll];
                             [E adjustEveryThing:E.root];
                             
-                            E.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
+                            E.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
                             E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                             
-                            layer.type = TEXTLAYER_EMPTY;
+                            curLayer.type = TEXTLAYER_EMPTY;
                         } else {
-                            [E removeElement:layer];
+                            [E removeElement:curLayer];
                         }
                     } else if (E.txtInsIdx == 0) {
-                        (void)findPrevTxtLayer(E, layer);
+                        (void)findPrevTxtLayer(E, curLayer);
                     } else {
-                        CGFloat orgW = layer.mainFrame.size.width;
-                        CGFloat offset = [layer delNumCharAt:E.txtInsIdx--];
-                        incrWidth += layer.mainFrame.size.width - orgW;
+                        CGFloat orgW = curLayer.mainFrame.size.width;
+                        CGFloat offset = [curLayer delNumCharAt:E.txtInsIdx--];
+                        incrWidth += curLayer.mainFrame.size.width - orgW;
                         [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
                         [E adjustEveryThing:E.root];
-                        E.view.inpOrg = CGPointMake(layer.frame.origin.x + offset, layer.frame.origin.y);
+                        E.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
                         E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                     }
-                } else if (layer.type == TEXTLAYER_OP || layer.type == TEXTLAYER_PARENTH) {
+                } else if (curLayer.type == TEXTLAYER_OP || curLayer.type == TEXTLAYER_PARENTH) {
                     if (E.txtInsIdx == 0) {
-                        (void)findPrevTxtLayer(E, layer);
+                        (void)findPrevTxtLayer(E, curLayer);
                     } else {
-                        [E removeElement:layer];
+                        [E removeElement:curLayer];
                     }
-                } else if (layer.type == TEXTLAYER_EMPTY) {
-                    if ([layer isExpoEmpty]) {
-                        [E removeElement:layer];
+                } else if (curLayer.type == TEXTLAYER_EMPTY) {
+                    if ([curLayer isExpoEmpty]) {
+                        [E removeElement:curLayer];
                     } else {
-                        (void)findPrevTxtLayer(E, layer);
+                        (void)findPrevTxtLayer(E, curLayer);
                     }
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
-            } else {
-                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
             }
-    }
+        } else {
+            
+        }
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
