@@ -1753,45 +1753,83 @@ static UIView *testview;
                 id blk = curLayer.expo.children.lastObject;
                 (void)locaLastTxtLyr(E, blk);
             } else if (curLayer.expo != nil && E.curTxtLyr != nil) {
-                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number
+                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number 1 char
+                    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:curLayer.string];
+                    CGFloat orgWidth = [orgStr size].width;
+                    [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
+                    [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
+                    CGFloat newWidth = [orgStr size].width;
+                    incrWidth = newWidth - orgWidth;
+                    
+                    CGRect frame = curLayer.frame;
+                    frame.size.width = [orgStr size].width;
+                    curLayer.frame = frame;
+                    curLayer.string = orgStr;
+                    [curLayer updateFrameBaseOnBase];
+                    
+                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :curLayer.roll];
+                    [E adjustEveryThing:E.root];
+                    
+                    E.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
+                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                    
+                    curLayer.type = TEXTLAYER_EMPTY;
                 } else if (curLayer.strLenTbl.count == 1 && E.txtInsIdx == 0) { // Empty layer
-                    
-                } else { // Number
-                    
-                }
-            } else { // expo == nil
-                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number/Op/Paren
-                } else if (curLayer.strLenTbl.count == 1 && E.txtInsIdx == 0) { // Empty layer
-                    
-                } else { // Number
-                    
-                }
-                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) {
-                    if (curLayer.expo != nil) {
-                        NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:curLayer.string];
-                        CGFloat orgWidth = [orgStr size].width;
-                        [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
-                        [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
-                        CGFloat newWidth = [orgStr size].width;
-                        incrWidth = newWidth - orgWidth;
-                        
-                        CGRect frame = curLayer.frame;
-                        frame.size.width = [orgStr size].width;
-                        curLayer.frame = frame;
-                        curLayer.string = orgStr;
-                        [curLayer updateFrameBaseOnBase];
-                        
-                        [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :curLayer.roll];
-                        [E adjustEveryThing:E.root];
-                        
-                        E.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
-                        E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
-                        
-                        curLayer.type = TEXTLAYER_EMPTY;
+                    id pre = getPrevBlk(E, curLayer);
+                    if (curLayer.c_idx == 0) {
+                        if (pre != nil) {
+                            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                                EquationTextLayer *layer = pre;
+                                if (layer.is_base_expo == curLayer.is_base_expo) {
+                                    (void)locaLastTxtLyr(E, pre);
+                                } else { //Switch from expo to base in a same text layer
+                                    E.curTxtLyr = layer;
+                                    E.curBlk = layer;
+                                    E.curParent = layer.parent;
+                                    E.curRoll = layer.roll;
+                                    E.curMode = MODE_INSERT;
+                                    E.insertCIdx = layer.c_idx + 1;
+                                    E.txtInsIdx = layer.strLenTbl.count - 1;
+
+                                    if (layer.is_base_expo == IS_BASE) {
+                                        E.curFont = E.baseFont;
+                                    } else if (layer.is_base_expo == IS_EXPO) {
+                                        E.curFont = E.superscriptFont;
+                                    } else {
+                                        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                                    }
+                                    
+                                    E.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
+                                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
+                                }
+                            } else {
+                                (void)locaLastTxtLyr(E, pre);
+                            }
+                        } else {
+                            return;
+                        }
                     } else {
-                        [E removeElement:curLayer];
+                        if (pre != nil) {
+                            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                                EquationTextLayer *l = pre;
+                                if (l.expo != nil) {
+                                    (void)locaLastTxtLyr(E, l);
+                                } else {
+                                    if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) {
+                                        [E removeElement:l];
+                                    } else {
+                                        [l delNumCharAt:l.strLenTbl.count - 1];
+                                    }
+                                }
+                            } else {
+                                (void)locaLastTxtLyr(E, pre);
+                            }
+                        } else {
+                            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            return;
+                        }
                     }
-                } else {
+                } else { // Number > 1 char
                     CGFloat orgW = curLayer.mainFrame.size.width;
                     CGFloat offset = [curLayer delNumCharAt:E.txtInsIdx--];
                     incrWidth += curLayer.mainFrame.size.width - orgW;
@@ -1800,61 +1838,23 @@ static UIView *testview;
                     E.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
                     E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                 }
-                if (curLayer.type == TEXTLAYER_NUM) {
-                    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:curLayer.string];
-                    if (orgStr.length == 1 && E.txtInsIdx == 1) {
-                        if (curLayer.expo != nil) {
-                            CGFloat orgWidth = [orgStr size].width;
-                            [orgStr replaceCharactersInRange:NSMakeRange(0, 1) withString:@"_"];
-                            [orgStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,1)];
-                            CGFloat newWidth = [orgStr size].width;
-                            incrWidth = newWidth - orgWidth;
-                            
-                            CGRect frame = curLayer.frame;
-                            frame.size.width = [orgStr size].width;
-                            curLayer.frame = frame;
-                            curLayer.string = orgStr;
-                            [curLayer updateFrameBaseOnBase];
-                            
-                            [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :curLayer.roll];
-                            [E adjustEveryThing:E.root];
-                            
-                            E.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
-                            E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
-                            
-                            curLayer.type = TEXTLAYER_EMPTY;
-                        } else {
-                            [E removeElement:curLayer];
-                        }
-                    } else if (E.txtInsIdx == 0) {
-                        (void)findPrevTxtLayer(E, curLayer);
-                    } else {
-                        CGFloat orgW = curLayer.mainFrame.size.width;
-                        CGFloat offset = [curLayer delNumCharAt:E.txtInsIdx--];
-                        incrWidth += curLayer.mainFrame.size.width - orgW;
-                        [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
-                        [E adjustEveryThing:E.root];
-                        E.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
-                        E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
-                    }
-                } else if (curLayer.type == TEXTLAYER_OP || curLayer.type == TEXTLAYER_PARENTH) {
-                    if (E.txtInsIdx == 0) {
-                        (void)findPrevTxtLayer(E, curLayer);
-                    } else {
-                        [E removeElement:curLayer];
-                    }
-                } else if (curLayer.type == TEXTLAYER_EMPTY) {
-                    if ([curLayer isExpoEmpty]) {
-                        [E removeElement:curLayer];
-                    } else {
-                        (void)findPrevTxtLayer(E, curLayer);
-                    }
-                } else {
-                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            } else { // expo == nil
+                if (curLayer.strLenTbl.count == 2 && E.txtInsIdx == 1) { // Number/Op/Paren
+                    [E removeElement:curLayer];
+                } else if (curLayer.strLenTbl.count == 1 && E.txtInsIdx == 0) { // Empty layer
+                    [E removeElement:curLayer];
+                } else { // Number > 1 char
+                    CGFloat orgW = curLayer.mainFrame.size.width;
+                    CGFloat offset = [curLayer delNumCharAt:E.txtInsIdx--];
+                    incrWidth += curLayer.mainFrame.size.width - orgW;
+                    [(EquationBlock *)E.curParent updateFrameWidth:incrWidth :E.curRoll];
+                    [E adjustEveryThing:E.root];
+                    E.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
+                    E.view.cursor.frame = CGRectMake(E.view.inpOrg.x, E.view.inpOrg.y, CURSOR_W, E.curFontH);
                 }
             }
         } else {
-            
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
