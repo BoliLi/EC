@@ -326,6 +326,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         if (layer.expo == nil) {
                             e.curTxtLyr = layer;
                             e.curBlk = layer;
+                            e.insertCIdx = layer.c_idx;
                         } else {
                             e.curTxtLyr = nil;
                             e.curBlk = layer;
@@ -343,6 +344,8 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         if (layer.expo == nil) {
                             e.curTxtLyr = layer;
                             e.curBlk = layer;
+                            e.insertCIdx = layer.c_idx;
+                            e.curMode = MODE_INSERT;
                         } else {
                             e.curTxtLyr = nil;
                             e.curBlk = layer;
@@ -494,6 +497,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 CGFloat tmp = layer.mainFrame.size.height;
                 e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
                 e.curTxtLyr = nil;
+                e.txtInsIdx = layer.strLenTbl.count;
             }
         } else if (layer.type == TEXTLAYER_EMPTY) {
             if (CGRectContainsPoint(layer.frame, curPoint)) {
@@ -527,10 +531,30 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         EquationBlock *block = layer.parent;
         id lastBlock = [block.children lastObject];
         if ([lastBlock isMemberOfClass: [EquationTextLayer class]] && layer == (EquationTextLayer *)lastBlock) {
-            e.curMode = MODE_INPUT;
+            if (e.txtInsIdx == 0) {
+                if (layer.type == TEXTLAYER_EMPTY) {
+                    if (e.curTxtLyr == nil) {
+                        e.insertCIdx = layer.c_idx + 1;
+                        e.curMode = MODE_INPUT;
+                    } else {
+                        e.insertCIdx = layer.c_idx;
+                        e.curMode = MODE_INSERT;
+                    }
+                } else {
+                    e.insertCIdx = layer.c_idx;
+                    e.curMode = MODE_INSERT;
+                }
+            } else {
+                e.insertCIdx = layer.c_idx + 1;
+                e.curMode = MODE_INPUT;
+            }
         } else {
             e.curMode = MODE_INSERT;
-            e.insertCIdx = layer.c_idx + 1;
+            if (e.txtInsIdx == 0) {
+                e.insertCIdx = layer.c_idx;
+            } else {
+                e.insertCIdx = layer.c_idx + 1;
+            }
         }
         e.curRoll = layer.roll;
         e.curParent = block;
@@ -595,23 +619,48 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
         
-        CGFloat tmp = block.mainFrame.size.height;
-        e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x+block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, tmp);
-        CGFloat x = block.bar.frame.origin.x + block.bar.frame.size.width;
-        CGFloat y = block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0;
-        e.view.inpOrg = CGPointMake(x, y);
         e.curTxtLyr = nil;
         e.curBlk = block;
         if (block.roll == ROLL_ROOT) {//Root block is a fraction. Need to dump all elements in the root block into new block
+            if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 0;
+            } else {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 1;
+            }
+            
             e.curMode = MODE_DUMP_ROOT;
             e.curRoll = ROLL_NUMERATOR;
             NSLog(@"%s%i~Tapped at bar.~GUID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, block.guid, (unsigned long)e.insertCIdx, e.curMode, e.curRoll, ((EquationBlock *)e.curParent).guid);
         } else if(block.roll == ROLL_ROOT_ROOT) {
+            if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 0;
+            } else {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 1;
+            }
+            
             e.curMode = MODE_DUMP_RADICAL;
             e.curRoll = ROLL_NUMERATOR;
             e.curParent = block.parent;
             NSLog(@"%s%i~Tapped at bar.~GUID: %i~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, block.guid, (unsigned long)e.insertCIdx, e.curMode, e.curRoll, ((RadicalBlock *)e.curParent).guid);
         } else if(block.roll == ROLL_EXPO_ROOT) {
+            if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 0;
+            } else {
+                e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                e.insertCIdx = 1;
+            }
+            
             e.curMode = MODE_DUMP_EXPO;
             e.curRoll = ROLL_NUMERATOR;
             e.curParent = block.parent;
@@ -619,10 +668,28 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else {
             id lastBlock = [((EquationBlock *)block.parent).children lastObject];
             if ([lastBlock isMemberOfClass: [EquationBlock class]] && block == (EquationBlock *)lastBlock) {
-                e.curMode = MODE_INPUT;
+                if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
+                    e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                    e.view.inpOrg = CGPointMake(block.bar.frame.origin.x, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                    e.curMode = MODE_INSERT;
+                    e.insertCIdx = block.c_idx;
+                } else {
+                    e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                    e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                    e.curMode = MODE_INPUT;
+                }
             } else {
-                e.curMode = MODE_INSERT;
-                e.insertCIdx = block.c_idx + 1;
+                if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
+                    e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                    e.view.inpOrg = CGPointMake(block.bar.frame.origin.x, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                    e.curMode = MODE_INSERT;
+                    e.insertCIdx = block.c_idx;
+                } else {
+                    e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
+                    e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                    e.curMode = MODE_INSERT;
+                    e.insertCIdx = block.c_idx + 1;
+                }
             }
             e.curParent = block.parent;
             e.curRoll = block.roll;

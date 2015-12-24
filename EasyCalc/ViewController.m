@@ -612,26 +612,17 @@ static UIView *testview;
         E.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, E.curFontH);
         E.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     } else { //Handle "÷"
-        
-//        if (E.curTxtLyr != nil && E.curTxtLyr.type == TEXTLAYER_EMPTY) {
-//            if (E.curTxtLyr.expo != nil) {
-//                if ([E.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
-//                    EquationTextLayer *l = E.curTxtLyr.expo.children.firstObject;
-//                    if (l.type != TEXTLAYER_EMPTY) {
-//                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-//                        return;
-//                    }
-//                } else {
-//                    NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-//                    return;
-//                }
-//            }
-//        }
-        
         if ([E.curParent isMemberOfClass: [EquationBlock class]]) {
-            NSLog(@"%s%i~Input Op %@.~~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, op, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((EquationBlock *)E.curParent).guid);
+            EquationBlock *par = E.curParent;
+            if (par.bar != nil) {
+                if (par.bar.c_idx == E.insertCIdx - 1) {
+                    return;
+                }
+            }
         } else if ([E.curParent isMemberOfClass: [RadicalBlock class]]) {
-            NSLog(@"%s%i~Input Op %@.~~CIDX: %lu~Mode: %i~Roll: %i~CurBlkId: %i~", __FUNCTION__, __LINE__, op, (unsigned long)E.insertCIdx, E.curMode, E.curRoll, ((RadicalBlock *)E.curParent).guid);
+            if (E.insertCIdx == 0) {
+                return;
+            }
         } else {
             NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
