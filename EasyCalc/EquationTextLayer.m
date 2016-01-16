@@ -241,7 +241,7 @@
         NSLog(@"%s%i>~%f~~~~~~~~~~", __FUNCTION__, __LINE__, [v doubleValue]);
     }
     int target = (int)(p.x - self.frame.origin.x);
-    int mid, left = 0, right = arr.count - 1;
+    int mid, left = 0, right = (int)arr.count - 1;
     
     while(left <= right) {
         mid = (left + right) / 2;
@@ -275,7 +275,7 @@
         NSLog(@"%s%i>~%f~~~~~~~~~~", __FUNCTION__, __LINE__, [v doubleValue]);
     }
     CGFloat target = p.x - self.frame.origin.x;
-    int mid, left = 0, right = arr.count - 1;
+    int mid, left = 0, right = (int)arr.count - 1;
     
     while(left <= right) {
         mid = (left + right) / 2;
@@ -295,7 +295,7 @@
     } else {
         CGFloat leftV = [[arr objectAtIndex:right] doubleValue];
         CGFloat rightV = [[arr objectAtIndex:left] doubleValue];
-        if (fabsf(leftV - target) < fabsf(target - rightV)) {
+        if (fabs(leftV - target) < fabs(target - rightV)) {
             return right;
         } else {
             return left;

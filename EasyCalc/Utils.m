@@ -49,12 +49,19 @@ EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
     
     if (blk != nil) {
         EquationTextLayer *layer = blk;
+        EquationBlock *par = layer.parent;
         e.curTxtLyr = layer;
         e.curBlk = layer;
         e.curParent = layer.parent;
         e.curRoll = layer.roll;
-        e.curMode = MODE_INPUT;
-        e.txtInsIdx = layer.strLenTbl.count - 1;
+        if (layer.c_idx == par.children.count - 1) {
+            e.curMode = MODE_INPUT;
+        } else {
+            e.curMode = MODE_INSERT;
+        }
+        
+        e.insertCIdx = layer.c_idx + 1;
+        e.txtInsIdx = (int)layer.strLenTbl.count - 1;
         
         if (layer.is_base_expo == IS_BASE) {
             e.curFont = e.baseFont;
@@ -64,8 +71,13 @@ EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
             NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
         
-        e.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
-        e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, e.view.inpOrg.y, CURSOR_W, e.curFontH);
+        if (layer.type == TEXTLAYER_EMPTY) {
+            e.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
+            e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, e.view.inpOrg.y, CURSOR_W, e.curFontH);
+        } else {
+            e.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
+            e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, e.view.inpOrg.y, CURSOR_W, e.curFontH);
+        }
     } else {
         NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -85,7 +97,17 @@ id getPrevBlk(Equation *E, id curBlk) {
             if (eb.c_idx == 0) {
                 return getPrevBlk(E, par);
             } else {
-                return [par.children objectAtIndex:eb.c_idx - 1];
+                id b = [par.children objectAtIndex:eb.c_idx - 1];
+                
+                if ([b isMemberOfClass:[FractionBarLayer class]]) {
+                    if (eb.c_idx < 2) {
+                        return nil;
+                    } else {
+                        return [par.children objectAtIndex:eb.c_idx - 2];
+                    }
+                } else {
+                    return b;
+                }
             }
         } else if ([eb.parent isMemberOfClass:[RadicalBlock class]]) {
             RadicalBlock *rb = eb.parent;
@@ -93,7 +115,17 @@ id getPrevBlk(Equation *E, id curBlk) {
             if (rb.c_idx == 0) {
                 return getPrevBlk(E, par);
             } else {
-                return [par.children objectAtIndex:rb.c_idx - 1];
+                id b = [par.children objectAtIndex:rb.c_idx - 1];
+                
+                if ([b isMemberOfClass:[FractionBarLayer class]]) {
+                    if (rb.c_idx < 2) {
+                        return nil;
+                    } else {
+                        return [par.children objectAtIndex:rb.c_idx - 2];
+                    }
+                } else {
+                    return b;
+                }
             }
         } else if ([eb.parent isMemberOfClass:[EquationTextLayer class]]) {
             return eb.parent;
@@ -106,7 +138,17 @@ id getPrevBlk(Equation *E, id curBlk) {
         if (rb.c_idx == 0) {
             return getPrevBlk(E, par);
         } else {
-            return [par.children objectAtIndex:rb.c_idx - 1];
+            id b = [par.children objectAtIndex:rb.c_idx - 1];
+            
+            if ([b isMemberOfClass:[FractionBarLayer class]]) {
+                if (rb.c_idx < 2) {
+                    return nil;
+                } else {
+                    return [par.children objectAtIndex:rb.c_idx - 2];
+                }
+            } else {
+                return b;
+            }
         }
     } else if ([curBlk isMemberOfClass:[FractionBarLayer class]]) {
         FractionBarLayer *bar = curBlk;
@@ -118,7 +160,17 @@ id getPrevBlk(Equation *E, id curBlk) {
         if (layer.c_idx == 0) {
             return getPrevBlk(E, par);
         } else {
-            return [par.children objectAtIndex:layer.c_idx - 1];
+            id b = [par.children objectAtIndex:layer.c_idx - 1];
+            
+            if ([b isMemberOfClass:[FractionBarLayer class]]) {
+                if (layer.c_idx < 2) {
+                    return nil;
+                } else {
+                    return [par.children objectAtIndex:layer.c_idx - 2];
+                }
+            } else {
+                return b;
+            }
         }
     } else {
         NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -210,7 +262,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 FractionBarLayer *bar = eBlock.bar;
                 e.curMode = MODE_INSERT;
                 e.insertCIdx = bar.c_idx;
-                blk = [eBlock.children objectAtIndex: e.insertCIdx];
+                blk = [eBlock.children objectAtIndex: e.insertCIdx - 1];
             }
             
             e.curRoll = ROLL_NUMERATOR;
@@ -225,6 +277,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             } else {
                 e.curMode = MODE_INPUT;
                 blk = [eBlock.children lastObject];
+                e.insertCIdx = eBlock.children.count;
             }
             
             e.curRoll = ROLL_DENOMINATOR;
@@ -282,7 +335,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         e.curBlk = layer;
                         if (layer.expo == nil) {
                             e.curTxtLyr = layer;
-                            e.txtInsIdx = layer.strLenTbl.count;
+                            e.txtInsIdx = (int)layer.strLenTbl.count - 1;
                         } else {
                             e.curTxtLyr = nil;
                         }
@@ -300,7 +353,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         e.curBlk = layer;
                         if (layer.expo == nil) {
                             e.curTxtLyr = layer;
-                            e.txtInsIdx = layer.strLenTbl.count;
+                            e.txtInsIdx = (int)layer.strLenTbl.count - 1;
                         } else {
                             e.curTxtLyr = nil;
                         }
@@ -497,7 +550,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 CGFloat tmp = layer.mainFrame.size.height;
                 e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
                 e.curTxtLyr = nil;
-                e.txtInsIdx = layer.strLenTbl.count;
+                e.txtInsIdx = (int)layer.strLenTbl.count - 1;
             }
         } else if (layer.type == TEXTLAYER_EMPTY) {
             if (CGRectContainsPoint(layer.frame, curPoint)) {
@@ -533,13 +586,8 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         if ([lastBlock isMemberOfClass: [EquationTextLayer class]] && layer == (EquationTextLayer *)lastBlock) {
             if (e.txtInsIdx == 0) {
                 if (layer.type == TEXTLAYER_EMPTY) {
-                    if (e.curTxtLyr == nil) {
-                        e.insertCIdx = layer.c_idx + 1;
-                        e.curMode = MODE_INPUT;
-                    } else {
-                        e.insertCIdx = layer.c_idx;
-                        e.curMode = MODE_INSERT;
-                    }
+                    e.insertCIdx = layer.c_idx + 1;
+                    e.curMode = MODE_INPUT;
                 } else {
                     e.insertCIdx = layer.c_idx;
                     e.curMode = MODE_INSERT;
@@ -551,7 +599,11 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else {
             e.curMode = MODE_INSERT;
             if (e.txtInsIdx == 0) {
-                e.insertCIdx = layer.c_idx;
+                if (layer.type == TEXTLAYER_EMPTY) {
+                    e.insertCIdx = layer.c_idx + 1;
+                } else {
+                    e.insertCIdx = layer.c_idx;
+                }
             } else {
                 e.insertCIdx = layer.c_idx + 1;
             }
@@ -581,6 +633,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 e.view.cursor.frame = CGRectMake(block.frame.origin.x, block.frame.origin.y, CURSOR_W, block.frame.size.height);
             } else {
                 e.curMode = MODE_INPUT;
+                e.insertCIdx = block.c_idx + 1;
                 CGFloat x = block.frame.origin.x + block.frame.size.width;
                 CGFloat y = block.frame.origin.y + block.frame.size.height / 2.0 - e.curFontH / 2.0;
                 e.view.inpOrg = CGPointMake(x, y);
@@ -676,6 +729,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 } else {
                     e.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
                     e.view.inpOrg = CGPointMake(block.bar.frame.origin.x + block.bar.frame.size.width, block.numerFrame.origin.y + block.numerFrame.size.height - e.curFontH / 2.0);
+                    e.insertCIdx = block.c_idx + 1;
                     e.curMode = MODE_INPUT;
                 }
             } else {

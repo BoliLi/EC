@@ -283,7 +283,7 @@
     CGFloat orgTop = self.denomTopHalf;
     CGFloat orgBtm = self.denomBtmHalf;
     self.denomTopHalf = self.denomBtmHalf = 0.0;
-    for (int i = self.children.count - 1; i != 0; i--) {
+    for (int i = (int)self.children.count - 1; i > 0; i--) {
         id b = [self.children objectAtIndex:i];
         if([b isMemberOfClass:[EquationBlock class]]) {
             EquationBlock * eb = b;
