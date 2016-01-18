@@ -45,33 +45,33 @@ void initCharWidthTbl(void) {
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+        CFRelease(ctFont);
         CGSize strSize = [attStr size];
         gBaseCharWidthTbl[i] = strSize.width;
-        NSLog(@"%s%i>~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
     }
     
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+    CFRelease(ctFont);
     CGSize strSize = [attStr size];
     gBaseCharWidthTbl[i] = strSize.width;
-    NSLog(@"%s%i>~%f~%f~%f~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height, baseFont.lineHeight);
     
     for (i = 0; i < 10; i++) {
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+        CFRelease(ctFont);
         CGSize strSize = [attStr size];
         gExpoCharWidthTbl[i] = strSize.width;
-        NSLog(@"%s%i>~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height);
     }
     
     attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
     ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+    CFRelease(ctFont);
     strSize = [attStr size];
     gExpoCharWidthTbl[i] = strSize.width;
-    NSLog(@"%s%i>~%f~%f~%f~~~~~~~~", __FUNCTION__, __LINE__, strSize.width, strSize.height, superscriptFont.lineHeight);
 }
 
 CGFloat getCharWidth(int base_expo, NSString *s) {

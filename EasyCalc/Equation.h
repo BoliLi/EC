@@ -35,7 +35,7 @@
 @property DisplayView *view;
 @property int txtInsIdx;
 
--(id) init;
+//-(id) init;
 -(id) init : (CGPoint)rootPos : (CGRect)dspFrame : (CGRect)cursorFrame : (ViewController *)vc;
 -(void) dumpObj : (EquationBlock *)parentBlock;
 -(void) dumpEverything : (EquationBlock *)eb;

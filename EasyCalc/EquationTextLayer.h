@@ -22,10 +22,11 @@
 @property int is_base_expo;
 @property int type;
 @property NSMutableArray *strLenTbl;
+@property NSMutableString *value;
 
--(id) init : (Equation *)e;
+//-(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
--(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t;
+//-(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t;
 -(CGFloat) addNumChar:(NSString *)str;
 -(CGFloat) insertNumChar:(NSString *)str at:(int)idx;
 -(CGFloat) delNumCharAt:(int)idx;

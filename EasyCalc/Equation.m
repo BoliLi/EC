@@ -39,47 +39,49 @@
 @synthesize view;
 @synthesize txtInsIdx;
 
--(id) init {
-    self = [super init];
-    if (self) {
-        guid_cnt = 0;
-        curRoll = ROLL_NUMERATOR;
-        curMode = MODE_INPUT;
-        curTxtLyr = curBlk = nil;
-        txtInsIdx = 0;
-        
-        baseFont = [UIFont systemFontOfSize: 20];
-        superscriptFont = [UIFont systemFontOfSize:8];
-        curFont = baseFont;
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        CGSize strSize = [attStr size];
-        baseCharWidth = strSize.width;
-        baseCharHight = strSize.height;
-        attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        strSize = [attStr size];
-        expoCharWidth = strSize.width;
-        expoCharHight = strSize.height;
-        
-        curFontW = baseCharWidth;
-        curFontH = baseCharHight;
-        
-        root = [[EquationBlock alloc] init:self];
-        root.numerTopHalf = baseCharHight / 2.0;
-        root.numerBtmHalf = baseCharHight / 2.0;
-        root.roll = ROLL_ROOT;
-        root.parent = nil;
-        curParent = root;
-        
-        NSLog(@"%s%i---%.1f-%.1f-%.1f-%.1f-", __FUNCTION__, __LINE__, baseCharWidth, baseCharHight, expoCharWidth, expoCharHight);
-        
-        [self addObserver:self forKeyPath:@"curFont" options:NSKeyValueObservingOptionNew context:nil];
-    }
-    return self;
-}
+//-(id) init {
+//    self = [super init];
+//    if (self) {
+//        guid_cnt = 0;
+//        curRoll = ROLL_NUMERATOR;
+//        curMode = MODE_INPUT;
+//        curTxtLyr = curBlk = nil;
+//        txtInsIdx = 0;
+//        
+//        baseFont = [UIFont systemFontOfSize: 20];
+//        superscriptFont = [UIFont systemFontOfSize:8];
+//        curFont = baseFont;
+//        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
+//        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        CFRelease(ctFont);
+//        CGSize strSize = [attStr size];
+//        baseCharWidth = strSize.width;
+//        baseCharHight = strSize.height;
+//        attStr = [[NSMutableAttributedString alloc] initWithString: @"8"];
+//        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
+//        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+//        CFRelease(ctFont);
+//        strSize = [attStr size];
+//        expoCharWidth = strSize.width;
+//        expoCharHight = strSize.height;
+//        
+//        curFontW = baseCharWidth;
+//        curFontH = baseCharHight;
+//        
+//        root = [[EquationBlock alloc] init:self];
+//        root.numerTopHalf = baseCharHight / 2.0;
+//        root.numerBtmHalf = baseCharHight / 2.0;
+//        root.roll = ROLL_ROOT;
+//        root.parent = nil;
+//        curParent = root;
+//        
+//        NSLog(@"%s%i---%.1f-%.1f-%.1f-%.1f-", __FUNCTION__, __LINE__, baseCharWidth, baseCharHight, expoCharWidth, expoCharHight);
+//        
+//        [self addObserver:self forKeyPath:@"curFont" options:NSKeyValueObservingOptionNew context:nil];
+//    }
+//    return self;
+//}
 
 -(id) init : (CGPoint)rootPos : (CGRect)dspFrame : (CGRect)cursorFrame : (ViewController *)vc {
     self = [super init];
@@ -283,7 +285,7 @@
                 return bar;
             }
         } else
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
     
     return rootB;
@@ -334,7 +336,7 @@
                 [layer updateFrameBaseOnBase];
                 curDenX += layer.mainFrame.size.width;
             } else
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             
             if (layer.expo != nil) {
                 EquationBlock *b = layer.expo;
@@ -368,7 +370,7 @@
                 block.mainFrame = frame;
                 curDenX += frame.size.width;
             } else
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             
             [self adjustEveryThing:block];
         } else if ([cb isMemberOfClass: [RadicalBlock class]]) {
@@ -387,7 +389,7 @@
                 block.frame = frame;
                 curDenX += frame.size.width;
             } else
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             if (block.rootNum != nil) {
                 CGFloat ML = RADICAL_MARGINE_L_PERC * block.frame.size.height;
                 CGRect f = block.rootNum.frame;
@@ -401,7 +403,7 @@
             
             [self adjustEveryThing:block.content];
         } else {
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
 }
@@ -637,13 +639,13 @@
                             RadicalBlock *rb = b;
                             cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                         } else {
-                            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
                     }
                 }
             }
         } else {
-            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return;
         }
     } else if ([blk isMemberOfClass: [EquationTextLayer class]]) {
@@ -679,7 +681,7 @@
                     [e adjustEveryThing:e.root];
                     cfgEqnBySlctBlk(e, parLayer, CGPointMake(parLayer.frame.origin.x + parLayer.frame.size.width - 1.0, parLayer.frame.origin.y + 1.0));
                 } else {
-                    NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
             } else {
                 CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
@@ -744,7 +746,7 @@
                             RadicalBlock *rb = b;
                             cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                         } else {
-                            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
                     } else { // Degrade e block
                         EquationBlock *eb = parent.parent;
@@ -796,7 +798,7 @@
                             RadicalBlock *rb = b;
                             cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
                         } else {
-                            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
                     }
                 } else {
@@ -844,7 +846,7 @@
                                     } else if (layer.is_base_expo == IS_EXPO) {
                                         e.curFont = e.superscriptFont;
                                     } else {
-                                        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                                     }
                                     
                                     e.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
@@ -981,7 +983,7 @@
                         RadicalBlock *rb = b;
                         cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
                     } else {
-                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
                 }
             }
@@ -1151,13 +1153,13 @@
                         RadicalBlock *rb = b;
                         cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
                     } else {
-                        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
                 }
             }
         }
     } else {
-        NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
 }
 
@@ -1172,7 +1174,7 @@
             e.curFontW = e.expoCharWidth;
             e.curFontH = e.expoCharHight;
         } else
-            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
 }
 @end

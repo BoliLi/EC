@@ -109,7 +109,7 @@
             self.mainFrame = CGRectUnion(self.denomFrame, frame);
         }
     } else
-        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
@@ -138,7 +138,7 @@
         
     } else if (r == ROLL_DENOMINATOR) {
         if (self.bar == nil) {
-            NSLog(@"[%s-%i]~ERR~~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return;
         }
         CGRect frame = self.denomFrame;
@@ -158,7 +158,7 @@
             self.mainFrame = CGRectUnion(self.denomFrame, frame);
         }
     } else
-        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     
     if ((int)orgWidth != (int)self.mainFrame.size.width) {
         id block = self.parent;
@@ -181,7 +181,7 @@
                     [layer.parent updateFrameWidth:layer.mainFrame.size.width - orgWidth1 :layer.roll];
                 }
             } else
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
 }
@@ -212,7 +212,7 @@
         }
     } else if (r == ROLL_DENOMINATOR) {
         if (self.bar == nil) {
-            NSLog(@"[%s-%i]~ERR~~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return;
         }
         CGRect frame = self.denomFrame;
@@ -236,7 +236,7 @@
             self.mainFrame = CGRectUnion(self.denomFrame, frame);
         }
     } else
-        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
 -(BOOL) updateNumerTB {
@@ -272,7 +272,7 @@
         } else if([b isMemberOfClass:[FractionBarLayer class]]) {
             break;
         } else {
-            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
     
@@ -313,7 +313,7 @@
         } else if([b isMemberOfClass:[FractionBarLayer class]]) {
             break;
         } else {
-            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
     
@@ -334,7 +334,7 @@
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     } else if([child isMemberOfClass:[RadicalBlock class]]) {
         RadicalBlock *rBlock = child;
         int r = rBlock.roll;
@@ -347,7 +347,7 @@
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     } else if([child isMemberOfClass:[EquationTextLayer class]]) {
         EquationTextLayer *layer = child;
         int r = layer.roll;
@@ -360,9 +360,9 @@
                 [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
             }
         } else
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     } else
-        NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     
     if (self.parent != nil) {
         if([self.parent isMemberOfClass:[EquationBlock class]]) {
@@ -376,7 +376,7 @@
                 [(EquationBlock *)rBlock.parent updateFrameHeightS1:rBlock];
                 [(EquationBlock *)rBlock.parent updateFrameWidth:rBlock.frame.size.width - orgW :rBlock.roll];
             } else {
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
         } else if([self.parent isMemberOfClass:[EquationTextLayer class]]) {
             EquationTextLayer *layer = self.parent;
@@ -384,10 +384,10 @@
             if ([layer.parent isMemberOfClass:[EquationBlock class]]) {
                 [(EquationBlock *)layer.parent updateFrameHeightS1:layer];
             } else {
-                NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
         } else {
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
 }
@@ -408,7 +408,7 @@
             RadicalBlock *b = block;
             b.c_idx = cnt++;
         } else
-            NSLog(@"%s%i~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
 }
 
@@ -427,7 +427,7 @@
             FractionBarLayer *fb = b;
             [fb destroy];
         } else
-            NSLog(@"[%s%i]~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
     
     [self.children removeAllObjects];
