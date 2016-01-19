@@ -15,7 +15,11 @@
 #import "EquationTextLayer.h"
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
-
+#import "DDMathParser.h"
+#import "DDMathTokenizer.h"
+#import "DDMathTokenInterpreter.h"
+#import "DDMathOperator.h"
+#import "DDMathOperatorSet.h"
 
 static UIView *testview;
 
@@ -2088,7 +2092,53 @@ static UIView *testview;
 }
 
 - (void)handleReturnBtnClick {
-    NSLog(@"%s%i>~: %@", __FUNCTION__, __LINE__, equationToString(E.root));
+    NSMutableString *str = equationToString(E.root);
+    if (str == nil) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
+    }
+    
+    DDMathOperatorSet *defaultOperators = [DDMathOperatorSet defaultOperatorSet];
+    defaultOperators.interpretsPercentSignAsModulo = NO;
+    DDMathEvaluator *evaluator = [[DDMathEvaluator alloc] init];
+    
+    evaluator.functionResolver = ^DDMathFunction (NSString *name) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return ^(NSArray *args, NSDictionary *substitutions, DDMathEvaluator *eval, NSError **error) {
+            return [DDExpression numberExpressionWithNumber:@0];
+        };
+    };
+    
+    evaluator.variableResolver = ^(NSString *variable) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return @0;
+    };
+    
+    NSError *error = nil;
+    
+    DDMathTokenizer *tokenizer = [[DDMathTokenizer alloc] initWithString:str operatorSet:nil error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    
+    DDMathTokenInterpreter *interpreter = [[DDMathTokenInterpreter alloc] initWithTokenizer:tokenizer error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    DDParser *parser = [[DDParser alloc] initWithTokenInterpreter:interpreter];
+    
+    DDExpression *expression = [parser parsedExpressionWithError:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    DDExpression *rewritten = [[DDExpressionRewriter defaultRewriter] expressionByRewritingExpression:expression withEvaluator:evaluator];
+    
+    NSNumber *value = [evaluator evaluateExpression:rewritten withSubstitutions:nil error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    
+    NSLog(@"%s%i>~%@~~~~~%@~~~~~", __FUNCTION__, __LINE__, str, value);
 }
 
 -(void)btnClicked: (UIButton *)btn {

@@ -757,9 +757,19 @@ NSMutableString *equationToString(EquationBlock *parent) {
     
     for (id b in parent.children) {
         if ([b isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *eb = b;
+            
+            if (eb.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
             [ret appendString:@"("];
             [ret appendString:equationToString(b)];
             [ret appendString:@")"];
+            
+            if (eb.c_idx == parent.children.count - 1) {
+                [ret appendString:@")"];
+            }
         } else if ([b isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *l = b;
             if (l.c_idx == 0) {
@@ -781,6 +791,11 @@ NSMutableString *equationToString(EquationBlock *parent) {
             }
         } else if ([b isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *rb = b;
+            
+            if (rb.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
             if (rb.rootNum != nil) {
                 [ret appendString:@"cuberoot("];
                 [ret appendString:equationToString(rb.content)];
@@ -788,6 +803,10 @@ NSMutableString *equationToString(EquationBlock *parent) {
             } else {
                 [ret appendString:@"sqrt("];
                 [ret appendString:equationToString(rb.content)];
+                [ret appendString:@")"];
+            }
+            
+            if (rb.c_idx == parent.children.count - 1) {
                 [ret appendString:@")"];
             }
         } else if ([b isMemberOfClass: [FractionBarLayer class]]) {
