@@ -22,7 +22,6 @@
 @property int is_base_expo;
 @property int type;
 @property NSMutableArray *strLenTbl;
-@property NSMutableString *value;
 
 //-(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
@@ -34,5 +33,6 @@
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;
 -(BOOL) isExpoEmpty;
+-(void) updateStrLenTbl;
 -(void) destroy;
 @end

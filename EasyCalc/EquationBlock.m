@@ -412,6 +412,316 @@
     }
 }
 
+-(void) moveUp : (CGFloat)distance {
+    
+    self.mainFrame = CGRectOffset(self.mainFrame, 0.0, -distance);
+    self.numerFrame = CGRectOffset(self.numerFrame, 0.0, -distance);
+    self.denomFrame = CGRectOffset(self.denomFrame, 0.0, -distance);
+    
+    for (id block in self.children) {
+        if ([block isMemberOfClass: [EquationTextLayer class]]) {
+            EquationTextLayer *l = block;
+            
+            l.frame = CGRectOffset(l.frame, 0.0, -distance);
+            
+            if (l.expo != nil) {
+                [l.expo moveUp:distance];
+                l.mainFrame = CGRectUnion(l.frame, l.expo.mainFrame);
+            } else {
+                l.mainFrame = l.frame;
+            }
+        } else if ([block isMemberOfClass: [FractionBarLayer class]]) {
+            FractionBarLayer *fb = block;
+            fb.frame = CGRectOffset(fb.frame, 0.0, -distance);
+        } else if ([block isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *eb = block;
+            [eb moveUp:distance];
+        } else if ([block isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *rb = block;
+            rb.frame = CGRectOffset(rb.frame, 0.0, -distance);
+            [rb.content moveUp:distance];
+            
+            if (rb.rootNum != nil) {
+                rb.rootNum.frame = CGRectOffset(rb.rootNum.frame, 0.0, -distance);
+            }
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+}
+
+-(void) updateElementSize: (Equation *)E {
+    CGFloat nTop = 0.0, nBtm = 0.0, dTop = 0.0, dBtm = 0.0, nWidth = 0.0, dWidth = 0.0;
+    
+    for (id block in self.children) {
+        if ([block isMemberOfClass: [EquationTextLayer class]]) {
+            EquationTextLayer *l = block;
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[l.string string]];
+            
+            if (l.is_base_expo == IS_BASE) {
+                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.baseFont.fontName, E.baseFont.pointSize, NULL);
+                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+                CFRelease(ctFont);
+                
+                CGRect f = l.frame;
+                f.size = [attStr size];
+                l.frame = f;
+                
+                l.string = attStr;
+                
+                if (l.expo != nil) {
+                    [l.expo updateElementSize:E];
+                    [l updateFrameBaseOnBase];
+                } else {
+                    l.mainFrame = l.frame;
+                }
+            } else {
+                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
+                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+                CFRelease(ctFont);
+                
+                CGRect f = l.frame;
+                f.size = [attStr size];
+                l.frame = f;
+                
+                l.string = attStr;
+                
+                l.mainFrame = l.frame;
+            }
+            
+            [l updateStrLenTbl];
+            
+            CGFloat top = l.mainFrame.size.height - l.frame.size.height / 2.0;
+            CGFloat btm = l.frame.size.height / 2.0;
+            if (l.roll == ROLL_NUMERATOR) {
+                if ((int)nTop < (int)top)
+                    nTop = top;
+                
+                if ((int)nBtm < (int)btm)
+                    nBtm = btm;
+                
+                nWidth += l.mainFrame.size.width;
+            } else if (l.roll == ROLL_DENOMINATOR) {
+                if ((int)dTop < (int)top)
+                    dTop = top;
+                
+                if ((int)dBtm < (int)btm)
+                    dBtm = btm;
+                
+                dWidth += l.mainFrame.size.width;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        } else if ([block isMemberOfClass: [FractionBarLayer class]]) {
+            FractionBarLayer *fb = block;
+            
+            if (fb.is_base_expo == IS_BASE) {
+                CGRect f = fb.frame;
+                f.size.height = E.baseCharHight / 2.0;
+                fb.frame = f;
+            } else {
+                CGRect f = fb.frame;
+                f.size.height = E.expoCharHight / 2.0;
+                fb.frame = f;
+            }
+        } else if ([block isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *eb = block;
+            
+            [eb updateElementSize:E];
+            
+            CGFloat top = eb.mainFrame.size.height / 2.0;
+            CGFloat btm = eb.mainFrame.size.height / 2.0;
+            if (eb.roll == ROLL_NUMERATOR) {
+                if ((int)nTop < (int)top)
+                    nTop = top;
+                
+                if ((int)nBtm < (int)btm)
+                    nBtm = btm;
+                
+                nWidth += eb.mainFrame.size.width;
+            } else if (eb.roll == ROLL_DENOMINATOR) {
+                if ((int)dTop < (int)top)
+                    dTop = top;
+                
+                if ((int)dBtm < (int)btm)
+                    dBtm = btm;
+                
+                dWidth += eb.mainFrame.size.width;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        } else if ([block isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *rb = block;
+            
+            [rb.content updateElementSize:E];
+            
+            [rb updateFrame];
+            
+            [rb setNeedsDisplay];
+            
+            if (rb.rootNum != nil) {
+                NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[rb.rootNum.string string]];
+                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
+                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+                CFRelease(ctFont);
+                
+                CGRect f = rb.rootNum.frame;
+                f.size = [attStr size];
+                rb.rootNum.frame = f;
+                
+                rb.rootNum.string = attStr;
+            }
+            
+            CGFloat top = rb.frame.size.height / 2.0;
+            CGFloat btm = rb.frame.size.height / 2.0;
+            if (rb.roll == ROLL_NUMERATOR) {
+                if ((int)nTop < (int)top)
+                    nTop = top;
+                
+                if ((int)nBtm < (int)btm)
+                    nBtm = btm;
+                
+                nWidth += rb.frame.size.width;
+            } else if (rb.roll == ROLL_DENOMINATOR) {
+                if ((int)dTop < (int)top)
+                    dTop = top;
+                
+                if ((int)dBtm < (int)btm)
+                    dBtm = btm;
+                
+                dWidth += rb.frame.size.width;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    
+    CGPoint orgP = self.mainFrame.origin;
+    self.numerTopHalf = nTop;
+    self.numerBtmHalf = nBtm;
+    self.denomTopHalf = dTop;
+    self.denomBtmHalf = dBtm;
+    self.numerFrame = CGRectMake(orgP.x, orgP.y, nWidth, nTop + nBtm);
+    self.denomFrame = CGRectMake(orgP.x, orgP.y + self.numerFrame.size.height, dWidth, dTop + dBtm);
+    self.mainFrame = CGRectUnion(self.numerFrame, self.denomFrame);
+}
+
+-(void) adjustElementPosition {
+    /* First adjust numerFrame and denomFrame */
+    CGFloat mainCenterX = self.mainFrame.origin.x + (self.mainFrame.size.width / 2.0);
+    
+    CGFloat curNumX = 0.0; // Track the layer/block orgin x
+    CGFloat curDenX = 0.0; // Track the layer/block orgin x
+    CGRect frame = self.numerFrame;
+    frame.origin.y = self.mainFrame.origin.y;
+    frame.origin.x = mainCenterX - (frame.size.width / 2.0);
+    self.numerFrame = frame;
+    curNumX = frame.origin.x;
+    
+    if (self.bar != nil) {
+        frame = self.denomFrame;
+        frame.origin.y = self.mainFrame.origin.y + self.numerFrame.size.height;
+        frame.origin.x = mainCenterX - (frame.size.width / 2.0);
+        self.denomFrame = frame;
+        curDenX = frame.origin.x;
+    }
+    
+    /* Then adjust blocks */
+    NSMutableArray *blockChildren = self.children;
+    NSEnumerator *enumerator = [blockChildren objectEnumerator];
+    id cb;
+    while (cb = [enumerator nextObject]) {
+        if ([cb isMemberOfClass: [EquationTextLayer class]]) {
+            EquationTextLayer *layer = cb;
+            
+            if (layer.roll == ROLL_NUMERATOR) {
+                CGRect frame = layer.frame;
+                frame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (layer.frame.size.height / 2.0);
+                frame.origin.x = curNumX;
+                layer.frame = frame;
+                [layer updateFrameBaseOnBase];
+                curNumX += layer.mainFrame.size.width;
+            } else if (layer.roll == ROLL_DENOMINATOR) {
+                CGRect frame = layer.frame;
+                frame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (layer.frame.size.height / 2.0);
+                frame.origin.x = curDenX;
+                layer.frame = frame;
+                [layer updateFrameBaseOnBase];
+                curDenX += layer.mainFrame.size.width;
+            } else
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            
+            if (layer.expo != nil) {
+                EquationBlock *b = layer.expo;
+                [b adjustElementPosition];
+            }
+        } else if ([cb isMemberOfClass: [FractionBarLayer class]]) {
+            FractionBarLayer *fb = cb;
+            CGRect frame = fb.frame;
+            frame.origin.x = self.mainFrame.origin.x;
+            frame.origin.y = self.mainFrame.origin.y + self.numerFrame.size.height - (frame.size.height / 2.0);
+            if ((int)frame.size.width != (int)self.mainFrame.size.width) {
+                frame.size.width = self.mainFrame.size.width;
+                fb.frame = frame;
+                [fb setNeedsDisplay];
+            } else {
+                fb.frame = frame;
+            }
+        } else if ([cb isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *block = cb;
+            
+            if (block.roll == ROLL_NUMERATOR) {
+                CGRect frame = block.mainFrame;
+                frame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (block.mainFrame.size.height / 2.0);
+                frame.origin.x = curNumX;
+                block.mainFrame = frame;
+                curNumX += frame.size.width;
+            } else if (block.roll == ROLL_DENOMINATOR) {
+                CGRect frame = block.mainFrame;
+                frame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (block.mainFrame.size.height / 2.0);
+                frame.origin.x = curDenX;
+                block.mainFrame = frame;
+                curDenX += frame.size.width;
+            } else
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            
+            [block adjustElementPosition];
+        } else if ([cb isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *block = cb;
+            CGRect mainF = block.content.mainFrame;
+            CGRect frame = block.frame;
+            
+            if (block.roll == ROLL_NUMERATOR) {
+                frame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (block.frame.size.height / 2.0);
+                frame.origin.x = curNumX;
+                block.frame = frame;
+                curNumX += frame.size.width;
+            } else if (block.roll == ROLL_DENOMINATOR) {
+                frame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (block.frame.size.height / 2.0);
+                frame.origin.x = curDenX;
+                block.frame = frame;
+                curDenX += frame.size.width;
+            } else
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            
+            if (block.rootNum != nil) {
+                CGFloat ML = RADICAL_MARGINE_L_PERC * block.frame.size.height;
+                CGRect f = block.rootNum.frame;
+                block.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - 4.0, frame.origin.y, f.size.width, f.size.height);
+            }
+            
+            frame.origin.x += RADICAL_MARGINE_L_PERC * block.frame.size.height;
+            frame.origin.y += RADICAL_MARGINE_T;
+            mainF.origin = frame.origin;
+            block.content.mainFrame = mainF;
+            
+            [block.content adjustElementPosition];
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+}
+
 -(void) destroy {
     for (id b in self.children) {
         if ([b isMemberOfClass:[EquationTextLayer class]]) {

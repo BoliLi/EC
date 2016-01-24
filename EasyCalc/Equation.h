@@ -34,12 +34,14 @@
 @property NSUInteger insertCIdx;
 @property DisplayView *view;
 @property int txtInsIdx;
+@property CGPoint downLeftBasePoint;
+@property BOOL hasResult;
+@property int zoomInLvl;
 
 //-(id) init;
--(id) init : (CGPoint)rootPos : (CGRect)dspFrame : (CGRect)cursorFrame : (ViewController *)vc;
+-(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
 -(void) dumpObj : (EquationBlock *)parentBlock;
 -(void) dumpEverything : (EquationBlock *)eb;
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point;
--(void) adjustEveryThing : (EquationBlock *)parentBlock;
 -(void)removeElement:(id)blk;
 @end

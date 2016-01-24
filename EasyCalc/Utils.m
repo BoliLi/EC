@@ -15,6 +15,11 @@
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
 #import "DisplayView.h"
+#import "DDMathParser.h"
+#import "DDMathTokenizer.h"
+#import "DDMathTokenInterpreter.h"
+#import "DDMathOperator.h"
+#import "DDMathOperatorSet.h"
 
 EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
 //    if ([blk isMemberOfClass:[EquationTextLayer class]]) {
@@ -778,12 +783,12 @@ NSMutableString *equationToString(EquationBlock *parent) {
             
             if (l.expo != nil) {
                 [ret appendString:@"pow("];
-                [ret appendString:l.value];
+                [ret appendString:[l.string string]];
                 [ret appendString:@","];
                 [ret appendString:equationToString(l.expo)];
                 [ret appendString:@")"];
             } else {
-                [ret appendString:l.value];
+                [ret appendString:[l.string string]];
             }
             
             if (l.c_idx == parent.children.count - 1) {
@@ -815,6 +820,51 @@ NSMutableString *equationToString(EquationBlock *parent) {
     }
     
     return ret;
+}
+
+NSNumber *calculate(NSMutableString *input) {
+    
+    DDMathOperatorSet *defaultOperators = [DDMathOperatorSet defaultOperatorSet];
+    defaultOperators.interpretsPercentSignAsModulo = NO;
+    DDMathEvaluator *evaluator = [[DDMathEvaluator alloc] init];
+    
+    evaluator.functionResolver = ^DDMathFunction (NSString *name) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return ^(NSArray *args, NSDictionary *substitutions, DDMathEvaluator *eval, NSError **error) {
+            return [DDExpression numberExpressionWithNumber:@0];
+        };
+    };
+    
+    evaluator.variableResolver = ^(NSString *variable) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return @0;
+    };
+    
+    NSError *error = nil;
+    
+    DDMathTokenizer *tokenizer = [[DDMathTokenizer alloc] initWithString:input operatorSet:nil error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    
+    DDMathTokenInterpreter *interpreter = [[DDMathTokenInterpreter alloc] initWithTokenizer:tokenizer error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    DDParser *parser = [[DDParser alloc] initWithTokenInterpreter:interpreter];
+    
+    DDExpression *expression = [parser parsedExpressionWithError:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    DDExpression *rewritten = [[DDExpressionRewriter defaultRewriter] expressionByRewritingExpression:expression withEvaluator:evaluator];
+    
+    NSNumber *value = [evaluator evaluateExpression:rewritten withSubstitutions:nil error:&error];
+    if (error) {
+        NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, [error localizedDescription]);
+    }
+    
+    return value;
 }
 
 bool rectContainsRect(CGRect rect1, CGRect rect2) {

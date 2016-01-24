@@ -15,4 +15,5 @@ id getPrevBlk(Equation *E, id curBlk);
 void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint);
 bool rectContainsRect(CGRect rect1, CGRect rect2);
 NSMutableString *equationToString(EquationBlock *parent);
+NSNumber *calculate(NSMutableString *input);
 #endif /* Utils_h */

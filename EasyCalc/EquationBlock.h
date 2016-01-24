@@ -35,4 +35,7 @@
 -(void) updateFrameHeightS1 : (id)child;
 -(void) updateCIdx;
 -(void) destroy;
+-(void) moveUp : (CGFloat)distance;
+-(void) updateElementSize: (Equation *)E;
+-(void) adjustElementPosition;
 @end

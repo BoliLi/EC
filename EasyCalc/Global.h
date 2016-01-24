@@ -50,8 +50,8 @@
 
 extern NSMutableArray *gEquationList;
 extern int gCurEqIdx;
-extern CGFloat gBaseCharWidthTbl[11];
-extern CGFloat gExpoCharWidthTbl[11];
+extern CGFloat gBaseCharWidthTbl[3][16];
+extern CGFloat gExpoCharWidthTbl[3][16];
 
 @interface NSMutableArray (Reverse)
 - (void)reverse;
@@ -59,6 +59,7 @@ extern CGFloat gExpoCharWidthTbl[11];
 
 
 void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock);
+int getBaseFontSize(int level);
 void initCharWidthTbl(void);
-CGFloat getCharWidth(int base_expo, NSString *s);
+CGFloat getCharWidth(int level, int base_expo, NSString *s);
 #endif /* Global_h */

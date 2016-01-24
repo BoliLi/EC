@@ -24,7 +24,6 @@
 @synthesize is_base_expo;
 @synthesize type;
 @synthesize strLenTbl;
-@synthesize value;
 
 //-(id) init : (Equation *)e {
 //    self = [super init];
@@ -35,7 +34,6 @@
 //        self.roll = e.curRoll;
 //        self.strLenTbl = [NSMutableArray array];
 //        [self.strLenTbl addObject:@0.0];
-//        self.value = [NSMutableString stringWithCapacity:36];
 //        
 //        if (e.curFont == e.baseFont) {
 //            is_base_expo = IS_BASE;
@@ -57,7 +55,6 @@
         self.name = str;
         self.strLenTbl = [NSMutableArray array];
         [self.strLenTbl addObject:@0.0];
-        self.value = [NSMutableString stringWithString:str];
         
         if (e.curFont == e.baseFont) {
             is_base_expo = IS_BASE;
@@ -141,11 +138,9 @@
     if (self.type == TEXTLAYER_NUM) {
         orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.string];
         [orgStr appendAttributedString:attStr];
-        [self.value appendString:str];
     } else if (self.type == TEXTLAYER_EMPTY) {
         self.type = TEXTLAYER_NUM;
         orgStr = attStr;
-        [self.value setString:str];
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         return 0.0;
@@ -161,7 +156,7 @@
     [self updateFrameBaseOnBase];
     
     CGFloat preStrLen = [self.strLenTbl.lastObject doubleValue];
-    CGFloat charW = getCharWidth(self.is_base_expo, str);
+    CGFloat charW = getCharWidth(E.zoomInLvl, self.is_base_expo, str);
     [self.strLenTbl addObject:@(preStrLen + charW)];
     
     return [self.strLenTbl.lastObject doubleValue];
@@ -182,8 +177,6 @@
     
     [orgStr insertAttributedString:attStr atIndex:idx];
     
-    [self.value insertString:str atIndex:idx];
-    
     CGSize strSize = [orgStr size];
     CGRect f = self.frame;
     f.size.width = strSize.width;
@@ -194,7 +187,7 @@
     [self updateFrameBaseOnBase];
     
     CGFloat preStrLen = [[self.strLenTbl objectAtIndex:idx] doubleValue];
-    CGFloat charW = getCharWidth(self.is_base_expo, str);
+    CGFloat charW = getCharWidth(E.zoomInLvl, self.is_base_expo, str);
     [self.strLenTbl insertObject:@(preStrLen + charW) atIndex:idx + 1];
     
     for (int i = idx + 2; i < self.strLenTbl.count; i++) {
@@ -218,8 +211,6 @@
     
     [orgStr deleteCharactersInRange:NSMakeRange(idx - 1, 1)];
     
-    [self.value deleteCharactersInRange:NSMakeRange(idx - 1, 1)];
-    
     strSize = [orgStr size];
     CGFloat charW = orgW - strSize.width;
     CGRect f = self.frame;
@@ -242,39 +233,19 @@
     return [[self.strLenTbl objectAtIndex:idx - 1] doubleValue];
 }
 
-//-(int) getTxtInsIdx1: (CGPoint) p {
-//    NSMutableArray *arr = self.strLenTbl;
-//    for (NSNumber *v in arr) {
-//        NSLog(@"%s%i>~%f~~~~~~~~~~", __FUNCTION__, __LINE__, [v doubleValue]);
-//    }
-//    int target = (int)(p.x - self.frame.origin.x);
-//    int mid, left = 0, right = (int)arr.count - 1;
-//    
-//    while(left <= right) {
-//        mid = (left + right) / 2;
-//        int v = [[arr objectAtIndex:mid] intValue];
-//        if(v == target)
-//            return mid;
-//        if(v > target)
-//            right = mid - 1;
-//        else
-//            left = mid + 1;
-//    }
-//    
-//    if (left == arr.count) {
-//        return right;
-//    } else if(right < 0) {
-//        return left;
-//    } else {
-//        int leftV = [[arr objectAtIndex:right] intValue];
-//        int rightV = [[arr objectAtIndex:left] intValue];
-//        if (abs(leftV - target) < abs(target - rightV)) {
-//            return right;
-//        } else {
-//            return left;
-//        }
-//    }
-//}
+-(void) updateStrLenTbl {
+    Equation *E = self.ancestor;
+    NSString *str = [self.string string];
+    CGFloat strLen = 0.0;
+    
+    for (int i = 1; i < self.strLenTbl.count; i++) {
+        NSString *subStr = [str substringWithRange:NSMakeRange(i - 1, 1)];
+        CGFloat charW = getCharWidth(E.zoomInLvl, self.is_base_expo, subStr);
+        strLen += charW;
+        NSNumber *len = @(strLen);
+        [self.strLenTbl replaceObjectAtIndex:i withObject:len];
+    }
+}
 
 -(int) getTxtInsIdx: (CGPoint) p {
     NSMutableArray *arr = self.strLenTbl;
@@ -346,7 +317,6 @@
     }
     [self.strLenTbl removeAllObjects];
     self.strLenTbl = nil;
-    self.value = nil;
     [self removeFromSuperlayer];
 }
 
