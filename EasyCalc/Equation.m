@@ -174,6 +174,40 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super init];
+    if (self) {
+        self.root = [coder decodeObjectForKey:@"root"];
+        self.baseFont = [coder decodeObjectForKey:@"baseFont"];
+        self.superscriptFont = [coder decodeObjectForKey:@"superscriptFont"];
+        self.baseCharWidth = [coder decodeDoubleForKey:@"baseCharWidth"];
+        self.baseCharHight = [coder decodeDoubleForKey:@"baseCharHight"];
+        self.expoCharWidth = [coder decodeDoubleForKey:@"expoCharWidth"];
+        self.expoCharHight = [coder decodeDoubleForKey:@"expoCharHight"];
+        self.view = [coder decodeObjectForKey:@"view"];
+        self.downLeftBasePoint = [coder decodeCGPointForKey:@"downLeftBasePoint"];
+        self.hasResult = [coder decodeBoolForKey:@"hasResult"];
+        self.zoomInLvl = [coder decodeIntForKey:@"zoomInLvl"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:self.root forKey:@"root"];
+    [coder encodeObject:self.baseFont forKey:@"baseFont"];
+    [coder encodeObject:self.superscriptFont forKey:@"superscriptFont"];
+    [coder encodeDouble:self.baseCharWidth forKey:@"baseCharWidth"];
+    [coder encodeDouble:self.baseCharHight forKey:@"baseCharHight"];
+    [coder encodeDouble:self.expoCharWidth forKey:@"expoCharWidth"];
+    [coder encodeDouble:self.expoCharHight forKey:@"expoCharHight"];
+    [coder encodeObject:self.view forKey:@"view"];
+    [coder encodeCGPoint:self.downLeftBasePoint forKey:@"downLeftBasePoint"];
+    [coder encodeBool:self.hasResult forKey:@"hasResult"];
+    [coder encodeInt:self.zoomInLvl forKey:@"zoomInLvl"];
+}
+
 -(void) dumpObj : (EquationBlock *)parentBlock {
     NSLog(@"%s~eBlk~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
     NSMutableArray *blockChildren = parentBlock.children;

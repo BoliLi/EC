@@ -10,7 +10,7 @@
 
 @class FractionBarLayer;
 
-@interface EquationBlock : NSObject
+@interface EquationBlock : NSObject <NSCoding, NSCopying>
 @property NSMutableArray *children;
 @property CGRect mainFrame;
 @property CGRect numerFrame;

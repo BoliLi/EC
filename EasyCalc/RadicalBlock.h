@@ -13,7 +13,7 @@
 @class EquationBlock;
 @class EquationTextLayer;
 
-@interface RadicalBlock : CALayer
+@interface RadicalBlock : CALayer <NSCoding, NSCopying>
 @property EquationBlock *content;
 @property (weak) id parent;
 @property (weak) Equation *ancestor;

@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DisplayView : UIView
+@interface DisplayView : UIView <NSCoding>
 @property CALayer *cursor;
 @property CGPoint inpOrg;
 @end

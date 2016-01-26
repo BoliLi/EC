@@ -104,6 +104,33 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.roll = [coder decodeIntForKey:@"roll"];
+        self.expo = [coder decodeObjectForKey:@"expo"];
+        self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
+        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+        self.type = [coder decodeIntForKey:@"type"];
+        self.strLenTbl = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"strLenTbl"]];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeInt:self.roll forKey:@"roll"];
+    if (self.expo != nil) {
+        [coder encodeObject:self.expo forKey:@"expo"];
+    }
+    [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
+    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+    [coder encodeInt:self.type forKey:@"type"];
+    [coder encodeObject:[NSArray arrayWithArray:self.strLenTbl] forKey:@"strLenTbl"];
+}
+
 //-(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t {
 //    Equation *E = self.ancestor;
 //    

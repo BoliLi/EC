@@ -37,6 +37,21 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+}
+
 -(void) destroy {
     [self removeFromSuperlayer];
 }

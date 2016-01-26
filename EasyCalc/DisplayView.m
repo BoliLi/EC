@@ -11,6 +11,24 @@
 @implementation DisplayView
 @synthesize cursor;
 @synthesize inpOrg;
+
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.cursor = [coder decodeObjectForKey:@"cursor"];
+        self.inpOrg = [coder decodeCGPointForKey:@"inpOrg"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeObject:self.cursor forKey:@"cursor"];
+    [coder encodeCGPoint:self.inpOrg forKey:@"inpOrg"];
+}
+
 -(void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx{
     
 }

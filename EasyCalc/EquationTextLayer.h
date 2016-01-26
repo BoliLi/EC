@@ -11,7 +11,7 @@
 
 @class EquationBlock;
 
-@interface EquationTextLayer : CATextLayer
+@interface EquationTextLayer : CATextLayer <NSCoding, NSCopying>
 @property (weak) id parent;
 @property (weak) Equation *ancestor;
 @property int guid;

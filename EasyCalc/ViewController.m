@@ -269,7 +269,7 @@ static UIView *testview;
     [secondKbView addGestureRecognizer:right];
     
     buttonFont = [UIFont systemFontOfSize: 30];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 25; i++) {
@@ -2167,6 +2167,15 @@ static UIView *testview;
         [self zoom];
     } else if([[btn currentTitle]  isEqual: @"="]) {
         [self handleReturnBtnClick];
+    } else if([[btn currentTitle]  isEqual: @"save"]) {
+        NSData *data = [NSKeyedArchiver archivedDataWithRootObject:E];
+        NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
+        [user setObject:data forKey:@"equation1"];
+        NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
+    } else if([[btn currentTitle]  isEqual: @"load"]) {
+        NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
+        Equation *eq = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"equation1"]];
+        [eq dumpEverything:eq.root];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }

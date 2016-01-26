@@ -14,7 +14,7 @@
 @class EquationTextLayer;
 @class EquationBlock;
 
-@interface Equation : NSObject
+@interface Equation : NSObject <NSCoding>
 @property int guid_cnt;
 @property EquationBlock *root;
 @property id curParent;

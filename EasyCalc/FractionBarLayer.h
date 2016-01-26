@@ -8,7 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-@interface FractionBarLayer : CALayer
+@interface FractionBarLayer : CALayer <NSCoding>
 
 @property int guid;
 @property NSUInteger c_idx;

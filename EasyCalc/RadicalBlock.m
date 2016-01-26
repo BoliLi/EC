@@ -96,6 +96,29 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super initWithCoder:coder];
+    if (self) {
+        self.content = [coder decodeObjectForKey:@"content"];
+        self.roll = [coder decodeIntForKey:@"roll"];
+        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+        self.rootNum = [coder decodeObjectForKey:@"rootNum"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [super encodeWithCoder:coder];
+    [coder encodeObject:self.content forKey:@"content"];
+    [coder encodeInt:self.roll forKey:@"roll"];
+    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+    if (self.rootNum != nil) {
+        [coder encodeObject:self.rootNum forKey:@"rootNum"];
+    }
+}
+
 -(void) updateFrame {
     EquationBlock *eBlock = self.content;
     CGRect frame;

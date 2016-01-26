@@ -69,6 +69,40 @@
     return self;
 }
 
+- (instancetype)initWithCoder:(NSCoder *)coder
+{
+    self = [super init];
+    if (self) {
+        self.children = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"children"]];
+        self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
+        self.numerFrame = [coder decodeCGRectForKey:@"numerFrame"];
+        self.denomFrame = [coder decodeCGRectForKey:@"denomFrame"];
+        self.bar = [coder decodeObjectForKey:@"bar"];
+        self.numerTopHalf = [coder decodeDoubleForKey:@"numerTopHalf"];
+        self.numerBtmHalf = [coder decodeDoubleForKey:@"numerBtmHalf"];
+        self.denomTopHalf = [coder decodeDoubleForKey:@"denomTopHalf"];
+        self.denomBtmHalf = [coder decodeDoubleForKey:@"denomBtmHalf"];
+        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+    }
+    return self;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    [coder encodeObject:[NSArray arrayWithArray:self.children] forKey:@"children"];
+    [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
+    [coder encodeCGRect:self.numerFrame forKey:@"numerFrame"];
+    [coder encodeCGRect:self.denomFrame forKey:@"denomFrame"];
+    if (self.bar != nil) {
+        [coder encodeObject:self.bar forKey:@"bar"];
+    }
+    [coder encodeDouble:self.numerTopHalf forKey:@"numerTopHalf"];
+    [coder encodeDouble:self.numerBtmHalf forKey:@"numerBtmHalf"];
+    [coder encodeDouble:self.denomTopHalf forKey:@"denomTopHalf"];
+    [coder encodeDouble:self.denomBtmHalf forKey:@"denomBtmHalf"];
+    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+}
+
 -(void) updateFrame : (CGRect)frame : (int)r {
     
     if (r == ROLL_NUMERATOR) {
