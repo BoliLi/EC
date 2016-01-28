@@ -26,7 +26,7 @@
     if (self) {
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         
         if (e.curFont == e.baseFont) {
             is_base_expo = IS_BASE;

@@ -208,6 +208,10 @@
     [coder encodeInt:self.zoomInLvl forKey:@"zoomInLvl"];
 }
 
+-(void) reconstruct {
+    
+}
+
 -(void) dumpObj : (EquationBlock *)parentBlock {
     NSLog(@"%s~eBlk~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
     NSMutableArray *blockChildren = parentBlock.children;

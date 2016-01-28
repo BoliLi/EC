@@ -49,7 +49,7 @@
     if (self) {
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         self.roll = e.curRoll;
         self.type = t;
         self.name = str;

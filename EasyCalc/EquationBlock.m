@@ -35,7 +35,7 @@
     if (self) {
         self.ancestor = e;
         self.children = [NSMutableArray array];
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         self.roll = e.curRoll;
         
         if (e.curFont == e.baseFont) {
@@ -52,7 +52,7 @@
     if (self) {
         self.ancestor = e;
         self.children = [NSMutableArray array];
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         self.roll = e.curRoll;
         
         self.numerFrame = CGRectMake(inputPos.x, inputPos.y, e.curFontW, e.curFontH);
@@ -78,6 +78,7 @@
         self.numerFrame = [coder decodeCGRectForKey:@"numerFrame"];
         self.denomFrame = [coder decodeCGRectForKey:@"denomFrame"];
         self.bar = [coder decodeObjectForKey:@"bar"];
+        self.roll = [coder decodeIntForKey:@"roll"];
         self.numerTopHalf = [coder decodeDoubleForKey:@"numerTopHalf"];
         self.numerBtmHalf = [coder decodeDoubleForKey:@"numerBtmHalf"];
         self.denomTopHalf = [coder decodeDoubleForKey:@"denomTopHalf"];
@@ -96,6 +97,7 @@
     if (self.bar != nil) {
         [coder encodeObject:self.bar forKey:@"bar"];
     }
+    [coder encodeInt:self.roll forKey:@"roll"];
     [coder encodeDouble:self.numerTopHalf forKey:@"numerTopHalf"];
     [coder encodeDouble:self.numerBtmHalf forKey:@"numerBtmHalf"];
     [coder encodeDouble:self.denomTopHalf forKey:@"denomTopHalf"];
@@ -103,14 +105,67 @@
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
 }
 
+-(void) reorganize : (int *)uid : (Equation *)anc : (ViewController *)vc {
+    if (self.roll == ROLL_ROOT) {
+        self.parent = nil;
+    }
+    
+    NSUInteger cidx = 0;
+    for (id b in self.children) {
+        if ([b isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock *eb = b;
+            eb.guid = (*uid)++;
+            eb.c_idx = cidx++;
+            eb.parent = self;
+            eb.ancestor = anc;
+            [eb reorganize:uid :anc :vc];
+        } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = b;
+            l.guid = (*uid)++;
+            l.c_idx = cidx++;
+            l.parent = self;
+            l.ancestor = anc;
+            [anc.view.layer addSublayer:l];
+            if (l.expo != nil) {
+                [l.expo reorganize:uid :anc :vc];
+            }
+        } else if ([b isMemberOfClass:[RadicalBlock class]]) {
+            RadicalBlock *rb = b;
+            rb.guid = (*uid)++;
+            rb.c_idx = cidx++;
+            rb.parent = self;
+            rb.ancestor = anc;
+            rb.delegate = vc;
+            [anc.view.layer addSublayer: rb];
+            [rb setNeedsDisplay];
+            
+            if (rb.rootNum != nil) {
+                [anc.view.layer addSublayer: rb.rootNum];
+            }
+            
+            [rb.content reorganize:uid :anc :vc];
+        } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
+            FractionBarLayer *fb = b;
+            fb.guid = (*uid)++;
+            fb.c_idx = cidx++;
+            fb.parent = self;
+            fb.ancestor = anc;
+            fb.delegate = vc;
+            [anc.view.layer addSublayer: fb];
+            [fb setNeedsDisplay];
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+}
+
 -(void) updateFrame : (CGRect)frame : (int)r {
     
     if (r == ROLL_NUMERATOR) {
         self.numerFrame = CGRectUnion(frame, self.numerFrame);
         if (self.bar == nil) {
-            self.mainFrame = self.numerFrame;
-        } else {
-            //Fix for the following case
+            self.mainFrame = self.numerFrame;\
+            
             // numer:   ********
             // bar  :   ----------
             // denom:       ******

@@ -29,7 +29,7 @@
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.content = [[EquationBlock alloc] init:e];
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         self.roll = e.curRoll;
         
         if (e.curFont == e.baseFont) {
@@ -46,7 +46,7 @@
     if (self) {
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
-        self.guid = ++e.guid_cnt;
+        self.guid = e.guid_cnt++;
         self.name = @"radical";
         self.hidden = NO;
         self.roll = e.curRoll;

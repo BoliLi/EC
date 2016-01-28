@@ -2176,6 +2176,26 @@ static UIView *testview;
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
         Equation *eq = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"equation1"]];
         [eq dumpEverything:eq.root];
+        int cnt = 0;
+        [eq.root reorganize:&cnt :eq :self];
+        eq.guid_cnt = cnt;
+        
+        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+        anim.fromValue = [NSNumber numberWithBool:YES];
+        anim.toValue = [NSNumber numberWithBool:NO];
+        anim.duration = 0.5;
+        anim.autoreverses = YES;
+        anim.repeatCount = HUGE_VALF;
+        [eq.view.cursor addAnimation:anim forKey:nil];
+        [eq.view.layer addSublayer:eq.view.cursor];
+        eq.view.cursor.delegate = self;
+        [eq.view.cursor setNeedsDisplay];
+        
+        //locaLastTxtLyr(eq, eq.root);
+        DisplayView *orgView = E.view;
+        [UIView transitionFromView:orgView toView:eq.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
+            // What to do when its finished.
+        }];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
