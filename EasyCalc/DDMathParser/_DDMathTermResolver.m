@@ -287,7 +287,7 @@
     } else {
         // left associative unary operator (factorial)
         if (operatorIndex == 0) {
-            *error = DD_ERR(DDErrorCodeUnaryOperatorMissingLeftOperand, @"no left operand to unary %@", term);
+            //*error = DD_ERR(DDErrorCodeUnaryOperatorMissingLeftOperand, @"no left operand to unary ");
             return NO;
         }
         

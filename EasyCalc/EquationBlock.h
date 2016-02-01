@@ -38,5 +38,5 @@
 -(void) moveUp : (CGFloat)distance;
 -(void) updateElementSize: (Equation *)E;
 -(void) adjustElementPosition;
--(void) reorganize : (int *)uid : (Equation *)anc : (ViewController *)vc;
+-(void) reorganize : (Equation *)anc : (ViewController *)vc;
 @end

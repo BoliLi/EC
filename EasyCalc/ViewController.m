@@ -246,12 +246,50 @@ static UIView *testview;
     CGPoint downLeft = CGPointMake(1, (scnHeight / 2) - statusBarHeight);
     //CGRect cursorFrame = CGRectMake(1, rootPos.y, 0.0, 0.0); //Size will update in Equation init
     
-    for (int i = 0; i < 16; i++) {
-        E = [[Equation alloc] init:downLeft :dspFrame :self];
-        [gEquationList addObject:E];
-        //[dspConView addSubview:E.view];
+    NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
+    NSString *ver = [user stringForKey:@"version"];
+    if (ver != nil) {
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        gCurEqIdx = [user integerForKey:@"gCurEqIdx"];
+        E = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:[NSString stringWithFormat: @"equation%li", (long)gCurEqIdx]]];
+        [E.root reorganize:E :self];
+        
+        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
+        tapGesture.numberOfTapsRequired = 1;
+        tapGesture.numberOfTouchesRequired = 1;
+        [E.view addGestureRecognizer:tapGesture];
+        
+        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeRight:)];
+        right.numberOfTouchesRequired = 1;
+        right.direction = UISwipeGestureRecognizerDirectionRight;
+        [E.view addGestureRecognizer:right];
+        
+        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeLeft:)];
+        left.numberOfTouchesRequired = 1;
+        left.direction = UISwipeGestureRecognizerDirectionLeft;
+        [E.view addGestureRecognizer:left];
+        
+        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+        anim.fromValue = [NSNumber numberWithBool:YES];
+        anim.toValue = [NSNumber numberWithBool:NO];
+        anim.duration = 0.5;
+        anim.autoreverses = YES;
+        anim.repeatCount = HUGE_VALF;
+        [E.view.cursor addAnimation:anim forKey:nil];
+        [E.view.layer addSublayer:E.view.cursor];
+        E.view.cursor.delegate = self;
+        [E.view.cursor setNeedsDisplay];
+        
+        [E dumpEverything:E.root];
+    } else {
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        for (int i = 0; i < 16; i++) {
+            E = [[Equation alloc] init:downLeft :dspFrame :self];
+            [gEquationList addObject:E];
+            //[dspConView addSubview:E.view];
+        }
+        E = gEquationList.firstObject;
     }
-    E = gEquationList.firstObject;
     
     [dspConView addSubview:E.view];
 
@@ -269,7 +307,7 @@ static UIView *testview;
     [secondKbView addGestureRecognizer:right];
     
     buttonFont = [UIFont systemFontOfSize: 30];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 25; i++) {
@@ -2170,32 +2208,46 @@ static UIView *testview;
     } else if([[btn currentTitle]  isEqual: @"save"]) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:E];
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
-        [user setObject:data forKey:@"equation1"];
+        [user setObject:data forKey:[NSString stringWithFormat:@"equation%li", (long)gCurEqIdx]];
+        [user setObject:@"1.0" forKey:@"version"];
+        [user setInteger:gCurEqIdx forKey:@"gCurEqIdx"];
         NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
     } else if([[btn currentTitle]  isEqual: @"load"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
-        Equation *eq = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"equation1"]];
-        [eq dumpEverything:eq.root];
-        int cnt = 0;
-        [eq.root reorganize:&cnt :eq :self];
-        eq.guid_cnt = cnt;
+        gCurEqIdx = [user integerForKey:@"gCurEqIdx"];
+        NSData *data = [user objectForKey:[NSString stringWithFormat:@"equation%li", (long)gCurEqIdx]];
+        if (data != nil) {
+            Equation *eq = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            [eq dumpEverything:eq.root];
+            [eq.root reorganize:eq :self];
+            
+            CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+            anim.fromValue = [NSNumber numberWithBool:YES];
+            anim.toValue = [NSNumber numberWithBool:NO];
+            anim.duration = 0.5;
+            anim.autoreverses = YES;
+            anim.repeatCount = HUGE_VALF;
+            [eq.view.cursor addAnimation:anim forKey:nil];
+            [eq.view.layer addSublayer:eq.view.cursor];
+            eq.view.cursor.delegate = self;
+            [eq.view.cursor setNeedsDisplay];
+            
+            //locaLastTxtLyr(eq, eq.root);
+            DisplayView *orgView = E.view;
+            [UIView transitionFromView:orgView toView:eq.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
+                // What to do when its finished.
+            }];
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
         
-        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
-        anim.fromValue = [NSNumber numberWithBool:YES];
-        anim.toValue = [NSNumber numberWithBool:NO];
-        anim.duration = 0.5;
-        anim.autoreverses = YES;
-        anim.repeatCount = HUGE_VALF;
-        [eq.view.cursor addAnimation:anim forKey:nil];
-        [eq.view.layer addSublayer:eq.view.cursor];
-        eq.view.cursor.delegate = self;
-        [eq.view.cursor setNeedsDisplay];
-        
-        //locaLastTxtLyr(eq, eq.root);
-        DisplayView *orgView = E.view;
-        [UIView transitionFromView:orgView toView:eq.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
-            // What to do when its finished.
-        }];
+    } else if([[btn currentTitle]  isEqual: @"reset"]) {
+        NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
+        NSDictionary *dictionary = [user dictionaryRepresentation];
+        for(NSString* key in [dictionary allKeys]){
+            [user removeObjectForKey:key];
+        }
+        [user synchronize];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }

@@ -109,6 +109,7 @@
     self = [super initWithCoder:coder];
     if (self) {
         self.roll = [coder decodeIntForKey:@"roll"];
+        self.guid = [coder decodeIntForKey:@"guid"];
         self.expo = [coder decodeObjectForKey:@"expo"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
@@ -122,6 +123,7 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeInt:self.roll forKey:@"roll"];
+    [coder encodeInt:self.guid forKey:@"guid"];
     if (self.expo != nil) {
         [coder encodeObject:self.expo forKey:@"expo"];
     }

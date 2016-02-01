@@ -41,6 +41,7 @@
 {
     self = [super initWithCoder:coder];
     if (self) {
+        self.guid = [coder decodeIntForKey:@"guid"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
     }
     return self;
@@ -49,6 +50,7 @@
 - (void)encodeWithCoder:(NSCoder *)coder
 {
     [super encodeWithCoder:coder];
+    [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
 }
 

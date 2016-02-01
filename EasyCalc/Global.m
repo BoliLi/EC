@@ -16,7 +16,7 @@
 
 
 NSMutableArray *gEquationList;
-int gCurEqIdx = 0;
+NSInteger gCurEqIdx = 0;
 CGFloat gBaseCharWidthTbl[3][16];
 CGFloat gExpoCharWidthTbl[3][16];
 

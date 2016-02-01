@@ -178,42 +178,64 @@
 {
     self = [super init];
     if (self) {
+        self.guid_cnt = [coder decodeIntForKey:@"guid_cnt"];
         self.root = [coder decodeObjectForKey:@"root"];
+        self.curParent = [coder decodeObjectForKey:@"curParent"];
+        self.curBlk = [coder decodeObjectForKey:@"curBlk"];
+        self.curTxtLyr = [coder decodeObjectForKey:@"curTxtLyr"];
+        self.curRoll = [coder decodeIntForKey:@"curRoll"];
+        self.curMode = [coder decodeIntForKey:@"curMode"];
         self.baseFont = [coder decodeObjectForKey:@"baseFont"];
         self.superscriptFont = [coder decodeObjectForKey:@"superscriptFont"];
+        self.curFont = [coder decodeObjectForKey:@"curFont"];
         self.baseCharWidth = [coder decodeDoubleForKey:@"baseCharWidth"];
         self.baseCharHight = [coder decodeDoubleForKey:@"baseCharHight"];
         self.expoCharWidth = [coder decodeDoubleForKey:@"expoCharWidth"];
         self.expoCharHight = [coder decodeDoubleForKey:@"expoCharHight"];
+        self.curFontH = [coder decodeDoubleForKey:@"curFontH"];
+        self.curFontW = [coder decodeDoubleForKey:@"curFontW"];
+        self.insertCIdx = [coder decodeIntegerForKey:@"insertCIdx"];
         self.view = [coder decodeObjectForKey:@"view"];
+        self.txtInsIdx = [coder decodeIntForKey:@"txtInsIdx"];
         self.downLeftBasePoint = [coder decodeCGPointForKey:@"downLeftBasePoint"];
         self.hasResult = [coder decodeBoolForKey:@"hasResult"];
         self.zoomInLvl = [coder decodeIntForKey:@"zoomInLvl"];
+        
+        [self addObserver:self forKeyPath:@"curFont" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
 }
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
+    [coder encodeInt:self.guid_cnt forKey:@"guid_cnt"];
     [coder encodeObject:self.root forKey:@"root"];
+    [coder encodeObject:self.curParent forKey:@"curParent"];
+    [coder encodeObject:self.curBlk forKey:@"curBlk"];
+    if (self.curTxtLyr != nil) {
+        [coder encodeObject:self.curTxtLyr forKey:@"curTxtLyr"];
+    }
+    [coder encodeInt:self.curRoll forKey:@"curRoll"];
+    [coder encodeInt:self.curMode forKey:@"curMode"];
     [coder encodeObject:self.baseFont forKey:@"baseFont"];
     [coder encodeObject:self.superscriptFont forKey:@"superscriptFont"];
+    [coder encodeObject:self.curFont forKey:@"curFont"];
     [coder encodeDouble:self.baseCharWidth forKey:@"baseCharWidth"];
     [coder encodeDouble:self.baseCharHight forKey:@"baseCharHight"];
     [coder encodeDouble:self.expoCharWidth forKey:@"expoCharWidth"];
     [coder encodeDouble:self.expoCharHight forKey:@"expoCharHight"];
+    [coder encodeDouble:self.curFontH forKey:@"curFontH"];
+    [coder encodeDouble:self.curFontW forKey:@"curFontW"];
+    [coder encodeInteger:self.insertCIdx forKey:@"insertCIdx"];
     [coder encodeObject:self.view forKey:@"view"];
+    [coder encodeInt:self.txtInsIdx forKey:@"txtInsIdx"];
     [coder encodeCGPoint:self.downLeftBasePoint forKey:@"downLeftBasePoint"];
     [coder encodeBool:self.hasResult forKey:@"hasResult"];
     [coder encodeInt:self.zoomInLvl forKey:@"zoomInLvl"];
 }
 
--(void) reconstruct {
-    
-}
-
 -(void) dumpObj : (EquationBlock *)parentBlock {
-    NSLog(@"%s~eBlk~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
+    NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, parentBlock, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
     NSMutableArray *blockChildren = parentBlock.children;
     NSEnumerator *enumerator = [blockChildren objectEnumerator];
     id cb;
@@ -221,17 +243,17 @@
         if ([cb isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *layer = cb;
             if (layer.expo != nil) {
-                NSLog(@"%s~Txt~id:%i~Cidx:%lu~roll:%i~with expo>>>>", __FUNCTION__, layer.guid, (unsigned long)layer.c_idx, layer.roll);
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~with expo>>>>", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll);
                 [self dumpObj:layer.expo];
-                NSLog(@"%s~Txt~id:%i~<<<<<<<<<", __FUNCTION__, layer.guid);
+                NSLog(@"%s~%@~id:%i~<<<<<<<<<", __FUNCTION__, layer, layer.guid);
             } else {
-                NSLog(@"%s~Txt~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.frame.origin.x, layer.frame.origin.y, layer.frame.size.width, layer.frame.size.height);
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.frame.origin.x, layer.frame.origin.y, layer.frame.size.width, layer.frame.size.height);
             }
         }
         
         if ([cb isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *bar = cb;
-            NSLog(@"%s~Bar~id:%i~Cidx:%lu~~~~~~~~~", __FUNCTION__, bar.guid, (unsigned long)bar.c_idx);
+            NSLog(@"%s~%@~id:%i~Cidx:%lu~~~~~~~~~", __FUNCTION__, bar, bar.guid, (unsigned long)bar.c_idx);
         }
         
         if ([cb isMemberOfClass: [EquationBlock class]]) {
@@ -241,16 +263,17 @@
         
         if ([cb isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *block = cb;
-            NSLog(@"%s~rBlk~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>>>>>", __FUNCTION__, block.guid, (unsigned long)block.c_idx, block.roll, block.frame.origin.x, block.frame.origin.y, block.frame.size.width, block.frame.size.height);
+            NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>>>>>", __FUNCTION__, block, block.guid, (unsigned long)block.c_idx, block.roll, block.frame.origin.x, block.frame.origin.y, block.frame.size.width, block.frame.size.height);
             [self dumpObj:block.content];
-            NSLog(@"%s~rBlk~%i<<<<<<", __FUNCTION__, block.guid);
+            NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, block, block.guid);
         }
     }
-    NSLog(@"%s~eBlk~%i<<<<<<", __FUNCTION__, parentBlock.guid);
+    NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, parentBlock, parentBlock.guid);
 }
 
 -(void) dumpEverything : (EquationBlock *)eb {
     [self dumpObj:eb];
+    NSLog(@"%s>~%@~%@~%@~%i~%lu~%i~~~~~", __FUNCTION__, self.curParent, self.curBlk, self.curTxtLyr, self.curMode, (unsigned long)self.insertCIdx, self.txtInsIdx);
 }
 
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point {

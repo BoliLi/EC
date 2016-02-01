@@ -49,7 +49,7 @@
 #define CURSOR_W 3.0
 
 extern NSMutableArray *gEquationList;
-extern int gCurEqIdx;
+extern NSInteger gCurEqIdx;
 extern CGFloat gBaseCharWidthTbl[3][16];
 extern CGFloat gExpoCharWidthTbl[3][16];
 

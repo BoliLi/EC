@@ -78,6 +78,7 @@
         self.numerFrame = [coder decodeCGRectForKey:@"numerFrame"];
         self.denomFrame = [coder decodeCGRectForKey:@"denomFrame"];
         self.bar = [coder decodeObjectForKey:@"bar"];
+        self.guid = [coder decodeIntForKey:@"guid"];
         self.roll = [coder decodeIntForKey:@"roll"];
         self.numerTopHalf = [coder decodeDoubleForKey:@"numerTopHalf"];
         self.numerBtmHalf = [coder decodeDoubleForKey:@"numerBtmHalf"];
@@ -97,6 +98,7 @@
     if (self.bar != nil) {
         [coder encodeObject:self.bar forKey:@"bar"];
     }
+    [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.roll forKey:@"roll"];
     [coder encodeDouble:self.numerTopHalf forKey:@"numerTopHalf"];
     [coder encodeDouble:self.numerBtmHalf forKey:@"numerBtmHalf"];
@@ -105,7 +107,7 @@
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
 }
 
--(void) reorganize : (int *)uid : (Equation *)anc : (ViewController *)vc {
+-(void) reorganize : (Equation *)anc : (ViewController *)vc {
     if (self.roll == ROLL_ROOT) {
         self.parent = nil;
     }
@@ -114,24 +116,22 @@
     for (id b in self.children) {
         if ([b isMemberOfClass:[EquationBlock class]]) {
             EquationBlock *eb = b;
-            eb.guid = (*uid)++;
+            NSLog(@"%s%i>~%p~~~~~~~~~~", __FUNCTION__, __LINE__, eb.bar);
             eb.c_idx = cidx++;
             eb.parent = self;
             eb.ancestor = anc;
-            [eb reorganize:uid :anc :vc];
+            [eb reorganize:anc :vc];
         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
             EquationTextLayer *l = b;
-            l.guid = (*uid)++;
             l.c_idx = cidx++;
             l.parent = self;
             l.ancestor = anc;
             [anc.view.layer addSublayer:l];
             if (l.expo != nil) {
-                [l.expo reorganize:uid :anc :vc];
+                [l.expo reorganize:anc :vc];
             }
         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
             RadicalBlock *rb = b;
-            rb.guid = (*uid)++;
             rb.c_idx = cidx++;
             rb.parent = self;
             rb.ancestor = anc;
@@ -143,10 +143,10 @@
                 [anc.view.layer addSublayer: rb.rootNum];
             }
             
-            [rb.content reorganize:uid :anc :vc];
+            [rb.content reorganize:anc :vc];
         } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
             FractionBarLayer *fb = b;
-            fb.guid = (*uid)++;
+            NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, fb);
             fb.c_idx = cidx++;
             fb.parent = self;
             fb.ancestor = anc;
