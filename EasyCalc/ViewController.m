@@ -307,7 +307,7 @@ static UIView *testview;
     [secondKbView addGestureRecognizer:right];
     
     buttonFont = [UIFont systemFontOfSize: 30];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 25; i++) {
@@ -2153,6 +2153,43 @@ static UIView *testview;
     
 }
 
+- (void)handleCleanBtnClick {
+    [E.root destroy];
+    E.guid_cnt = 0;
+    E.zoomInLvl = 0;
+    E.baseFont = [UIFont systemFontOfSize: getBaseFontSize(E.zoomInLvl)];
+    E.superscriptFont = [UIFont systemFontOfSize:getBaseFontSize(E.zoomInLvl) / 2.0];
+    
+    E.baseCharWidth = gBaseCharWidthTbl[E.zoomInLvl][8];
+    E.baseCharHight = E.baseFont.lineHeight;
+    
+    E.expoCharWidth = gExpoCharWidthTbl[E.zoomInLvl][8];
+    E.expoCharHight = E.superscriptFont.lineHeight;
+
+    E.curFont = E.baseFont;
+
+    CGPoint rootPos = CGPointMake(E.downLeft.x, E.downLeft.y - E.baseCharHight - 1.0);
+    E.view.cursor.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, E.baseCharHight);
+    E.inpOrg = E.view.cursor.frame.origin;
+
+    E.root = [[EquationBlock alloc] init:rootPos :E];
+    E.root.roll = ROLL_ROOT;
+    E.root.parent = nil;
+    E.root.ancestor = E;
+    E.curParent = E.root;
+
+    EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :rootPos :E :TEXTLAYER_EMPTY];
+    layer.parent = E.root;
+    E.root.numerFrame = layer.frame;
+    E.root.mainFrame = layer.frame;
+    
+    layer.c_idx = 0;
+    [E.root.children addObject:layer];
+    [E.view.layer addSublayer:layer];
+    E.curTxtLyr = layer;
+    E.curBlk = layer;
+}
+
 -(void)btnClicked: (UIButton *)btn {
     
     if([[btn currentTitle]  isEqual: @"DUMP"]) {
@@ -2248,6 +2285,8 @@ static UIView *testview;
             [user removeObjectForKey:key];
         }
         [user synchronize];
+    } else if([[btn currentTitle]  isEqual: @"C"]) {
+        [self handleCleanBtnClick];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
