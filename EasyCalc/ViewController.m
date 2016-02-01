@@ -2168,9 +2168,9 @@ static UIView *testview;
 
     E.curFont = E.baseFont;
 
-    CGPoint rootPos = CGPointMake(E.downLeft.x, E.downLeft.y - E.baseCharHight - 1.0);
+    CGPoint rootPos = CGPointMake(E.downLeftBasePoint.x, E.downLeftBasePoint.y - E.baseCharHight - 1.0);
     E.view.cursor.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, E.baseCharHight);
-    E.inpOrg = E.view.cursor.frame.origin;
+    E.view.inpOrg = E.view.cursor.frame.origin;
 
     E.root = [[EquationBlock alloc] init:rootPos :E];
     E.root.roll = ROLL_ROOT;
