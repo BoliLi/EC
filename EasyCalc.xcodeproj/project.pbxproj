@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A93F7CB21C62579900B994B4 /* WrapedEqTxtLyr.m in Sources */ = {isa = PBXBuildFile; fileRef = A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */; };
 		A94F42981C5DC5E5008F8EF5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A94F42961C5DC5E5008F8EF5 /* LaunchScreen.storyboard */; };
 		A9589E2C1C13E847007F2C8B /* UIView+Easing.m in Sources */ = {isa = PBXBuildFile; fileRef = A9589E2B1C13E847007F2C8B /* UIView+Easing.m */; };
 		A96222F11BFF0F690059FF51 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = A96222F01BFF0F690059FF51 /* main.m */; };
@@ -66,6 +67,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A93F7CB01C62579900B994B4 /* WrapedEqTxtLyr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrapedEqTxtLyr.h; sourceTree = "<group>"; };
+		A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrapedEqTxtLyr.m; sourceTree = "<group>"; };
 		A94F42971C5DC5E5008F8EF5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		A9589E2A1C13E847007F2C8B /* UIView+Easing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIView+Easing.h"; sourceTree = "<group>"; };
 		A9589E2B1C13E847007F2C8B /* UIView+Easing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIView+Easing.m"; sourceTree = "<group>"; };
@@ -225,6 +228,8 @@
 				A96223351BFF161C0059FF51 /* DisplayView.m */,
 				A98122781C021F47002A1A75 /* Utils.m */,
 				A981227A1C021F5A002A1A75 /* Utils.h */,
+				A93F7CB01C62579900B994B4 /* WrapedEqTxtLyr.h */,
+				A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */,
 			);
 			path = EasyCalc;
 			sourceTree = "<group>";
@@ -476,6 +481,7 @@
 				A96222F71BFF0F690059FF51 /* EasyCalc.xcdatamodeld in Sources */,
 				A997B67C1C4D1D3F00DD2C31 /* _DDRewriteRule.m in Sources */,
 				A997B6771C4D1D3F00DD2C31 /* _DDFunctionExpression.m in Sources */,
+				A93F7CB21C62579900B994B4 /* WrapedEqTxtLyr.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

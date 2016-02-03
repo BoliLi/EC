@@ -17,6 +17,7 @@
 
 NSMutableArray *gEquationList;
 NSInteger gCurEqIdx = 0;
+Equation *gCurE;
 CGFloat gBaseCharWidthTbl[3][16];
 CGFloat gExpoCharWidthTbl[3][16];
 
@@ -95,32 +96,26 @@ void initCharWidthTbl(void) {
         }
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"+"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"-"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"×"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"("];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@")"];
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gExpoCharWidthTbl[j][i++] = [attStr size].width;
         

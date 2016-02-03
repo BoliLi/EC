@@ -50,6 +50,7 @@
 
 extern NSMutableArray *gEquationList;
 extern NSInteger gCurEqIdx;
+extern Equation *gCurE;
 extern CGFloat gBaseCharWidthTbl[3][16];
 extern CGFloat gExpoCharWidthTbl[3][16];
 

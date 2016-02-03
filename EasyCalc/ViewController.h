@@ -15,13 +15,11 @@
 @class RadicalBlock;
 
 @interface ViewController : UIViewController
-@property UIFont *buttonFont;
 @property UIView *dspConView;
 @property UIView *mainKbView;
 @property UIView *secondKbView;
 @property UIView *kbConView;
 @property CALayer *borderLayer;
-@property Equation *E;
 @property CGFloat scnWidth;
 @property CGFloat scnHeight;
 @property CGFloat statusBarHeight;
