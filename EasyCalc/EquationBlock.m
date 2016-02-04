@@ -12,6 +12,7 @@
 #import "EquationTextLayer.h"
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
+#import "WrapedEqTxtLyr.h"
 
 @implementation EquationBlock
 @synthesize children;

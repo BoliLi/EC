@@ -6,8 +6,24 @@
 //  Copyright © 2016年 LiBoli. All rights reserved.
 //
 
-#import "EquationTextLayer.h"
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <QuartzCore/QuartzCore.h>
 
-@interface WrapedEqTxtLyr : EquationTextLayer
+@class EquationBlock;
+@class Equation;
 
+@interface WrapedEqTxtLyr : NSObject <NSCoding, NSCopying>
+@property (weak) id parent;
+@property (weak) Equation *ancestor;
+@property int guid;
+@property NSUInteger c_idx;
+@property int roll;
+@property CATextLayer *prefix;
+@property EquationBlock *content;
+@property CATextLayer *suffix;
+@property CGRect mainFrame;
+@property int is_base_expo;
+
+-(id) init : (NSString *)str : (CGPoint)inputPos : (Equation *)E;
 @end
