@@ -23,6 +23,7 @@
 #define ROLL_DENOMINATOR 2
 #define ROLL_ROOT_ROOT 3
 #define ROLL_EXPO_ROOT 4
+#define ROLL_WRAP_ROOT 5
 
 #define IS_BASE 0
 #define IS_EXPO 1
@@ -39,6 +40,7 @@
 #define MODE_DUMP_ROOT 2
 #define MODE_DUMP_RADICAL 3
 #define MODE_DUMP_EXPO 4
+#define MODE_DUMP_WETL 5
 #define RADICAL_MARGINE_T 3.0
 #define RADICAL_MARGINE_B 1.0
 #define RADICAL_MARGINE_L_PERC 0.502

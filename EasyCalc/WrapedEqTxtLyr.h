@@ -26,4 +26,5 @@
 @property int is_base_expo;
 
 -(id) init : (NSString *)str : (CGPoint)inputPos : (Equation *)E;
+-(void) destroy;
 @end

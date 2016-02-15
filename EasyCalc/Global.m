@@ -13,6 +13,7 @@
 #import "EquationTextLayer.h"
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
+#import "WrapedEqTxtLyr.h"
 
 
 NSMutableArray *gEquationList;
@@ -291,6 +292,18 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
             [layer setNeedsDisplay];
             
             drawFrame(vc, view, block.content);
+        }
+        
+        if ([cb isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = cb;
+            CALayer *layer = [CALayer layer];
+            layer.contentsScale = [UIScreen mainScreen].scale;
+            layer.name = @"drawframe";
+            layer.backgroundColor = [UIColor clearColor].CGColor;
+            layer.frame = wetl.mainFrame;
+            layer.delegate = vc;
+            [view.layer addSublayer: layer];
+            [layer setNeedsDisplay];
         }
     }
 }

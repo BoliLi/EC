@@ -154,6 +154,15 @@
             fb.delegate = vc;
             [anc.view.layer addSublayer: fb];
             [fb setNeedsDisplay];
+        } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            wetl.c_idx = cidx++;
+            wetl.parent = self;
+            wetl.ancestor = anc;
+            [anc.view.layer addSublayer: wetl.prefix];
+            [anc.view.layer addSublayer: wetl.suffix];
+            
+            [wetl.content reorganize:anc :vc];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -270,6 +279,14 @@
                 if ((int)orgWidth1 != (int)layer.mainFrame.size.width) {
                     [layer.parent updateFrameWidth:layer.mainFrame.size.width - orgWidth1 :layer.roll];
                 }
+            } else if([block isMemberOfClass:[WrapedEqTxtLyr class]]) {
+                WrapedEqTxtLyr *wetl = block;
+                CGFloat orgWidth1 = wetl.mainFrame.size.width;
+                CGFloat newMW = wetl.prefix.frame.size.width + wetl.content.mainFrame.size.width + wetl.suffix.frame.size.width;
+                wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newMW, wetl.mainFrame.size.height);
+                if ((int)orgWidth1 != (int)wetl.mainFrame.size.width) {
+                    [wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgWidth1 :wetl.roll];
+                }
             } else
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -361,6 +378,14 @@
                 self.numerBtmHalf = btm;
         } else if([b isMemberOfClass:[FractionBarLayer class]]) {
             break;
+        } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            CGFloat newH = wetl.mainFrame.size.height;
+            if ((int)self.numerTopHalf < (int)(newH / 2.0))
+                self.numerTopHalf = newH / 2.0;
+            
+            if ((int)self.numerBtmHalf < (int)(newH / 2.0))
+                self.numerBtmHalf = newH / 2.0;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -402,6 +427,14 @@
                 self.denomBtmHalf = btm;
         } else if([b isMemberOfClass:[FractionBarLayer class]]) {
             break;
+        } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            CGFloat newH = wetl.mainFrame.size.height;
+            if ((int)self.numerTopHalf < (int)(newH / 2.0))
+                self.numerTopHalf = newH / 2.0;
+            
+            if ((int)self.numerBtmHalf < (int)(newH / 2.0))
+                self.numerBtmHalf = newH / 2.0;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -451,6 +484,19 @@
             }
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    } else if([child isMemberOfClass:[WrapedEqTxtLyr class]]) {
+        WrapedEqTxtLyr *wetl = child;
+        int r = wetl.roll;
+        if (r == ROLL_NUMERATOR) {
+            if ([self updateNumerTB]) {
+                [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
+            }
+        } else if (r == ROLL_DENOMINATOR) {
+            if ([self updateDenomTB]) {
+                [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
+            }
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     
@@ -476,6 +522,14 @@
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
+        } else if([self.parent isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = self.parent;
+            wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, wetl.mainFrame.size.width, self.mainFrame.size.height);
+            if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
+                [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -496,6 +550,9 @@
             b.c_idx = cnt++;
         } else if ([block isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *b = block;
+            b.c_idx = cnt++;
+        } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *b = block;
             b.c_idx = cnt++;
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -534,6 +591,11 @@
             if (rb.rootNum != nil) {
                 rb.rootNum.frame = CGRectOffset(rb.rootNum.frame, 0.0, -distance);
             }
+        } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = block;
+            wetl.prefix.frame = CGRectOffset(wetl.prefix.frame, 0.0, -distance);
+            [wetl.content moveUp:distance];
+            wetl.suffix.frame = CGRectOffset(wetl.suffix.frame, 0.0, -distance);
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -682,6 +744,63 @@
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
+        } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = block;
+            
+            CTFontRef ctFont;
+            if (wetl.is_base_expo == IS_BASE) {
+                ctFont = CTFontCreateWithName((CFStringRef)E.baseFont.fontName, E.baseFont.pointSize, NULL);
+            } else {
+                ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
+            }
+            
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.prefix.string string]];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+            
+            CGRect f = wetl.prefix.frame;
+            f.size = [attStr size];
+            wetl.prefix.frame = f;
+            
+            wetl.prefix.string = attStr;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.suffix.string string]];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+            
+            f = wetl.suffix.frame;
+            f.size = [attStr size];
+            wetl.suffix.frame = f;
+            
+            wetl.suffix.string = attStr;
+            
+            CFRelease(ctFont);
+            
+            [wetl.content updateElementSize:E];
+            
+            CGFloat newW = wetl.prefix.frame.size.width + wetl.content.mainFrame.size.width + wetl.suffix.frame.size.width;
+            CGFloat newH = wetl.prefix.frame.size.height + wetl.content.mainFrame.size.height + wetl.suffix.frame.size.height;
+            wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+            
+            CGFloat top = wetl.mainFrame.size.height / 2.0;
+            CGFloat btm = wetl.mainFrame.size.height / 2.0;
+            if (wetl.roll == ROLL_NUMERATOR) {
+                if ((int)nTop < (int)top)
+                    nTop = top;
+                
+                if ((int)nBtm < (int)btm)
+                    nBtm = btm;
+                
+                nWidth += wetl.mainFrame.size.width;
+            } else if (wetl.roll == ROLL_DENOMINATOR) {
+                if ((int)dTop < (int)top)
+                    dTop = top;
+                
+                if ((int)dBtm < (int)btm)
+                    dBtm = btm;
+                
+                dWidth += wetl.mainFrame.size.width;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -806,6 +925,49 @@
             block.content.mainFrame = mainF;
             
             [block.content adjustElementPosition];
+        } else if ([cb isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = cb;
+            
+            if (wetl.roll == ROLL_NUMERATOR) {
+                CGRect f = wetl.prefix.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.prefix.frame.size.height / 2.0);
+                f.origin.x = curNumX;
+                wetl.prefix.frame = f;
+                curNumX += f.size.width;
+                
+                f = wetl.content.mainFrame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.content.mainFrame.size.height / 2.0);
+                f.origin.x = curNumX;
+                wetl.content.mainFrame = f;
+                curNumX += f.size.width;
+                [wetl.content adjustElementPosition];
+                
+                f = wetl.suffix.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.suffix.frame.size.height / 2.0);
+                f.origin.x = curNumX;
+                wetl.suffix.frame = f;
+                curNumX += f.size.width;
+            } else if (wetl.roll == ROLL_DENOMINATOR) {
+                CGRect f = wetl.prefix.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.prefix.frame.size.height / 2.0);
+                f.origin.x = curDenX;
+                wetl.prefix.frame = f;
+                curDenX += f.size.width;
+                
+                f = wetl.content.mainFrame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.content.mainFrame.size.height / 2.0);
+                f.origin.x = curDenX;
+                wetl.content.mainFrame = f;
+                curDenX += f.size.width;
+                [wetl.content adjustElementPosition];
+                
+                f = wetl.suffix.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.suffix.frame.size.height / 2.0);
+                f.origin.x = curDenX;
+                wetl.suffix.frame = f;
+                curDenX += f.size.width;
+            } else
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -826,6 +988,9 @@
         } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
             FractionBarLayer *fb = b;
             [fb destroy];
+        } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            [wetl destroy];
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
