@@ -430,11 +430,11 @@
         } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = b;
             CGFloat newH = wetl.mainFrame.size.height;
-            if ((int)self.numerTopHalf < (int)(newH / 2.0))
-                self.numerTopHalf = newH / 2.0;
+            if ((int)self.denomTopHalf < (int)(newH / 2.0))
+                self.denomTopHalf = newH / 2.0;
             
-            if ((int)self.numerBtmHalf < (int)(newH / 2.0))
-                self.numerBtmHalf = newH / 2.0;
+            if ((int)self.denomBtmHalf < (int)(newH / 2.0))
+                self.denomBtmHalf = newH / 2.0;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -777,7 +777,7 @@
             [wetl.content updateElementSize:E];
             
             CGFloat newW = wetl.prefix.frame.size.width + wetl.content.mainFrame.size.width + wetl.suffix.frame.size.width;
-            CGFloat newH = wetl.prefix.frame.size.height + wetl.content.mainFrame.size.height + wetl.suffix.frame.size.height;
+            CGFloat newH = wetl.content.mainFrame.size.height;
             wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
             
             CGFloat top = wetl.mainFrame.size.height / 2.0;
@@ -929,7 +929,12 @@
             WrapedEqTxtLyr *wetl = cb;
             
             if (wetl.roll == ROLL_NUMERATOR) {
-                CGRect f = wetl.prefix.frame;
+                CGRect f = wetl.mainFrame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.mainFrame.size.height / 2.0);
+                f.origin.x = curNumX;
+                wetl.mainFrame = f;
+                
+                f = wetl.prefix.frame;
                 f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.prefix.frame.size.height / 2.0);
                 f.origin.x = curNumX;
                 wetl.prefix.frame = f;
@@ -948,7 +953,12 @@
                 wetl.suffix.frame = f;
                 curNumX += f.size.width;
             } else if (wetl.roll == ROLL_DENOMINATOR) {
-                CGRect f = wetl.prefix.frame;
+                CGRect f = wetl.mainFrame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.mainFrame.size.height / 2.0);
+                f.origin.x = curDenX;
+                wetl.mainFrame = f;
+                
+                f = wetl.prefix.frame;
                 f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.prefix.frame.size.height / 2.0);
                 f.origin.x = curDenX;
                 wetl.prefix.frame = f;

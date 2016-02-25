@@ -25,6 +25,9 @@
 #define ROLL_EXPO_ROOT 4
 #define ROLL_WRAP_ROOT 5
 
+#define LEFT_PARENTH 0
+#define RIGHT_PARENTH 1
+
 #define IS_BASE 0
 #define IS_EXPO 1
 

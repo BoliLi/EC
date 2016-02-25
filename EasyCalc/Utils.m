@@ -708,7 +708,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         
         id lastBlock = [((EquationBlock *)wetl.parent).children lastObject];
         if ([lastBlock isMemberOfClass: [WrapedEqTxtLyr class]] && wetl == (WrapedEqTxtLyr *)lastBlock) {
-            if (CGRectContainsPoint(wetl.prefix.frame, curPoint)) {
+            if (curPoint.x >= wetl.prefix.frame.origin.x && curPoint.x < wetl.prefix.frame.origin.x + wetl.prefix.frame.size.width) {
                 if (curPoint.x < wetl.prefix.frame.origin.x + wetl.prefix.frame.size.width / 2.0) {
                     e.curMode = MODE_INSERT;
                     e.insertCIdx = wetl.c_idx;
@@ -782,7 +782,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         }
                     }
                 }
-            } else if (CGRectContainsPoint(wetl.suffix.frame, curPoint)) {
+            } else if (curPoint.x >= wetl.suffix.frame.origin.x && curPoint.x < wetl.suffix.frame.origin.x + wetl.suffix.frame.size.width) {
                 if (curPoint.x < wetl.suffix.frame.origin.x + wetl.suffix.frame.size.width / 2.0) {
                     if (wetl.content.bar != nil) {
                         e.curMode = MODE_DUMP_WETL;
@@ -864,7 +864,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
         } else {
-            if (CGRectContainsPoint(wetl.prefix.frame, curPoint)) {
+            if (curPoint.x >= wetl.prefix.frame.origin.x && curPoint.x < wetl.prefix.frame.origin.x + wetl.prefix.frame.size.width) {
                 if (curPoint.x < wetl.prefix.frame.origin.x + wetl.prefix.frame.size.width / 2.0) {
                     e.curMode = MODE_INSERT;
                     e.insertCIdx = wetl.c_idx;
@@ -938,7 +938,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         }
                     }
                 }
-            } else if (CGRectContainsPoint(wetl.suffix.frame, curPoint)) {
+            } else if (curPoint.x >= wetl.suffix.frame.origin.x && curPoint.x < wetl.suffix.frame.origin.x + wetl.suffix.frame.size.width) {
                 if (curPoint.x < wetl.suffix.frame.origin.x + wetl.suffix.frame.size.width / 2.0) {
                     if (wetl.content.bar != nil) {
                         e.curMode = MODE_DUMP_WETL;

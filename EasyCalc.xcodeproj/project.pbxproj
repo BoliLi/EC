@@ -25,6 +25,7 @@
 		A96223321BFF15840059FF51 /* Global.m in Sources */ = {isa = PBXBuildFile; fileRef = A96223311BFF15840059FF51 /* Global.m */; };
 		A96223361BFF161C0059FF51 /* DisplayView.m in Sources */ = {isa = PBXBuildFile; fileRef = A96223351BFF161C0059FF51 /* DisplayView.m */; };
 		A98122791C021F47002A1A75 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = A98122781C021F47002A1A75 /* Utils.m */; };
+		A98556551C7F270300B8103C /* Parentheses.m in Sources */ = {isa = PBXBuildFile; fileRef = A98556541C7F270300B8103C /* Parentheses.m */; };
 		A997B6751C4D1D3F00DD2C31 /* _DDDecimalFunctions.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6471C4D1D3F00DD2C31 /* _DDDecimalFunctions.m */; };
 		A997B6761C4D1D3F00DD2C31 /* _DDFunctionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6491C4D1D3F00DD2C31 /* _DDFunctionEvaluator.m */; };
 		A997B6771C4D1D3F00DD2C31 /* _DDFunctionExpression.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B64B1C4D1D3F00DD2C31 /* _DDFunctionExpression.m */; };
@@ -103,6 +104,8 @@
 		A96223351BFF161C0059FF51 /* DisplayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DisplayView.m; sourceTree = "<group>"; };
 		A98122781C021F47002A1A75 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utils.m; sourceTree = "<group>"; };
 		A981227A1C021F5A002A1A75 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
+		A98556531C7F270300B8103C /* Parentheses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Parentheses.h; sourceTree = "<group>"; };
+		A98556541C7F270300B8103C /* Parentheses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Parentheses.m; sourceTree = "<group>"; };
 		A997B6461C4D1D3F00DD2C31 /* _DDDecimalFunctions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _DDDecimalFunctions.h; sourceTree = "<group>"; };
 		A997B6471C4D1D3F00DD2C31 /* _DDDecimalFunctions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _DDDecimalFunctions.m; sourceTree = "<group>"; };
 		A997B6481C4D1D3F00DD2C31 /* _DDFunctionEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _DDFunctionEvaluator.h; sourceTree = "<group>"; };
@@ -230,6 +233,8 @@
 				A981227A1C021F5A002A1A75 /* Utils.h */,
 				A93F7CB01C62579900B994B4 /* WrapedEqTxtLyr.h */,
 				A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */,
+				A98556531C7F270300B8103C /* Parentheses.h */,
+				A98556541C7F270300B8103C /* Parentheses.m */,
 			);
 			path = EasyCalc;
 			sourceTree = "<group>";
@@ -472,6 +477,7 @@
 				A96223271BFF124B0059FF51 /* FractionBarLayer.m in Sources */,
 				A96223361BFF161C0059FF51 /* DisplayView.m in Sources */,
 				A997B67A1C4D1D3F00DD2C31 /* _DDParserTerm.m in Sources */,
+				A98556551C7F270300B8103C /* Parentheses.m in Sources */,
 				A997B6751C4D1D3F00DD2C31 /* _DDDecimalFunctions.m in Sources */,
 				A997B6871C4D1D3F00DD2C31 /* DDMathTokenizer.m in Sources */,
 				A997B6811C4D1D3F00DD2C31 /* DDMathEvaluator.m in Sources */,

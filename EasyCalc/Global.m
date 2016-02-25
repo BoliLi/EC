@@ -304,6 +304,8 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
             layer.delegate = vc;
             [view.layer addSublayer: layer];
             [layer setNeedsDisplay];
+            
+            drawFrame(vc, view, wetl.content);
         }
     }
 }

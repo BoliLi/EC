@@ -16,7 +16,7 @@
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
-
+#import "Parentheses.h"
 
 static UIView *testview;
 
@@ -339,7 +339,11 @@ static UIView *testview;
 - (void)foreGroundInit: (Equation *)firstE {
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     NSString *ver = [user stringForKey:@"version"];
+#if 0
     if (ver != nil) {
+#else
+    if (0) {
+#endif
         for (int i = 0; i < 16; i++) {
             if (i == gCurEqIdx) {
                 [gEquationList addObject:firstE];
@@ -396,7 +400,7 @@ static UIView *testview;
     [secondKbView addGestureRecognizer:right];
     
     UIFont *buttonFont = [UIFont systemFontOfSize: 30];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"COS", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 25; i++) {
@@ -433,7 +437,11 @@ static UIView *testview;
     
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     NSString *ver = [user stringForKey:@"version"];
+#if 0
     if (ver != nil) {
+#else
+    if (0) {
+#endif
         NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
         gCurEqIdx = [user integerForKey:@"gCurEqIdx"];
         gCurE = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:[NSString stringWithFormat: @"equation%li", (long)gCurEqIdx]]];
@@ -1341,7 +1349,7 @@ static UIView *testview;
                 id block = [eBlock.children objectAtIndex:i];
                 if ([block isMemberOfClass: [EquationTextLayer class]]) {
                     EquationTextLayer *layer = block;
-                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && parenCnt == 0) {
+                    if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && parenCnt <= 0) {
                         tmp = 1;
                         break;
                     }
@@ -1397,6 +1405,21 @@ static UIView *testview;
                     }
                     b.parent = newBlock;
                     [newBlock.children addObject:b];
+                } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
+                    WrapedEqTxtLyr *wetl = block;
+                    wetl.roll = ROLL_NUMERATOR;
+                    frameW += wetl.mainFrame.size.width;
+                    frameX = wetl.mainFrame.origin.x;
+                    if (newNumerTop < wetl.mainFrame.size.height / 2.0) {
+                        newNumerTop = wetl.mainFrame.size.height / 2.0;
+                        frameY = wetl.mainFrame.origin.y;
+                    }
+                    
+                    if (newNumerBtm < wetl.mainFrame.size.height / 2.0) {
+                        newNumerBtm = wetl.mainFrame.size.height / 2.0;
+                    }
+                    wetl.parent = newBlock;
+                    [newBlock.children addObject:wetl];
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
@@ -1452,6 +1475,14 @@ static UIView *testview;
                     }
                 } else if ([eBlock.parent isMemberOfClass: [EquationBlock class]]) {
                     [(EquationBlock *)eBlock.parent updateFrameHeightS1:eBlock];
+                } else if ([eBlock.parent isMemberOfClass: [WrapedEqTxtLyr class]]) {
+                    WrapedEqTxtLyr *wetl = eBlock.parent;
+                    wetl.mainFrame = CGRectMake(wetl.prefix.frame.origin.x, eBlock.mainFrame.origin.y, wetl.mainFrame.size.width, eBlock.mainFrame.size.height);
+                    if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
+                        [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+                    } else {
+                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    }
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
@@ -1571,6 +1602,45 @@ static UIView *testview;
             
             gCurE.curParent = newExpo;
             gCurE.curMode = MODE_INPUT;
+        } else if(gCurE.curMode == MODE_DUMP_WETL) {
+            CGFloat frameW = 0.0;
+            CGFloat frameH = 0.0;
+            CGFloat frameX = 0.0;
+            CGFloat frameY = 0.0;
+            WrapedEqTxtLyr *wetl = gCurE.curParent;
+            EquationBlock *orgWrapRoot = wetl.content;
+            EquationBlock *newWrapRoot = [[EquationBlock alloc] init:gCurE];
+            orgWrapRoot.roll = ROLL_NUMERATOR;
+            newWrapRoot.roll = ROLL_WRAP_ROOT;
+            newWrapRoot.parent = wetl;
+            
+            frameX = orgWrapRoot.mainFrame.origin.x;
+            frameY = orgWrapRoot.mainFrame.origin.y - gCurE.curFontH;
+            frameW = orgWrapRoot.mainFrame.size.width;
+            frameH = orgWrapRoot.mainFrame.size.height;
+            
+            newWrapRoot.numerFrame = CGRectMake(frameX, frameY, frameW, frameH);
+            newWrapRoot.numerTopHalf = frameH / 2.0;
+            newWrapRoot.numerBtmHalf = frameH / 2.0;
+            newWrapRoot.denomFrame = CGRectMake(frameX, frameY + frameH, 0, gCurE.curFontH); //Make an empty denominator frame
+            newWrapRoot.denomTopHalf = gCurE.curFontH / 2.0;
+            newWrapRoot.denomBtmHalf = gCurE.curFontH / 2.0;
+            newWrapRoot.mainFrame = CGRectUnion(newWrapRoot.numerFrame, newWrapRoot.denomFrame);
+            
+            orgWrapRoot.mainFrame = newWrapRoot.numerFrame;
+            orgWrapRoot.c_idx = 0;
+            orgWrapRoot.parent = newWrapRoot;
+            [newWrapRoot.children addObject: orgWrapRoot];
+            
+            wetl.content = newWrapRoot;
+            wetl.mainFrame = CGRectMake(wetl.prefix.frame.origin.x, newWrapRoot.mainFrame.origin.y, wetl.mainFrame.size.width, newWrapRoot.mainFrame.size.height);
+            if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
+                [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+            gCurE.curParent = newWrapRoot;
+            gCurE.curMode = MODE_INPUT;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -1613,7 +1683,7 @@ static UIView *testview;
         gCurE.txtInsIdx = 0;
         gCurE.curTxtLyr = layer;
         gCurE.curBlk = layer;
-        
+        [gCurE dumpEverything:gCurE.root];
         [gCurE.root adjustElementPosition];
         
         /* Move cursor */
@@ -1769,6 +1839,35 @@ static UIView *testview;
         
         layer.expo = newExpo;
         gCurE.curParent = newExpo;
+    } else if(gCurE.curMode == MODE_DUMP_WETL) {
+        WrapedEqTxtLyr *wetl = gCurE.curParent;
+        EquationBlock *orgWrapRoot = wetl.content;
+        EquationBlock *newWrapRoot = [[EquationBlock alloc] init:gCurE];
+        newWrapRoot.roll = ROLL_ROOT_ROOT;
+        newWrapRoot.parent = wetl;
+        newWrapRoot.numerFrame = orgWrapRoot.mainFrame;
+        newWrapRoot.numerTopHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.numerBtmHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.mainFrame = newWrapRoot.numerFrame;
+        orgWrapRoot.roll = ROLL_NUMERATOR;
+        orgWrapRoot.parent = newWrapRoot;
+        
+        if (gCurE.insertCIdx == 0) {
+            orgWrapRoot.c_idx = 1;
+            newRBlock.c_idx = 0;
+            [newWrapRoot.children addObject:newRBlock];
+            [newWrapRoot.children addObject:orgWrapRoot];
+            gCurE.curMode = MODE_INSERT;
+        } else {
+            orgWrapRoot.c_idx = 0;
+            [newWrapRoot.children addObject:orgWrapRoot];
+            newRBlock.c_idx = 1;
+            [newWrapRoot.children addObject:newRBlock];
+            gCurE.curMode = MODE_INPUT;
+        }
+        
+        wetl.content = newWrapRoot;
+        gCurE.curParent = newWrapRoot;
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -1902,6 +2001,35 @@ static UIView *testview;
             
             rBlock.content = newRootRoot;
             gCurE.curParent = newRootRoot;
+        } else if(gCurE.curMode == MODE_DUMP_WETL) {
+            WrapedEqTxtLyr *wetl = gCurE.curParent;
+            EquationBlock *orgWrapRoot = wetl.content;
+            EquationBlock *newWrapRoot = [[EquationBlock alloc] init:gCurE];
+            newWrapRoot.roll = ROLL_WRAP_ROOT;
+            newWrapRoot.parent = wetl;
+            newWrapRoot.numerFrame = orgWrapRoot.mainFrame;
+            newWrapRoot.numerTopHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+            newWrapRoot.numerBtmHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+            newWrapRoot.mainFrame = newWrapRoot.numerFrame;
+            orgWrapRoot.roll = ROLL_NUMERATOR;
+            orgWrapRoot.parent = newWrapRoot;
+            
+            if (gCurE.insertCIdx == 0) {
+                baseLayer.c_idx = 0;
+                [newWrapRoot.children addObject:baseLayer];
+                orgWrapRoot.c_idx = 1;
+                [newWrapRoot.children addObject:orgWrapRoot];
+                gCurE.curMode = MODE_INSERT;
+            } else {
+                orgWrapRoot.c_idx = 0;
+                [newWrapRoot.children addObject:orgWrapRoot];
+                baseLayer.c_idx = 1;
+                [newWrapRoot.children addObject:baseLayer];
+                gCurE.curMode = MODE_INPUT;
+            }
+            
+            wetl.content = newWrapRoot;
+            gCurE.curParent = newWrapRoot;
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         
@@ -1975,7 +2103,7 @@ static UIView *testview;
     }
 }
 
-- (void)handleParenthBtnClick : (NSString *)parenth {
+- (void)handleParenthBtnClick : (int)l_r {
     CGFloat incrWidth = 0.0;
     
     if (gCurE.curTxtLyr != nil && gCurE.curTxtLyr.type == TEXTLAYER_EMPTY) {
@@ -2003,18 +2131,18 @@ static UIView *testview;
         }
     }
 
-    EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:parenth :gCurE.view.inpOrg :gCurE :TEXTLAYER_PARENTH];
-    incrWidth += tLayer.frame.size.width;
+    Parentheses *parenth = [[Parentheses alloc] init:gCurE.view.inpOrg :gCurE :l_r];
+    incrWidth += parenth.frame.size.width;
     if(gCurE.curMode == MODE_INPUT) {
         EquationBlock *block = gCurE.curParent;
         
-        tLayer.c_idx = block.children.count;
-        [block.children addObject:tLayer];
+        parenth.c_idx = block.children.count;
+        [block.children addObject:parenth];
     } else if(gCurE.curMode == MODE_INSERT) {
         EquationBlock *block = gCurE.curParent;
         
-        tLayer.c_idx = gCurE.insertCIdx;
-        [block.children insertObject:tLayer atIndex:tLayer.c_idx];
+        parenth.c_idx = gCurE.insertCIdx;
+        [block.children insertObject:parenth atIndex:parenth.c_idx];
         /*Update c_idx*/
         [block updateCIdx];
     } else if(gCurE.curMode == MODE_DUMP_ROOT) {
@@ -2029,16 +2157,16 @@ static UIView *testview;
         gCurE.root.parent = newRoot;
         
         if (gCurE.insertCIdx == 0) {
-            tLayer.c_idx = 0;
-            [newRoot.children addObject:tLayer];
+            parenth.c_idx = 0;
+            [newRoot.children addObject:parenth];
             gCurE.root.c_idx = 1;
             [newRoot.children addObject:gCurE.root];
             gCurE.curMode = MODE_INSERT;
         } else {
             gCurE.root.c_idx = 0;
             [newRoot.children addObject:gCurE.root];
-            tLayer.c_idx = 1;
-            [newRoot.children addObject:tLayer];
+            parenth.c_idx = 1;
+            [newRoot.children addObject:parenth];
             gCurE.curMode = MODE_INPUT;
         }
         
@@ -2058,8 +2186,8 @@ static UIView *testview;
         orgRootRoot.parent = newRootRoot;
         
         if (gCurE.insertCIdx == 0) {
-            tLayer.c_idx = 0;
-            [newRootRoot.children addObject:tLayer];
+            parenth.c_idx = 0;
+            [newRootRoot.children addObject:parenth];
             orgRootRoot.c_idx = 1;
             [newRootRoot.children addObject:orgRootRoot];
             gCurE.curMode = MODE_INSERT;
@@ -2067,8 +2195,8 @@ static UIView *testview;
         } else {
             orgRootRoot.c_idx = 0;
             [newRootRoot.children addObject:orgRootRoot];
-            tLayer.c_idx = 1;
-            [newRootRoot.children addObject:tLayer];
+            parenth.c_idx = 1;
+            [newRootRoot.children addObject:parenth];
             gCurE.curMode = MODE_INPUT;
         }
         
@@ -2089,42 +2217,162 @@ static UIView *testview;
         
         if (gCurE.insertCIdx == 0) {
             orgExpo.c_idx = 1;
-            tLayer.c_idx = 0;
-            [newExpo.children addObject:tLayer];
+            parenth.c_idx = 0;
+            [newExpo.children addObject:parenth];
             [newExpo.children addObject:orgExpo];
             gCurE.curMode = MODE_INSERT;
             gCurE.insertCIdx = 1;
         } else {
             orgExpo.c_idx = 0;
             [newExpo.children addObject:orgExpo];
-            tLayer.c_idx = 1;
-            [newExpo.children addObject:tLayer];
+            parenth.c_idx = 1;
+            [newExpo.children addObject:parenth];
             gCurE.curMode = MODE_INPUT;
         }
         
         layer.expo = newExpo;
         gCurE.curParent = newExpo;
+    } else if(gCurE.curMode == MODE_DUMP_WETL) {
+        WrapedEqTxtLyr *wetl = gCurE.curParent;
+        EquationBlock *orgWrapRoot = wetl.content;
+        EquationBlock *newWrapRoot = [[EquationBlock alloc] init:gCurE];
+        newWrapRoot.roll = ROLL_ROOT_ROOT;
+        newWrapRoot.parent = wetl;
+        newWrapRoot.numerFrame = orgWrapRoot.mainFrame;
+        newWrapRoot.numerTopHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.numerBtmHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.mainFrame = newWrapRoot.numerFrame;
+        orgWrapRoot.roll = ROLL_NUMERATOR;
+        orgWrapRoot.parent = newWrapRoot;
+        
+        if (gCurE.insertCIdx == 0) {
+            parenth.c_idx = 0;
+            [newWrapRoot.children addObject:parenth];
+            orgWrapRoot.c_idx = 1;
+            [newWrapRoot.children addObject:orgWrapRoot];
+            gCurE.curMode = MODE_INSERT;
+            gCurE.insertCIdx = 1;
+        } else {
+            orgWrapRoot.c_idx = 0;
+            [newWrapRoot.children addObject:orgWrapRoot];
+            parenth.c_idx = 1;
+            [newWrapRoot.children addObject:parenth];
+            gCurE.curMode = MODE_INPUT;
+        }
+        
+        wetl.content = newWrapRoot;
+        gCurE.curParent = newWrapRoot;
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         return;
     }
     
-    tLayer.parent = gCurE.curParent;
-    [gCurE.view.layer addSublayer:tLayer];
+    parenth.parent = gCurE.curParent;
+    
+    if(l_r == LEFT_PARENTH) {
+        EquationBlock *par = parenth.parent;
+        CGFloat h = 0;
+        int pcnt = 1;
+        for (int i = parenth.c_idx + 1; i < par.children.count; i++) {
+            id b = [par.children objectAtIndex:i];
+            if([b isMemberOfClass:[EquationBlock class]]) {
+                EquationBlock * eb = b;
+                if (h < eb.mainFrame.size.height)
+                    h = eb.mainFrame.size.height;
+            } else if([b isMemberOfClass:[RadicalBlock class]]) {
+                RadicalBlock * rb = b;
+                if (h < rb.frame.size.height)
+                    h = rb.frame.size.height;
+            } else if([b isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *layer = b;
+                if (h < layer.mainFrame.size.height)
+                    h = layer.mainFrame.size.height;
+            } else if([b isMemberOfClass:[FractionBarLayer class]]) {
+                break;
+            } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+                WrapedEqTxtLyr *wetl = b;
+                if (h < wetl.mainFrame.size.height)
+                    h = wetl.mainFrame.size.height;
+            } else if([b isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = b;
+                if (p.l_or_r == RIGHT_PARENTH) {
+                    pcnt--;
+                    
+                    if (pcnt == 0) {
+                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / 4.0, h);
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / 4.0, h);
+                        break;
+                    }
+                } else
+                    pcnt++;
+                
+                if (h < p.frame.size.height)
+                    h = p.frame.size.height;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        }
+    } else {
+        EquationBlock *par = parenth.parent;
+        CGFloat h = 0;
+        int pcnt = 1;
+        for (int i = parenth.c_idx - 1; i >= 0; i--) {
+            id b = [par.children objectAtIndex:i];
+            if([b isMemberOfClass:[EquationBlock class]]) {
+                EquationBlock * eb = b;
+                if (h < eb.mainFrame.size.height)
+                    h = eb.mainFrame.size.height;
+            } else if([b isMemberOfClass:[RadicalBlock class]]) {
+                RadicalBlock * rb = b;
+                if (h < rb.frame.size.height)
+                    h = rb.frame.size.height;
+            } else if([b isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *layer = b;
+                if (h < layer.mainFrame.size.height)
+                    h = layer.mainFrame.size.height;
+            } else if([b isMemberOfClass:[FractionBarLayer class]]) {
+                break;
+            } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+                WrapedEqTxtLyr *wetl = b;
+                if (h < wetl.mainFrame.size.height)
+                    h = wetl.mainFrame.size.height;
+            } else if([b isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = b;
+                if (p.l_or_r == LEFT_PARENTH) {
+                    pcnt--;
+                    
+                    if (pcnt == 0) {
+                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / 4.0, h);
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / 4.0, h);
+                        break;
+                    }
+                } else
+                    pcnt++;
+                
+                if (h < p.frame.size.height)
+                    h = p.frame.size.height;
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            }
+        }
+    }
+    
+    [gCurE.view.layer addSublayer:parenth];
+    [parenth setNeedsDisplay];
     
     /* Update frame info of current block */
     [(EquationBlock *)gCurE.curParent updateFrameWidth:incrWidth :gCurE.curRoll];
     [gCurE.root adjustElementPosition];
     
     /* Move cursor */
-    CGFloat cursorOrgX = tLayer.frame.origin.x + tLayer.frame.size.width;
-    CGFloat cursorOrgY = tLayer.frame.origin.y;
+    CGFloat cursorOrgX = parenth.frame.origin.x + parenth.frame.size.width;
+    CGFloat cursorOrgY = parenth.frame.origin.y;
     
     gCurE.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurE.curFontH);
     gCurE.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     
-    gCurE.insertCIdx = tLayer.c_idx + 1;
-    gCurE.curBlk = tLayer;
+    gCurE.insertCIdx = parenth.c_idx + 1;
+    gCurE.curBlk = parenth;
     gCurE.curTxtLyr = nil;
     
     if (gCurE.root.mainFrame.origin.x + gCurE.root.mainFrame.size.width > scnWidth && gCurE.zoomInLvl < 2) {
@@ -2234,6 +2482,58 @@ static UIView *testview;
             }
         } else if (gCurE.insertCIdx == rb.c_idx + 1) {
             (void)locaLastTxtLyr(gCurE, rb);
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    } else if ([gCurE.curBlk isMemberOfClass:[WrapedEqTxtLyr class]]) {
+        WrapedEqTxtLyr *wetl = gCurE.curBlk;
+        if (gCurE.insertCIdx == wetl.c_idx) {
+            id pre = getPrevBlk(gCurE, wetl);
+            EquationBlock *par = wetl.parent;
+            if (wetl.c_idx == 0 || [[par.children objectAtIndex:wetl.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
+                if (pre != nil) {
+                    if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                        EquationTextLayer *layer = pre;
+                        if (layer.is_base_expo == wetl.is_base_expo) {
+                            (void)locaLastTxtLyr(gCurE, pre);
+                        } else { //Switch from expo to base in a same text layer
+                            cfgEqnBySlctBlk(gCurE, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
+                        }
+                    } else {
+                        (void)locaLastTxtLyr(gCurE, pre);
+                    }
+                } else {
+                    return;
+                }
+            } else {
+                if (pre != nil) {
+                    if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                        EquationTextLayer *l = pre;
+                        if (l.expo != nil) {
+                            (void)locaLastTxtLyr(gCurE, l);
+                        } else {
+                            if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) { // 1 char num/op/empty
+                                [gCurE removeElement:l];
+                            } else {
+                                CGFloat orgW = l.mainFrame.size.width;
+                                [l delNumCharAt:(int)l.strLenTbl.count - 1];
+                                CGFloat incrWidth = l.mainFrame.size.width - orgW;
+                                [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
+                                [gCurE.root adjustElementPosition];
+                                cfgEqnBySlctBlk(gCurE, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                            }
+                        }
+                    } else {
+                        (void)locaLastTxtLyr(gCurE, pre);
+                    }
+                } else {
+                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    return;
+                }
+            }
+        } else if (gCurE.insertCIdx == wetl.c_idx + 1) {
+            (void)locaLastTxtLyr(gCurE, wetl);
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return;
@@ -2485,6 +2785,194 @@ static UIView *testview;
     gCurE.curBlk = layer;
 }
 
+- (void)handleWETLInput: (NSString *)pfx {
+    CGFloat incrWidth = 0.0;
+    
+    if (gCurE.curTxtLyr != nil && gCurE.curTxtLyr.type == TEXTLAYER_EMPTY) {
+        if (gCurE.curTxtLyr.expo == nil) {
+            EquationBlock *cb = gCurE.curParent;
+            [gCurE.curTxtLyr destroy];
+            [cb.children removeObjectAtIndex:gCurE.curTxtLyr.c_idx];
+            [cb updateCIdx];
+            incrWidth -= gCurE.curTxtLyr.mainFrame.size.width;
+        } else if ([gCurE.curTxtLyr.expo.children.firstObject isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = gCurE.curTxtLyr.expo.children.firstObject;
+            if (l.type == TEXTLAYER_EMPTY) {
+                EquationBlock *cb = gCurE.curParent;
+                [gCurE.curTxtLyr destroy];
+                [cb.children removeObjectAtIndex:gCurE.curTxtLyr.c_idx];
+                [cb updateCIdx];
+                incrWidth -= gCurE.curTxtLyr.mainFrame.size.width;
+            } else {
+                gCurE.curMode = MODE_INSERT;
+                gCurE.insertCIdx = gCurE.curTxtLyr.c_idx;
+            }
+        } else {
+            gCurE.curMode = MODE_INSERT;
+            gCurE.insertCIdx = gCurE.curTxtLyr.c_idx;
+        }
+    }
+    
+    WrapedEqTxtLyr *wetl = [[WrapedEqTxtLyr alloc] init:pfx :gCurE.view.inpOrg :gCurE];
+    
+    incrWidth += wetl.mainFrame.size.width;
+    
+    //    if (orgLayer != nil && orgLayer.type == TEXTLAYER_EMPTY) {
+    //        EquationBlock *cb = gCurE.curBlk;
+    //        [orgLayer destroy];
+    //        [cb.children removeObjectAtIndex:orgLayer.c_idx];
+    //        [cb updateCIdx];
+    //        incrWidth -= orgLayer.mainFrame.size.width;
+    //    }
+    
+    
+    if(gCurE.curMode == MODE_INPUT) {
+        EquationBlock *eBlock = gCurE.curParent;
+        
+        wetl.c_idx = eBlock.children.count;
+        
+        [eBlock.children addObject:wetl];
+    } else if(gCurE.curMode == MODE_INSERT) {
+        EquationBlock *eBlock = gCurE.curParent;
+        
+        [eBlock.children insertObject:wetl atIndex: gCurE.insertCIdx];
+        
+        /*Update c_idx*/
+        [eBlock updateCIdx];
+    } else if(gCurE.curMode == MODE_DUMP_ROOT) {
+        EquationBlock *newRoot = [[EquationBlock alloc] init:gCurE];
+        newRoot.roll = ROLL_ROOT;
+        newRoot.parent = nil;
+        newRoot.numerFrame = gCurE.root.mainFrame;
+        newRoot.numerTopHalf = gCurE.root.mainFrame.size.height / 2.0;
+        newRoot.numerBtmHalf = gCurE.root.mainFrame.size.height / 2.0;
+        newRoot.mainFrame = newRoot.numerFrame;
+        gCurE.root.roll = ROLL_NUMERATOR;
+        gCurE.root.parent = newRoot;
+        if (gCurE.insertCIdx == 0) {
+            gCurE.root.c_idx = 1;
+            wetl.c_idx = 0;
+            [newRoot.children addObject:wetl];
+            [newRoot.children addObject:gCurE.root];
+            gCurE.curMode = MODE_INSERT;
+        } else {
+            gCurE.root.c_idx = 0;
+            [newRoot.children addObject:gCurE.root];
+            wetl.c_idx = 1;
+            [newRoot.children addObject:wetl];
+            gCurE.curMode = MODE_INPUT;
+        }
+        gCurE.curParent = newRoot;
+        gCurE.root = newRoot;
+    } else if(gCurE.curMode == MODE_DUMP_RADICAL) {
+        RadicalBlock *rBlock = gCurE.curParent;
+        EquationBlock *orgRootRoot = rBlock.content;
+        EquationBlock *newRootRoot = [[EquationBlock alloc] init:gCurE];
+        newRootRoot.roll = ROLL_ROOT_ROOT;
+        newRootRoot.parent = rBlock;
+        newRootRoot.numerFrame = orgRootRoot.mainFrame;
+        newRootRoot.numerTopHalf = orgRootRoot.mainFrame.size.height / 2.0;
+        newRootRoot.numerBtmHalf = orgRootRoot.mainFrame.size.height / 2.0;
+        newRootRoot.mainFrame = newRootRoot.numerFrame;
+        orgRootRoot.roll = ROLL_NUMERATOR;
+        orgRootRoot.parent = newRootRoot;
+        
+        if (gCurE.insertCIdx == 0) {
+            orgRootRoot.c_idx = 1;
+            wetl.c_idx = 0;
+            [newRootRoot.children addObject:wetl];
+            [newRootRoot.children addObject:orgRootRoot];
+            gCurE.curMode = MODE_INSERT;
+        } else {
+            orgRootRoot.c_idx = 0;
+            [newRootRoot.children addObject:orgRootRoot];
+            wetl.c_idx = 1;
+            [newRootRoot.children addObject:wetl];
+            gCurE.curMode = MODE_INPUT;
+        }
+        
+        rBlock.content = newRootRoot;
+        gCurE.curParent = newRootRoot;
+    } else if(gCurE.curMode == MODE_DUMP_EXPO) {
+        EquationTextLayer *layer = gCurE.curParent;
+        EquationBlock *orgExpo = layer.expo;
+        EquationBlock *newExpo = [[EquationBlock alloc] init:gCurE];
+        newExpo.roll = ROLL_EXPO_ROOT;
+        newExpo.parent = layer;
+        newExpo.numerFrame = orgExpo.mainFrame;
+        newExpo.numerTopHalf = orgExpo.mainFrame.size.height / 2.0;
+        newExpo.numerBtmHalf = orgExpo.mainFrame.size.height / 2.0;
+        newExpo.mainFrame = newExpo.numerFrame;
+        orgExpo.roll = ROLL_NUMERATOR;
+        orgExpo.parent = newExpo;
+        
+        if (gCurE.insertCIdx == 0) {
+            wetl.c_idx = 0;
+            [newExpo.children addObject:wetl];
+            orgExpo.c_idx = 1;
+            [newExpo.children addObject:orgExpo];
+            gCurE.curMode = MODE_INSERT;
+        } else {
+            orgExpo.c_idx = 0;
+            [newExpo.children addObject:orgExpo];
+            wetl.c_idx = 1;
+            [newExpo.children addObject:wetl];
+            gCurE.curMode = MODE_INPUT;
+        }
+        
+        layer.expo = newExpo;
+        gCurE.curParent = newExpo;
+    } else if(gCurE.curMode == MODE_DUMP_WETL) {
+        WrapedEqTxtLyr *orgWETL = gCurE.curParent;
+        EquationBlock *orgWrapRoot = orgWETL.content;
+        EquationBlock *newWrapRoot = [[EquationBlock alloc] init:gCurE];
+        newWrapRoot.roll = ROLL_ROOT_ROOT;
+        newWrapRoot.parent = orgWETL;
+        newWrapRoot.numerFrame = orgWrapRoot.mainFrame;
+        newWrapRoot.numerTopHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.numerBtmHalf = orgWrapRoot.mainFrame.size.height / 2.0;
+        newWrapRoot.mainFrame = newWrapRoot.numerFrame;
+        orgWrapRoot.roll = ROLL_NUMERATOR;
+        orgWrapRoot.parent = newWrapRoot;
+        
+        if (gCurE.insertCIdx == 0) {
+            orgWrapRoot.c_idx = 1;
+            wetl.c_idx = 0;
+            [newWrapRoot.children addObject:wetl];
+            [newWrapRoot.children addObject:orgWrapRoot];
+            gCurE.curMode = MODE_INSERT;
+        } else {
+            orgWrapRoot.c_idx = 0;
+            [newWrapRoot.children addObject:orgWrapRoot];
+            wetl.c_idx = 1;
+            [newWrapRoot.children addObject:wetl];
+            gCurE.curMode = MODE_INPUT;
+        }
+        
+        orgWETL.content = newWrapRoot;
+        gCurE.curParent = newWrapRoot;
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    
+    wetl.parent = gCurE.curParent;
+    
+    [(EquationBlock *)gCurE.curParent updateFrameWidth:incrWidth :gCurE.curRoll];
+    [gCurE.root adjustElementPosition];
+    
+    gCurE.insertCIdx = 1;
+    gCurE.curMode = MODE_INPUT;
+    gCurE.curRoll = ROLL_NUMERATOR;
+    gCurE.curParent = wetl.content;
+    gCurE.view.inpOrg = ((EquationBlock *)gCurE.curParent).mainFrame.origin;
+    gCurE.view.cursor.frame = CGRectMake(gCurE.view.inpOrg.x, gCurE.view.inpOrg.y, CURSOR_W, gCurE.curFontH);
+    
+    if ((gCurE.root.mainFrame.origin.y < 0.0 || gCurE.root.mainFrame.origin.x + gCurE.root.mainFrame.size.width > scnWidth) && gCurE.zoomInLvl < 2) {
+        gCurE.zoomInLvl++;
+        [self zoom];
+    }
+}
+
 -(void)btnClicked: (UIButton *)btn {
     
     if([[btn currentTitle]  isEqual: @"DUMP"]) {
@@ -2525,13 +3013,20 @@ static UIView *testview;
     } else if([[btn currentTitle]  isEqual: @"x^"]) {
         [self handlePowBtnClick];
     } else if([[btn currentTitle]  isEqual: @"("]) {
-        [self handleParenthBtnClick:@"("];
+        [self handleParenthBtnClick: LEFT_PARENTH];
     } else if([[btn currentTitle]  isEqual: @")"]) {
-        [self handleParenthBtnClick:@")"];
+        [self handleParenthBtnClick: RIGHT_PARENTH];
     } else if([[btn currentTitle]  isEqual: @"<-"]) {
         [self handleDelBtnClick];
     } else if([[btn currentTitle]  isEqual: @"·"]) {
-        [self handleNumBtnClick: @"."];
+        //[self handleNumBtnClick: @"."];
+        CALayer *test = [[CALayer alloc] init];
+        test.contentsScale = [UIScreen mainScreen].scale;
+        test.frame = CGRectMake(10, 10, 10, 40);
+        test.name = @"parenthesis";
+        test.delegate = self;
+        [gCurE.view.layer addSublayer: test];
+        [test setNeedsDisplay];
     } else if([[btn currentTitle]  isEqual: @"%"]) {
         gCurE.zoomInLvl = 1;
         [self zoom];
@@ -2582,6 +3077,8 @@ static UIView *testview;
         [user synchronize];
     } else if([[btn currentTitle]  isEqual: @"C"]) {
         [self handleCleanBtnClick];
+    } else if([[btn currentTitle]  isEqual: @"COS"]) {
+        [self handleWETLInput:@"COS("];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
@@ -2616,6 +3113,9 @@ static UIView *testview;
     } else if ([gCurE.curBlk isMemberOfClass:[RadicalBlock class]]) {
         RadicalBlock *rb = gCurE.curBlk;
         cfgEqnBySlctBlk(gCurE, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
+    } else if ([gCurE.curBlk isMemberOfClass:[WrapedEqTxtLyr class]]) {
+        WrapedEqTxtLyr *wetl = gCurE.curBlk;
+        cfgEqnBySlctBlk(gCurE, wetl, CGPointMake(wetl.suffix.frame.origin.x + wetl.suffix.frame.size.width - 1.0, wetl.suffix.frame.origin.y + 1.0));
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -2664,6 +3164,13 @@ static UIView *testview;
             CGPointMake(layer.frame.size.width - 0.5, layer.frame.size.height - 0.5), CGPointMake(0.5, layer.frame.size.height - 0.5),
             CGPointMake(0.5, layer.frame.size.height), CGPointMake(0.5, 0.0)};
         CGContextStrokeLineSegments(ctx, points, 8);
+    } else if ([layer.name isEqual: @"parenthesis"]) {
+        CGContextSetRGBStrokeColor(ctx, 0, 0, 1, 1);
+        CGContextSetLineCap(ctx, kCGLineCapRound);
+        CGContextSetLineWidth(ctx, 3.0);
+        CGContextMoveToPoint(ctx, 2, 2);
+        CGContextAddQuadCurveToPoint(ctx, layer.frame.size.width, layer.frame.size.height / 2.0, 2.0, layer.frame.size.height - 2.0);
+        CGContextStrokePath(ctx);
     } else
         NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, layer.name);
 }

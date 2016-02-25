@@ -60,9 +60,9 @@
         self.content = [[EquationBlock alloc] init:org :E];
         self.content.roll = ROLL_WRAP_ROOT;
         self.content.parent = self;
-        self.content.ancestor = E;
-        
+        NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, org.x, org.y);
         EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :org :E :TEXTLAYER_EMPTY];
+        layer.roll = ROLL_NUMERATOR;
         layer.parent = self.content;
         self.content.numerFrame = layer.frame;
         self.content.mainFrame = layer.frame;
@@ -74,7 +74,6 @@
         E.curBlk = layer;
         
         self.parent = E.curParent;
-        E.curParent = self.content;
         
         org.x += layer.mainFrame.size.width;
         w += layer.mainFrame.size.width;
