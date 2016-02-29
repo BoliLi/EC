@@ -15,6 +15,7 @@
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
+#import "Parentheses.h"
 #import "DisplayView.h"
 #import "DDMathParser.h"
 #import "DDMathTokenizer.h"

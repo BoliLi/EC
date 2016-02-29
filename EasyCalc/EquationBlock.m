@@ -13,6 +13,7 @@
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
+#import "Parentheses.h"
 
 @implementation EquationBlock
 @synthesize children;
@@ -163,6 +164,14 @@
             [anc.view.layer addSublayer: wetl.suffix];
             
             [wetl.content reorganize:anc :vc];
+        } else if ([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            p.c_idx = cidx++;
+            p.parent = self;
+            p.ancestor = anc;
+            p.delegate = vc;
+            [anc.view.layer addSublayer: p];
+            [p setNeedsDisplay];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -350,10 +359,18 @@
     CGFloat orgTop = self.numerTopHalf;
     CGFloat orgBtm = self.numerBtmHalf;
     self.numerTopHalf = self.numerBtmHalf = 0.0;
+    CGFloat hstack[32];
+    CGFloat maxh = 0.0;
+    NSMutableArray *pstack = [NSMutableArray array];
+    int idx = 0;
     for (id b in self.children) {
         if([b isMemberOfClass:[EquationBlock class]]) {
             EquationBlock * eb = b;
             CGFloat newH = eb.mainFrame.size.height;
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.numerTopHalf < (int)(newH / 2.0))
                 self.numerTopHalf = newH / 2.0;
             
@@ -362,6 +379,10 @@
         } else if([b isMemberOfClass:[RadicalBlock class]]) {
             RadicalBlock * rb = b;
             CGFloat newH = rb.frame.size.height;
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.numerTopHalf < (int)(newH / 2.0))
                 self.numerTopHalf = newH / 2.0;
             
@@ -371,6 +392,11 @@
             EquationTextLayer *layer = b;
             CGFloat top = layer.mainFrame.size.height - layer.frame.size.height / 2.0;
             CGFloat btm = layer.frame.size.height / 2.0;
+            
+            if (maxh < layer.mainFrame.size.height && idx > 0) {
+                maxh = layer.mainFrame.size.height;
+            }
+            
             if ((int)self.numerTopHalf < (int)top)
                 self.numerTopHalf = top;
             
@@ -381,15 +407,38 @@
         } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = b;
             CGFloat newH = wetl.mainFrame.size.height;
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.numerTopHalf < (int)(newH / 2.0))
                 self.numerTopHalf = newH / 2.0;
             
             if ((int)self.numerBtmHalf < (int)(newH / 2.0))
                 self.numerBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            
+            if (p.l_or_r == LEFT_PARENTH) {
+                [pstack insertObject:p atIndex:idx];
+                hstack[idx++] = maxh;
+                maxh = 0.0;
+            } else {
+                if (idx > 0) {
+                    Parentheses *lp = [pstack objectAtIndex:idx - 1];
+                    p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    if (hstack[--idx] > maxh) {
+                        maxh = hstack[idx];
+                    }
+                }
+            }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
+    
+    [pstack removeAllObjects];
     
     return ((int)orgTop != (int)self.numerTopHalf) || ((int)orgBtm != (int)self.numerBtmHalf);
 }
@@ -398,11 +447,20 @@
     CGFloat orgTop = self.denomTopHalf;
     CGFloat orgBtm = self.denomBtmHalf;
     self.denomTopHalf = self.denomBtmHalf = 0.0;
+    CGFloat hstack[32];
+    CGFloat maxh = 0.0;
+    NSMutableArray *pstack = [NSMutableArray array];
+    int idx = 0;
     for (int i = (int)self.children.count - 1; i > 0; i--) {
         id b = [self.children objectAtIndex:i];
         if([b isMemberOfClass:[EquationBlock class]]) {
             EquationBlock * eb = b;
             CGFloat newH = eb.mainFrame.size.height;
+            
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.denomTopHalf < (int)(newH / 2.0))
                 self.denomTopHalf = newH / 2.0;
             
@@ -411,6 +469,11 @@
         } else if([b isMemberOfClass:[RadicalBlock class]]) {
             RadicalBlock * rb = b;
             CGFloat newH = rb.frame.size.height;
+            
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.denomTopHalf < (int)(newH / 2.0))
                 self.denomTopHalf = newH / 2.0;
             
@@ -420,6 +483,11 @@
             EquationTextLayer *layer = b;
             CGFloat top = layer.mainFrame.size.height - layer.frame.size.height / 2.0;
             CGFloat btm = layer.frame.size.height / 2.0;
+            
+            if (maxh < layer.mainFrame.size.height && idx > 0) {
+                maxh = layer.mainFrame.size.height;
+            }
+            
             if ((int)self.denomTopHalf < (int)top)
                 self.denomTopHalf = top;
             
@@ -430,15 +498,39 @@
         } else if([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = b;
             CGFloat newH = wetl.mainFrame.size.height;
+            
+            if (maxh < newH && idx > 0) {
+                maxh = newH;
+            }
+            
             if ((int)self.denomTopHalf < (int)(newH / 2.0))
                 self.denomTopHalf = newH / 2.0;
             
             if ((int)self.denomBtmHalf < (int)(newH / 2.0))
                 self.denomBtmHalf = newH / 2.0;
+        } else if([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            
+            if (p.l_or_r == RIGHT_PARENTH) {
+                [pstack insertObject:p atIndex:idx];
+                hstack[idx++] = maxh;
+                maxh = 0.0;
+            } else {
+                if (idx > 0) {
+                    Parentheses *rp = [pstack objectAtIndex:idx - 1];
+                    p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    if (hstack[--idx] > maxh) {
+                        maxh = hstack[idx];
+                    }
+                }
+            }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
+    
+    [pstack removeAllObjects];
     
     return ((int)orgTop != (int)self.denomTopHalf) || ((int)orgBtm != (int)self.denomBtmHalf);
 }
@@ -487,6 +579,19 @@
     } else if([child isMemberOfClass:[WrapedEqTxtLyr class]]) {
         WrapedEqTxtLyr *wetl = child;
         int r = wetl.roll;
+        if (r == ROLL_NUMERATOR) {
+            if ([self updateNumerTB]) {
+                [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
+            }
+        } else if (r == ROLL_DENOMINATOR) {
+            if ([self updateDenomTB]) {
+                [self updateFrameHeightS2:self.denomTopHalf + self.denomBtmHalf :r];
+            }
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    } else if([child isMemberOfClass:[Parentheses class]]) {
+        Parentheses *p = child;
+        int r = p.roll;
         if (r == ROLL_NUMERATOR) {
             if ([self updateNumerTB]) {
                 [self updateFrameHeightS2:self.numerTopHalf + self.numerBtmHalf :r];
@@ -554,6 +659,9 @@
         } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *b = block;
             b.c_idx = cnt++;
+        } else if ([block isMemberOfClass: [Parentheses class]]) {
+            Parentheses *b = block;
+            b.c_idx = cnt++;
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -596,6 +704,9 @@
             wetl.prefix.frame = CGRectOffset(wetl.prefix.frame, 0.0, -distance);
             [wetl.content moveUp:distance];
             wetl.suffix.frame = CGRectOffset(wetl.suffix.frame, 0.0, -distance);
+        } else if ([block isMemberOfClass: [Parentheses class]]) {
+            Parentheses *p = block;
+            p.frame = CGRectOffset(p.frame, 0.0, -distance);
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }

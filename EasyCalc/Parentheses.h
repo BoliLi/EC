@@ -20,4 +20,5 @@
 @property int l_or_r;
 
 -(id) init : (CGPoint)inputPos : (Equation *)E : (int)l_r;
+-(void) destroy;
 @end

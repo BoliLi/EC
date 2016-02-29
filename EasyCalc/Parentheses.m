@@ -35,7 +35,7 @@
         self.roll = E.curRoll;
         self.l_or_r = l_r;
         
-        self.frame = CGRectMake(inputPos.x, inputPos.y, E.curFontH / 4.0, E.curFontH);
+        self.frame = CGRectMake(inputPos.x, inputPos.y, E.curFontH / PARENTH_HW_R, E.curFontH);
         
         if (E.curFont == E.baseFont) {
             is_base_expo = IS_BASE;

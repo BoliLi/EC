@@ -2299,8 +2299,8 @@ static UIView *testview;
                     pcnt--;
                     
                     if (pcnt == 0) {
-                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / 4.0, h);
-                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / 4.0, h);
+                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / PARENTH_HW_R, h);
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / PARENTH_HW_R, h);
                         break;
                     }
                 } else
@@ -2342,8 +2342,8 @@ static UIView *testview;
                     pcnt--;
                     
                     if (pcnt == 0) {
-                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / 4.0, h);
-                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / 4.0, h);
+                        parenth.frame = CGRectMake(parenth.frame.origin.x, parenth.frame.origin.y, h / PARENTH_HW_R, h);
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, h / PARENTH_HW_R, h);
                         break;
                     }
                 } else

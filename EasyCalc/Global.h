@@ -28,6 +28,8 @@
 #define LEFT_PARENTH 0
 #define RIGHT_PARENTH 1
 
+#define PARENTH_HW_R 4.0
+
 #define IS_BASE 0
 #define IS_EXPO 1
 

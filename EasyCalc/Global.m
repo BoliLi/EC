@@ -14,6 +14,7 @@
 #import "RadicalBlock.h"
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
+#import "Parentheses.h"
 
 
 NSMutableArray *gEquationList;
