@@ -23,9 +23,10 @@
 @synthesize is_base_expo;
 @synthesize mainFrame;
 @synthesize roll;
-@synthesize prefix;
+@synthesize title;
 @synthesize content;
-@synthesize suffix;
+@synthesize left_parenth;
+@synthesize right_parenth;
 
 -(id) init : (NSString *)pfx : (CGPoint)inputPos : (Equation *)E {
     self = [super init];
@@ -48,15 +49,23 @@
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, pfx.length)];
         CGSize strSize = [attStr size];
         
-        self.prefix = [[CATextLayer alloc] init];
-        self.prefix.contentsScale = [UIScreen mainScreen].scale;
-        self.prefix.backgroundColor = [UIColor clearColor].CGColor;
-        self.prefix.frame = CGRectMake(org.x, org.y, strSize.width, strSize.height);
-        self.prefix.string = attStr;
-        [E.view.layer addSublayer:self.prefix];
+        self.title = [[CATextLayer alloc] init];
+        self.title.contentsScale = [UIScreen mainScreen].scale;
+        self.title.backgroundColor = [UIColor clearColor].CGColor;
+        self.title.frame = CGRectMake(org.x, org.y, strSize.width, strSize.height);
+        self.title.string = attStr;
+        [E.view.layer addSublayer:self.title];
         
         org.x += strSize.width;
         w += strSize.width;
+        
+        self.left_parenth = [[Parentheses alloc] init:org :E :LEFT_PARENTH];
+        self.left_parenth.parent = self;
+        [E.view.layer addSublayer:self.left_parenth];
+        [self.left_parenth setNeedsDisplay];
+        
+        org.x += self.left_parenth.frame.size.width;
+        w += self.left_parenth.frame.size.width;
         
         self.content = [[EquationBlock alloc] init:org :E];
         self.content.roll = ROLL_WRAP_ROOT;
@@ -79,19 +88,12 @@
         org.x += layer.mainFrame.size.width;
         w += layer.mainFrame.size.width;
         
-        attStr = [[NSMutableAttributedString alloc] initWithString: @")"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        CFRelease(ctFont);
-        strSize = [attStr size];
+        self.right_parenth = [[Parentheses alloc] init:org :E :RIGHT_PARENTH];
+        self.right_parenth.parent = self;
+        [E.view.layer addSublayer:self.right_parenth];
+        [self.right_parenth setNeedsDisplay];
         
-        self.suffix = [[CATextLayer alloc] init];
-        self.suffix.contentsScale = [UIScreen mainScreen].scale;
-        self.suffix.backgroundColor = [UIColor clearColor].CGColor;
-        self.suffix.frame = CGRectMake(org.x, org.y, strSize.width, strSize.height);
-        self.suffix.string = attStr;
-        [E.view.layer addSublayer:self.suffix];
-        
-        w += strSize.width;
+        w += self.right_parenth.frame.size.width;
         
         self.mainFrame = CGRectMake(inputPos.x, inputPos.y, w, self.content.mainFrame.size.height);
     }
@@ -105,9 +107,10 @@
         self.guid = [coder decodeIntForKey:@"guid"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
-        self.prefix = [coder decodeObjectForKey:@"prefix"];
+        self.title = [coder decodeObjectForKey:@"title"];
         self.content = [coder decodeObjectForKey:@"content"];
-        self.suffix = [coder decodeObjectForKey:@"suffix"];
+        self.left_parenth = [coder decodeObjectForKey:@"left_parenth"];
+        self.right_parenth = [coder decodeObjectForKey:@"right_parenth"];
     }
     return self;
 }
@@ -119,14 +122,16 @@
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
-    [coder encodeObject:self.prefix forKey:@"prefix"];
+    [coder encodeObject:self.title forKey:@"title"];
     [coder encodeObject:self.content forKey:@"content"];
-    [coder encodeObject:self.suffix forKey:@"suffix"];
+    [coder encodeObject:self.left_parenth forKey:@"left_parenth"];
+    [coder encodeObject:self.right_parenth forKey:@"right_parenth"];
 }
 
 -(void) destroy {
     [self.content destroy];
-    [self.prefix removeFromSuperlayer];
-    [self.suffix removeFromSuperlayer];
+    [self.title removeFromSuperlayer];
+    [self.left_parenth destroy];
+    [self.right_parenth destroy];
 }
 @end

@@ -160,8 +160,13 @@
             wetl.c_idx = cidx++;
             wetl.parent = self;
             wetl.ancestor = anc;
-            [anc.view.layer addSublayer: wetl.prefix];
-            [anc.view.layer addSublayer: wetl.suffix];
+            [anc.view.layer addSublayer: wetl.title];
+            [anc.view.layer addSublayer: wetl.left_parenth];
+            wetl.left_parenth.delegate = vc;
+            [wetl.left_parenth setNeedsDisplay];
+            [anc.view.layer addSublayer: wetl.right_parenth];
+            wetl.left_parenth.delegate = vc;
+            [wetl.right_parenth setNeedsDisplay];
             
             [wetl.content reorganize:anc :vc];
         } else if ([b isMemberOfClass:[Parentheses class]]) {
@@ -291,7 +296,7 @@
             } else if([block isMemberOfClass:[WrapedEqTxtLyr class]]) {
                 WrapedEqTxtLyr *wetl = block;
                 CGFloat orgWidth1 = wetl.mainFrame.size.width;
-                CGFloat newMW = wetl.prefix.frame.size.width + wetl.content.mainFrame.size.width + wetl.suffix.frame.size.width;
+                CGFloat newMW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
                 wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newMW, wetl.mainFrame.size.height);
                 if ((int)orgWidth1 != (int)wetl.mainFrame.size.width) {
                     [wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgWidth1 :wetl.roll];
@@ -425,9 +430,16 @@
                 maxh = 0.0;
             } else {
                 if (idx > 0) {
-                    Parentheses *lp = [pstack objectAtIndex:idx - 1];
-                    p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
-                    lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    if ((int)p.frame.size.height != (int)maxh) {
+                        Parentheses *lp = [pstack objectAtIndex:idx - 1];
+                        CGFloat orgW = p.frame.size.width;
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [p setNeedsDisplay];
+                        lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [lp setNeedsDisplay];
+                        [self updateFrameWidth:2.0 * (p.frame.size.width - orgW) :p.roll];
+                    }
+                    
                     if (hstack[--idx] > maxh) {
                         maxh = hstack[idx];
                     }
@@ -435,6 +447,20 @@
             }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+    
+    while (idx > 0) {    // Handle unpaired parenth
+        Parentheses *lp = [pstack objectAtIndex:idx - 1];
+        if ((int)lp.frame.size.height != (int)maxh) {
+            CGFloat orgW = lp.frame.size.width;
+            lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+            [lp setNeedsDisplay];
+            [self updateFrameWidth:lp.frame.size.width - orgW :lp.roll];
+        }
+        
+        if (hstack[--idx] > maxh) {
+            maxh = hstack[idx];
         }
     }
     
@@ -517,9 +543,16 @@
                 maxh = 0.0;
             } else {
                 if (idx > 0) {
-                    Parentheses *rp = [pstack objectAtIndex:idx - 1];
-                    p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
-                    rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    if ((int)p.frame.size.height != (int)maxh) {
+                        Parentheses *rp = [pstack objectAtIndex:idx - 1];
+                        CGFloat orgW = p.frame.size.width;
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [p setNeedsDisplay];
+                        rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [rp setNeedsDisplay];
+                        [self updateFrameWidth:2.0 * (p.frame.size.width - orgW) :p.roll];
+                    }
+                    
                     if (hstack[--idx] > maxh) {
                         maxh = hstack[idx];
                     }
@@ -527,6 +560,20 @@
             }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+    
+    while (idx > 0) {    // Handle unpaired parenth
+        Parentheses *rp = [pstack objectAtIndex:idx - 1];
+        if ((int)rp.frame.size.height != (int)maxh) {
+            CGFloat orgW = rp.frame.size.width;
+            rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+            [rp setNeedsDisplay];
+            [self updateFrameWidth:rp.frame.size.width - orgW :rp.roll];
+        }
+        
+        if (hstack[--idx] > maxh) {
+            maxh = hstack[idx];
         }
     }
     
@@ -701,9 +748,10 @@
             }
         } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = block;
-            wetl.prefix.frame = CGRectOffset(wetl.prefix.frame, 0.0, -distance);
+            wetl.title.frame = CGRectOffset(wetl.title.frame, 0.0, -distance);
+            wetl.left_parenth.frame = CGRectOffset(wetl.left_parenth.frame, 0.0, -distance);
             [wetl.content moveUp:distance];
-            wetl.suffix.frame = CGRectOffset(wetl.suffix.frame, 0.0, -distance);
+            wetl.right_parenth.frame = CGRectOffset(wetl.right_parenth.frame, 0.0, -distance);
         } else if ([block isMemberOfClass: [Parentheses class]]) {
             Parentheses *p = block;
             p.frame = CGRectOffset(p.frame, 0.0, -distance);
@@ -714,7 +762,10 @@
 
 -(void) updateElementSize: (Equation *)E {
     CGFloat nTop = 0.0, nBtm = 0.0, dTop = 0.0, dBtm = 0.0, nWidth = 0.0, dWidth = 0.0;
-    
+    CGFloat hstack[32];
+    CGFloat maxh = 0.0;
+    NSMutableArray *pstack = [NSMutableArray array];
+    int idx = 0;
     for (id block in self.children) {
         if ([block isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *l = block;
@@ -753,6 +804,10 @@
             
             [l updateStrLenTbl];
             
+            if (maxh < l.mainFrame.size.height && idx > 0) {
+                maxh = l.mainFrame.size.height;
+            }
+            
             CGFloat top = l.mainFrame.size.height - l.frame.size.height / 2.0;
             CGFloat btm = l.frame.size.height / 2.0;
             if (l.roll == ROLL_NUMERATOR) {
@@ -786,10 +841,37 @@
                 f.size.height = E.expoCharHight / 2.0;
                 fb.frame = f;
             }
+            
+            while (idx > 0) {    // Handle unpaired parenth
+                Parentheses *lp = [pstack objectAtIndex:idx - 1];
+                if ((int)lp.frame.size.height != (int)maxh) {
+                    lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                    [lp setNeedsDisplay];
+                }
+                
+                if (hstack[--idx] > maxh) {
+                    maxh = hstack[idx];
+                }
+                
+                if (lp.roll == ROLL_NUMERATOR) {
+                    nWidth += lp.frame.size.width;
+                } else if (lp.roll == ROLL_DENOMINATOR) {
+                    dWidth += lp.frame.size.width;
+                } else {
+                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                }
+            }
+            
+            maxh = 0.0;
+            idx = 0;
         } else if ([block isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *eb = block;
             
             [eb updateElementSize:E];
+            
+            if (maxh < eb.mainFrame.size.height && idx > 0) {
+                maxh = eb.mainFrame.size.height;
+            }
             
             CGFloat top = eb.mainFrame.size.height / 2.0;
             CGFloat btm = eb.mainFrame.size.height / 2.0;
@@ -834,6 +916,10 @@
                 rb.rootNum.string = attStr;
             }
             
+            if (maxh < rb.frame.size.height && idx > 0) {
+                maxh = rb.frame.size.height;
+            }
+            
             CGFloat top = rb.frame.size.height / 2.0;
             CGFloat btm = rb.frame.size.height / 2.0;
             if (rb.roll == ROLL_NUMERATOR) {
@@ -865,31 +951,31 @@
                 ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
             }
             
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.prefix.string string]];
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.title.string string]];
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
             
-            CGRect f = wetl.prefix.frame;
+            CGRect f = wetl.title.frame;
             f.size = [attStr size];
-            wetl.prefix.frame = f;
+            wetl.title.frame = f;
             
-            wetl.prefix.string = attStr;
-            
-            attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.suffix.string string]];
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
-            
-            f = wetl.suffix.frame;
-            f.size = [attStr size];
-            wetl.suffix.frame = f;
-            
-            wetl.suffix.string = attStr;
+            wetl.title.string = attStr;
             
             CFRelease(ctFont);
             
             [wetl.content updateElementSize:E];
             
-            CGFloat newW = wetl.prefix.frame.size.width + wetl.content.mainFrame.size.width + wetl.suffix.frame.size.width;
+            wetl.left_parenth.frame = CGRectMake(wetl.left_parenth.frame.origin.x, wetl.left_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+            [wetl.left_parenth setNeedsDisplay];
+            wetl.right_parenth.frame = CGRectMake(wetl.right_parenth.frame.origin.x, wetl.right_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+            [wetl.right_parenth setNeedsDisplay];
+            
+            CGFloat newW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
             CGFloat newH = wetl.content.mainFrame.size.height;
             wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+            
+            if (maxh < wetl.mainFrame.size.height && idx > 0) {
+                maxh = wetl.mainFrame.size.height;
+            }
             
             CGFloat top = wetl.mainFrame.size.height / 2.0;
             CGFloat btm = wetl.mainFrame.size.height / 2.0;
@@ -912,9 +998,61 @@
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
+        } else if ([block isMemberOfClass: [Parentheses class]]) {
+            Parentheses *p = block;
+            
+            if (p.l_or_r == LEFT_PARENTH) {
+                [pstack insertObject:p atIndex:idx];
+                hstack[idx++] = maxh;
+                maxh = 0.0;
+            } else {
+                if (idx > 0) {
+                    if ((int)p.frame.size.height != (int)maxh) {
+                        Parentheses *lp = [pstack objectAtIndex:idx - 1];
+                        p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [p setNeedsDisplay];
+                        lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+                        [lp setNeedsDisplay];
+                    }
+                    
+                    if (hstack[--idx] > maxh) {
+                        maxh = hstack[idx];
+                    }
+                    
+                    if (p.roll == ROLL_NUMERATOR) {
+                        nWidth += (2.0 * p.frame.size.width);
+                    } else if (p.roll == ROLL_DENOMINATOR) {
+                        dWidth += (2.0 * p.frame.size.width);
+                    } else {
+                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                    }
+                }
+            }
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
+    
+    while (idx > 0) {    // Handle unpaired parenth
+        Parentheses *lp = [pstack objectAtIndex:idx - 1];
+        if ((int)lp.frame.size.height != (int)maxh) {
+            lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
+            [lp setNeedsDisplay];
+        }
+        
+        if (hstack[--idx] > maxh) {
+            maxh = hstack[idx];
+        }
+        
+        if (lp.roll == ROLL_NUMERATOR) {
+            nWidth += lp.frame.size.width;
+        } else if (lp.roll == ROLL_DENOMINATOR) {
+            dWidth += lp.frame.size.width;
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+    
+    [pstack removeAllObjects];
     
     CGPoint orgP = self.mainFrame.origin;
     self.numerTopHalf = nTop;
@@ -1045,10 +1183,16 @@
                 f.origin.x = curNumX;
                 wetl.mainFrame = f;
                 
-                f = wetl.prefix.frame;
-                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.prefix.frame.size.height / 2.0);
+                f = wetl.title.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.title.frame.size.height / 2.0);
                 f.origin.x = curNumX;
-                wetl.prefix.frame = f;
+                wetl.title.frame = f;
+                curNumX += f.size.width;
+                
+                f = wetl.left_parenth.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.left_parenth.frame.size.height / 2.0);
+                f.origin.x = curNumX;
+                wetl.left_parenth.frame = f;
                 curNumX += f.size.width;
                 
                 f = wetl.content.mainFrame;
@@ -1058,10 +1202,10 @@
                 curNumX += f.size.width;
                 [wetl.content adjustElementPosition];
                 
-                f = wetl.suffix.frame;
-                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.suffix.frame.size.height / 2.0);
+                f = wetl.right_parenth.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (wetl.right_parenth.frame.size.height / 2.0);
                 f.origin.x = curNumX;
-                wetl.suffix.frame = f;
+                wetl.right_parenth.frame = f;
                 curNumX += f.size.width;
             } else if (wetl.roll == ROLL_DENOMINATOR) {
                 CGRect f = wetl.mainFrame;
@@ -1069,10 +1213,16 @@
                 f.origin.x = curDenX;
                 wetl.mainFrame = f;
                 
-                f = wetl.prefix.frame;
-                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.prefix.frame.size.height / 2.0);
+                f = wetl.title.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.title.frame.size.height / 2.0);
                 f.origin.x = curDenX;
-                wetl.prefix.frame = f;
+                wetl.title.frame = f;
+                curDenX += f.size.width;
+                
+                f = wetl.left_parenth.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.left_parenth.frame.size.height / 2.0);
+                f.origin.x = curDenX;
+                wetl.left_parenth.frame = f;
                 curDenX += f.size.width;
                 
                 f = wetl.content.mainFrame;
@@ -1082,10 +1232,27 @@
                 curDenX += f.size.width;
                 [wetl.content adjustElementPosition];
                 
-                f = wetl.suffix.frame;
-                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.suffix.frame.size.height / 2.0);
+                f = wetl.right_parenth.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (wetl.right_parenth.frame.size.height / 2.0);
                 f.origin.x = curDenX;
-                wetl.suffix.frame = f;
+                wetl.right_parenth.frame = f;
+                curDenX += f.size.width;
+            } else
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        } else if ([cb isMemberOfClass: [Parentheses class]]) {
+            Parentheses *p = cb;
+            
+            if (p.roll == ROLL_NUMERATOR) {
+                CGRect f = p.frame;
+                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (f.size.height / 2.0);
+                f.origin.x = curNumX;
+                p.frame = f;
+                curNumX += f.size.width;
+            } else if (p.roll == ROLL_DENOMINATOR) {
+                CGRect f = p.frame;
+                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (f.size.height / 2.0);
+                f.origin.x = curDenX;
+                p.frame = f;
                 curDenX += f.size.width;
             } else
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -1112,6 +1279,9 @@
         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = b;
             [wetl destroy];
+        } else if ([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            [p destroy];
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }

@@ -87,13 +87,6 @@
             CFRelease(ctFont);
             [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,str.length)];
             newStrSize = [attStr size];
-        } else if (t == TEXTLAYER_PARENTH) {
-            attStr = [[NSMutableAttributedString alloc] initWithString: str];
-            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)e.curFont.fontName, e.curFont.pointSize, NULL);
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
-            CFRelease(ctFont);
-            newStrSize = [attStr size];
-            [self.strLenTbl addObject:@(newStrSize.width)];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }

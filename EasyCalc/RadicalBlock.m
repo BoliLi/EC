@@ -29,6 +29,7 @@
     self = [super init];
     if (self) {
         self.ancestor = e;
+        self.delegate = e;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.content = [[EquationBlock alloc] init:e];
         self.guid = e.guid_cnt++;
@@ -47,6 +48,7 @@
     self = [super init];
     if (self) {
         self.ancestor = e;
+        self.delegate = e;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = e.guid_cnt++;
         self.name = @"radical";

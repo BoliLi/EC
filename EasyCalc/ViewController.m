@@ -157,6 +157,19 @@ static UIView *testview;
                     CGFloat y = wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - gCurE.curFontH / 2.0;
                     gCurE.view.inpOrg = CGPointMake(x, y);
                     gCurE.view.cursor.frame = CGRectMake(x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                } else if ([block isMemberOfClass: [Parentheses class]]) {
+                    Parentheses *p = block;
+                    gCurE.curMode = MODE_INPUT;
+                    gCurE.curParent = p.parent;
+                    gCurE.curRoll = p.roll;
+                    gCurE.curTxtLyr = nil;
+                    gCurE.curBlk = p;
+                    gCurE.insertCIdx = p.c_idx + 1;
+                    CGFloat x = p.frame.origin.x + p.frame.size.width;
+                    CGFloat y = p.frame.origin.y + p.frame.size.height / 2.0 - gCurE.curFontH / 2.0;
+                    gCurE.view.inpOrg = CGPointMake(x, y);
+                    CGFloat tmp = p.frame.size.height;
+                    gCurE.view.cursor.frame = CGRectMake(gCurE.view.inpOrg.x, p.frame.origin.y, CURSOR_W, tmp);
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
@@ -494,8 +507,6 @@ static UIView *testview;
     kbConView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:kbConView];
     
-    
-    
     mainKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
     mainKbView.backgroundColor = [UIColor whiteColor];
     [kbConView addSubview:mainKbView];
@@ -746,6 +757,51 @@ static UIView *testview;
                     needNewLayer = YES;
                 } else {
                     id b = [par.children objectAtIndex:wetl.c_idx + 1];
+                    if ([b isMemberOfClass:[EquationTextLayer class]]) {
+                        EquationTextLayer *l = b;
+                        if (l.type == TEXTLAYER_NUM) {
+                            needNewLayer = NO;
+                            cfgEqnBySlctBlk(gCurE, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                        } else {
+                            needNewLayer = YES;
+                        }
+                    } else {
+                        needNewLayer = YES;
+                    }
+                }
+            } else {
+                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                return;
+            }
+        } else if ([gCurE.curBlk isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = gCurE.curBlk;
+            EquationBlock *par = p.parent;
+            if (gCurE.insertCIdx == p.c_idx) {
+                if (p.c_idx == 0) {
+                    needNewLayer = YES;
+                } else {
+                    id b = [par.children objectAtIndex:p.c_idx - 1];
+                    if ([b isMemberOfClass:[EquationTextLayer class]]) {
+                        EquationTextLayer *l = b;
+                        if (l.type == TEXTLAYER_NUM) {
+                            if (l.expo == nil) {
+                                needNewLayer = NO;
+                                cfgEqnBySlctBlk(gCurE, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                            } else {
+                                needNewLayer = YES;
+                            }
+                        } else {
+                            needNewLayer = YES;
+                        }
+                    } else {
+                        needNewLayer = YES;
+                    }
+                }
+            } else if (gCurE.insertCIdx == p.c_idx + 1) {
+                if (p.c_idx == par.children.count - 1) {
+                    needNewLayer = YES;
+                } else {
+                    id b = [par.children objectAtIndex:p.c_idx + 1];
                     if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
                         if (l.type == TEXTLAYER_NUM) {
@@ -1166,12 +1222,6 @@ static UIView *testview;
                     if (([layer.name isEqual: @"+"] || [layer.name isEqual: @"-"]) && parenCnt <= 0)
                         break;
                     
-                    if ([layer.name isEqual: @")"])
-                        parenCnt++;
-                    
-                    if ([layer.name isEqual: @"("])
-                        parenCnt--;
-                    
                     /* Move numerators */
                     layer.roll = ROLL_NUMERATOR;
                     frameW += layer.mainFrame.size.width;
@@ -1225,6 +1275,24 @@ static UIView *testview;
                     if (newNumerBtm < wetl.mainFrame.size.height / 2.0) {
                         newNumerBtm = wetl.mainFrame.size.height / 2.0;
                     }
+                }else if ([block isMemberOfClass: [Parentheses class]]) {
+                    Parentheses *p = block;
+                    if (p.l_or_r == RIGHT_PARENTH)
+                        parenCnt++;
+                    else
+                        parenCnt--;
+                    
+                    p.roll = ROLL_NUMERATOR;
+                    frameW += p.frame.size.width;
+                    frameX = p.frame.origin.x;
+                    if (newNumerTop < p.frame.size.height / 2.0) {
+                        newNumerTop = p.frame.size.height / 2.0;
+                        frameY = p.frame.origin.y;
+                    }
+                    
+                    if (newNumerBtm < p.frame.size.height / 2.0) {
+                        newNumerBtm = p.frame.size.height / 2.0;
+                    }
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
@@ -1271,6 +1339,11 @@ static UIView *testview;
                         b.c_idx = newBlock.children.count;
                         b.parent = newBlock;
                         [newBlock.children addObject:b];
+                    } else if ([block isMemberOfClass: [Parentheses class]]) {
+                        Parentheses *p = block;
+                        p.c_idx = newBlock.children.count;
+                        p.parent = newBlock;
+                        [newBlock.children addObject:p];
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1315,9 +1388,20 @@ static UIView *testview;
                     [(EquationBlock *)eBlock.parent updateFrameHeightS1:eBlock];
                 } else if ([eBlock.parent isMemberOfClass: [WrapedEqTxtLyr class]]) {
                     WrapedEqTxtLyr *wetl = eBlock.parent;
-                    wetl.mainFrame = CGRectMake(wetl.prefix.frame.origin.x, eBlock.mainFrame.origin.y, wetl.mainFrame.size.width, eBlock.mainFrame.size.height);
+                    CGFloat orgW = wetl.mainFrame.size.width;
+                    
+                    wetl.left_parenth.frame = CGRectMake(wetl.left_parenth.frame.origin.x, wetl.left_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+                    [wetl.left_parenth setNeedsDisplay];
+                    wetl.right_parenth.frame = CGRectMake(wetl.right_parenth.frame.origin.x, wetl.right_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+                    [wetl.right_parenth setNeedsDisplay];
+                    
+                    CGFloat newW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
+                    CGFloat newH = wetl.content.mainFrame.size.height;
+                    wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+                    
                     if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
                         [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+                        [(EquationBlock *)wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgW :wetl.roll];
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1665,7 +1749,6 @@ static UIView *testview;
         frame.size.width = eBlock.mainFrame.size.width;
         
         barLayer.frame = frame;
-        barLayer.delegate = self;
         barLayer.c_idx = eBlock.children.count;
         [gCurE.view.layer addSublayer: barLayer];
         [barLayer setNeedsDisplay];
@@ -1874,7 +1957,6 @@ static UIView *testview;
     
     newRBlock.parent = gCurE.curParent;
 
-    newRBlock.delegate = self;
     [gCurE.view.layer addSublayer: newRBlock];
     [newRBlock setNeedsDisplay];
     

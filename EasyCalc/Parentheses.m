@@ -28,9 +28,10 @@
     self = [super init];
     if (self) {
         self.ancestor = E;
+        self.delegate = E;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = E.guid_cnt++;
-        self.name = @"parentheses";
+        self.name = @"parenthesis";
         self.hidden = NO;
         self.roll = E.curRoll;
         self.l_or_r = l_r;

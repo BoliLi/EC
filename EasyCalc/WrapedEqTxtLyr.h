@@ -12,6 +12,7 @@
 
 @class EquationBlock;
 @class Equation;
+@class Parentheses;
 
 @interface WrapedEqTxtLyr : NSObject <NSCoding, NSCopying>
 @property (weak) id parent;
@@ -19,9 +20,10 @@
 @property int guid;
 @property NSUInteger c_idx;
 @property int roll;
-@property CATextLayer *prefix;
+@property CATextLayer *title;
 @property EquationBlock *content;
-@property CATextLayer *suffix;
+@property Parentheses *left_parenth;
+@property Parentheses *right_parenth;
 @property CGRect mainFrame;
 @property int is_base_expo;
 

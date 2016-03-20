@@ -29,6 +29,7 @@
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = e.guid_cnt++;
+        self.delegate = e;
         
         if (e.curFont == e.baseFont) {
             is_base_expo = IS_BASE;
