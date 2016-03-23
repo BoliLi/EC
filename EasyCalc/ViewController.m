@@ -1561,9 +1561,20 @@ static UIView *testview;
                     [(EquationBlock *)eBlock.parent updateFrameHeightS1:eBlock];
                 } else if ([eBlock.parent isMemberOfClass: [WrapedEqTxtLyr class]]) {
                     WrapedEqTxtLyr *wetl = eBlock.parent;
-                    wetl.mainFrame = CGRectMake(wetl.prefix.frame.origin.x, eBlock.mainFrame.origin.y, wetl.mainFrame.size.width, eBlock.mainFrame.size.height);
+                    CGFloat orgW = wetl.mainFrame.size.width;
+                    
+                    wetl.left_parenth.frame = CGRectMake(wetl.left_parenth.frame.origin.x, wetl.left_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+                    [wetl.left_parenth setNeedsDisplay];
+                    wetl.right_parenth.frame = CGRectMake(wetl.right_parenth.frame.origin.x, wetl.right_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
+                    [wetl.right_parenth setNeedsDisplay];
+                    
+                    CGFloat newW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
+                    CGFloat newH = wetl.content.mainFrame.size.height;
+                    wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+                    
                     if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
                         [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+                        [(EquationBlock *)wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgW :wetl.roll];
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
