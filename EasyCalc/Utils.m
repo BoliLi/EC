@@ -495,37 +495,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                 e.view.inpOrg = CGPointMake(x, y);
                 CGFloat tmp = layer.mainFrame.size.height;
                 e.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
-            } else if (layer.type == TEXTLAYER_PARENTH) {
-                CGFloat x = 0.0, y = 0.0;
-                if (e.curRoll == ROLL_NUMERATOR) {
-                    if (e.insertCIdx == 0) {
-                        x = layer.mainFrame.origin.x;
-                        y = layer.frame.origin.y;
-                        e.txtInsIdx = 0;
-                    } else {
-                        x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
-                        y = layer.frame.origin.y;
-                        e.txtInsIdx = 1;
-                    }
-                } else if (e.curRoll == ROLL_DENOMINATOR) {
-                    if (e.curMode == MODE_INSERT) {
-                        x = layer.mainFrame.origin.x;
-                        y = layer.frame.origin.y;
-                        e.txtInsIdx = 0;
-                    } else {
-                        x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
-                        y = layer.frame.origin.y;
-                        e.txtInsIdx = 1;
-                    }
-                } else {
-                    NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                }
-                
-                e.view.inpOrg = CGPointMake(x, y);
-                CGFloat tmp = layer.mainFrame.size.height;
-                e.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
-                e.curBlk = layer;
-                e.curTxtLyr = nil;
             } else
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             

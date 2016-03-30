@@ -16,6 +16,6 @@
 @property (weak) Equation *ancestor;
 @property int is_base_expo;
 
--(id) init : (Equation *)e;
+-(id) init :(Equation *)e :(ViewController *)vc;
 -(void) destroy;
 @end

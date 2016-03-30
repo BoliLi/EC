@@ -19,6 +19,6 @@
 @property int is_base_expo;
 @property int l_or_r;
 
--(id) init : (CGPoint)inputPos : (Equation *)E : (int)l_r;
+-(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc;
 -(void) destroy;
 @end

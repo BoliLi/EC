@@ -28,7 +28,7 @@
 @synthesize left_parenth;
 @synthesize right_parenth;
 
--(id) init : (NSString *)pfx : (CGPoint)inputPos : (Equation *)E {
+-(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc {
     self = [super init];
     if (self) {
         self.ancestor = E;
@@ -59,7 +59,7 @@
         org.x += strSize.width;
         w += strSize.width;
         
-        self.left_parenth = [[Parentheses alloc] init:org :E :LEFT_PARENTH];
+        self.left_parenth = [[Parentheses alloc] init:org :E :LEFT_PARENTH :vc];
         self.left_parenth.parent = self;
         [E.view.layer addSublayer:self.left_parenth];
         [self.left_parenth setNeedsDisplay];
@@ -88,7 +88,7 @@
         org.x += layer.mainFrame.size.width;
         w += layer.mainFrame.size.width;
         
-        self.right_parenth = [[Parentheses alloc] init:org :E :RIGHT_PARENTH];
+        self.right_parenth = [[Parentheses alloc] init:org :E :RIGHT_PARENTH :vc];
         self.right_parenth.parent = self;
         [E.view.layer addSublayer:self.right_parenth];
         [self.right_parenth setNeedsDisplay];
@@ -126,6 +126,19 @@
     [coder encodeObject:self.content forKey:@"content"];
     [coder encodeObject:self.left_parenth forKey:@"left_parenth"];
     [coder encodeObject:self.right_parenth forKey:@"right_parenth"];
+}
+
+-(void) updateFrame:(BOOL)updateParenth {
+    if (updateParenth) {
+        self.left_parenth.frame = CGRectMake(self.left_parenth.frame.origin.x, self.left_parenth.frame.origin.y, self.content.mainFrame.size.height / PARENTH_HW_R, self.content.mainFrame.size.height);
+        [self.left_parenth setNeedsDisplay];
+        self.right_parenth.frame = CGRectMake(self.right_parenth.frame.origin.x, self.right_parenth.frame.origin.y, self.content.mainFrame.size.height / PARENTH_HW_R, self.content.mainFrame.size.height);
+        [self.right_parenth setNeedsDisplay];
+    }
+    
+    CGFloat newW = self.title.frame.size.width + self.left_parenth.frame.size.width + self.content.mainFrame.size.width + self.right_parenth.frame.size.width;
+    CGFloat newH = self.content.mainFrame.size.height;
+    self.mainFrame = CGRectMake(self.mainFrame.origin.x, self.mainFrame.origin.y, newW, newH);
 }
 
 -(void) destroy {

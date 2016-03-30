@@ -679,14 +679,7 @@
             
             CGFloat orgW = wetl.mainFrame.size.width;
             
-            wetl.left_parenth.frame = CGRectMake(wetl.left_parenth.frame.origin.x, wetl.left_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
-            [wetl.left_parenth setNeedsDisplay];
-            wetl.right_parenth.frame = CGRectMake(wetl.right_parenth.frame.origin.x, wetl.right_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
-            [wetl.right_parenth setNeedsDisplay];
-            
-            CGFloat newW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
-            CGFloat newH = wetl.content.mainFrame.size.height;
-            wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+            [wetl updateFrame:YES];
             
             if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
                 [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
@@ -976,14 +969,7 @@
             
             [wetl.content updateElementSize:E];
             
-            wetl.left_parenth.frame = CGRectMake(wetl.left_parenth.frame.origin.x, wetl.left_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
-            [wetl.left_parenth setNeedsDisplay];
-            wetl.right_parenth.frame = CGRectMake(wetl.right_parenth.frame.origin.x, wetl.right_parenth.frame.origin.y, wetl.content.mainFrame.size.height / PARENTH_HW_R, wetl.content.mainFrame.size.height);
-            [wetl.right_parenth setNeedsDisplay];
-            
-            CGFloat newW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
-            CGFloat newH = wetl.content.mainFrame.size.height;
-            wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newW, newH);
+            [wetl updateFrame:YES];
             
             if (maxh < wetl.mainFrame.size.height && idx > 0) {
                 maxh = wetl.mainFrame.size.height;
@@ -1256,13 +1242,13 @@
             
             if (p.roll == ROLL_NUMERATOR) {
                 CGRect f = p.frame;
-                f.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (f.size.height / 2.0);
+                f.origin.y = self.numerFrame.origin.y + (self.numerFrame.size.height / 2.0) - (f.size.height / 2.0);
                 f.origin.x = curNumX;
                 p.frame = f;
                 curNumX += f.size.width;
             } else if (p.roll == ROLL_DENOMINATOR) {
                 CGRect f = p.frame;
-                f.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (f.size.height / 2.0);
+                f.origin.y = self.denomFrame.origin.y + (self.denomFrame.size.height / 2.0) - (f.size.height / 2.0);
                 f.origin.x = curDenX;
                 p.frame = f;
                 curDenX += f.size.width;

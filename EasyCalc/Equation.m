@@ -245,11 +245,11 @@
         if ([cb isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *layer = cb;
             if (layer.expo != nil) {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~with expo>>>>", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll);
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
                 [self dumpObj:layer.expo];
                 NSLog(@"%s~%@~id:%i~<<<<<<<<<", __FUNCTION__, layer, layer.guid);
             } else {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.frame.origin.x, layer.frame.origin.y, layer.frame.size.width, layer.frame.size.height);
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
             }
         } else if ([cb isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *bar = cb;
@@ -704,7 +704,7 @@
                     [parent.children removeLastObject];
                     parent.bar = nil;
                     /* Remove denom */
-                    if (parent.roll == ROLL_ROOT || parent.roll == ROLL_ROOT_ROOT || parent.roll == ROLL_EXPO_ROOT) { // Just move down numer
+                    if (parent.roll == ROLL_ROOT || parent.roll == ROLL_ROOT_ROOT || parent.roll == ROLL_EXPO_ROOT || parent.roll == ROLL_WRAP_ROOT) { // Just move down numer
                         parent.numerFrame = CGRectOffset(parent.numerFrame, 0.0, fontH);
                         parent.denomFrame = CGRectMake(0, 0, 0, 0);
                         parent.mainFrame = parent.numerFrame;
@@ -719,6 +719,18 @@
                             EquationTextLayer *parLayer = parent.parent;
                             [parLayer updateFrameBaseOnExpo];
                             [parLayer.parent updateFrameHeightS1:parLayer];
+                        } else if (parent.roll == ROLL_WRAP_ROOT) {
+                            WrapedEqTxtLyr *wetl = parent.parent;
+                            CGFloat orgW = wetl.mainFrame.size.width;
+                            
+                            [wetl updateFrame:YES];
+                            
+                            if ([wetl.parent isMemberOfClass:[EquationBlock class]]) {
+                                [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+                                [(EquationBlock *)wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgW :wetl.roll];
+                            } else {
+                                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+                            }
                         }
                         [e.root adjustElementPosition];
                         id b = [parent.children lastObject];

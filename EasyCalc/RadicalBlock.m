@@ -25,11 +25,11 @@
 @synthesize ancestor;
 @synthesize rootNum;
 
--(id) init : (Equation *)e {
+-(id) init :(Equation *)e :(ViewController *)vc {
     self = [super init];
     if (self) {
         self.ancestor = e;
-        self.delegate = e;
+        self.delegate = vc;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.content = [[EquationBlock alloc] init:e];
         self.guid = e.guid_cnt++;
@@ -44,11 +44,11 @@
     return self;
 }
 
--(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt {
+-(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt :(ViewController *)vc {
     self = [super init];
     if (self) {
         self.ancestor = e;
-        self.delegate = e;
+        self.delegate = vc;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = e.guid_cnt++;
         self.name = @"radical";

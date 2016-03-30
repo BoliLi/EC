@@ -27,6 +27,7 @@
 @property CGRect mainFrame;
 @property int is_base_expo;
 
--(id) init : (NSString *)str : (CGPoint)inputPos : (Equation *)E;
+-(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc;
+-(void) updateFrame:(BOOL)updateParenth;
 -(void) destroy;
 @end

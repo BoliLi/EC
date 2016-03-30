@@ -308,6 +308,18 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
             
             drawFrame(vc, view, wetl.content);
         }
+        
+        if ([cb isMemberOfClass: [Parentheses class]]) {
+            Parentheses *p = cb;
+            CALayer *layer = [CALayer layer];
+            layer.contentsScale = [UIScreen mainScreen].scale;
+            layer.name = @"drawframe";
+            layer.backgroundColor = [UIColor clearColor].CGColor;
+            layer.frame = p.frame;
+            layer.delegate = vc;
+            [view.layer addSublayer: layer];
+            [layer setNeedsDisplay];
+        }
     }
 }
 

@@ -24,14 +24,14 @@
 @synthesize ancestor;
 @synthesize l_or_r;
 
--(id) init : (CGPoint)inputPos : (Equation *)E : (int)l_r {
+-(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc {
     self = [super init];
     if (self) {
         self.ancestor = E;
-        self.delegate = E;
+        self.delegate = vc;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = E.guid_cnt++;
-        self.name = @"parenthesis";
+        self.name = @"parentheses";
         self.hidden = NO;
         self.roll = E.curRoll;
         self.l_or_r = l_r;

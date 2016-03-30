@@ -23,8 +23,8 @@
 @property int is_base_expo;
 @property EquationTextLayer *rootNum;
 
--(id) init : (Equation *)e;
--(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt;
+-(id) init :(Equation *)e :(ViewController *)vc;
+-(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt :(ViewController *)vc;
 -(void) updateFrame;
 -(void) destroy;
 @end

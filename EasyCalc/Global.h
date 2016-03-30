@@ -17,7 +17,6 @@
 #define TEXTLAYER_NUM 0
 #define TEXTLAYER_OP 1
 #define TEXTLAYER_EMPTY 2
-#define TEXTLAYER_PARENTH 3
 #define ROLL_ROOT 0
 #define ROLL_NUMERATOR 1
 #define ROLL_DENOMINATOR 2
@@ -28,7 +27,7 @@
 #define LEFT_PARENTH 0
 #define RIGHT_PARENTH 1
 
-#define PARENTH_HW_R 4.0
+#define PARENTH_HW_R 5.0
 
 #define IS_BASE 0
 #define IS_EXPO 1

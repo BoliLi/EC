@@ -23,13 +23,13 @@
 @synthesize ancestor;
 @synthesize is_base_expo;
 
--(id) init : (Equation *)e {
+-(id) init :(Equation *)e :(ViewController *)vc {
     self = [super init];
     if (self) {
         self.ancestor = e;
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = e.guid_cnt++;
-        self.delegate = e;
+        self.delegate = vc;
         
         if (e.curFont == e.baseFont) {
             is_base_expo = IS_BASE;
