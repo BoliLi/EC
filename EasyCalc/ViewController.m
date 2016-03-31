@@ -2908,6 +2908,10 @@ static UIView *testview;
 
 - (void)handleCleanBtnClick {
     [gCurE.root destroy];
+    gCurE.curMode = MODE_INPUT;
+    gCurE.curRoll = ROLL_NUMERATOR;
+    gCurE.insertCIdx = 0;
+    gCurE.txtInsIdx = 0;
     gCurE.guid_cnt = 0;
     gCurE.zoomInLvl = 0;
     gCurE.baseFont = [UIFont systemFontOfSize: getBaseFontSize(gCurE.zoomInLvl)];

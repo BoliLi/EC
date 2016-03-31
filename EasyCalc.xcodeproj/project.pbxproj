@@ -48,6 +48,7 @@
 		A997B6881C4D1D3F00DD2C31 /* DDParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6701C4D1D3F00DD2C31 /* DDParser.m */; };
 		A997B6891C4D1D3F00DD2C31 /* DDTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6721C4D1D3F00DD2C31 /* DDTypes.m */; };
 		A997B68A1C4D1D3F00DD2C31 /* NSString+DDMathParsing.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6741C4D1D3F00DD2C31 /* NSString+DDMathParsing.m */; };
+		A9D841551CAC2D1900E88760 /* CalcBoard.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D841541CAC2D1900E88760 /* CalcBoard.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -153,6 +154,8 @@
 		A997B6721C4D1D3F00DD2C31 /* DDTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTypes.m; sourceTree = "<group>"; };
 		A997B6731C4D1D3F00DD2C31 /* NSString+DDMathParsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DDMathParsing.h"; sourceTree = "<group>"; };
 		A997B6741C4D1D3F00DD2C31 /* NSString+DDMathParsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DDMathParsing.m"; sourceTree = "<group>"; };
+		A9D841531CAC2D1900E88760 /* CalcBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalcBoard.h; sourceTree = "<group>"; };
+		A9D841541CAC2D1900E88760 /* CalcBoard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CalcBoard.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -235,6 +238,8 @@
 				A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */,
 				A98556531C7F270300B8103C /* Parentheses.h */,
 				A98556541C7F270300B8103C /* Parentheses.m */,
+				A9D841531CAC2D1900E88760 /* CalcBoard.h */,
+				A9D841541CAC2D1900E88760 /* CalcBoard.m */,
 			);
 			path = EasyCalc;
 			sourceTree = "<group>";
@@ -476,6 +481,7 @@
 				A96223241BFF122A0059FF51 /* RadicalBlock.m in Sources */,
 				A96223271BFF124B0059FF51 /* FractionBarLayer.m in Sources */,
 				A96223361BFF161C0059FF51 /* DisplayView.m in Sources */,
+				A9D841551CAC2D1900E88760 /* CalcBoard.m in Sources */,
 				A997B67A1C4D1D3F00DD2C31 /* _DDParserTerm.m in Sources */,
 				A98556551C7F270300B8103C /* Parentheses.m in Sources */,
 				A997B6751C4D1D3F00DD2C31 /* _DDDecimalFunctions.m in Sources */,
