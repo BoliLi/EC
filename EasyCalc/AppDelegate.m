@@ -19,7 +19,7 @@
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    gEquationList = [NSMutableArray array];
+    gCalcBoardList = [NSMutableArray array];
     
     NSLog(@"%s%i>~%.2f~%.2f~~~~~~~~~", __FUNCTION__, __LINE__, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height);
     
@@ -39,9 +39,9 @@
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
-    [user setInteger:gCurEqIdx forKey:@"gCurEqIdx"];
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurE];
-    [user setObject:data forKey:[NSString stringWithFormat:@"equation%li", (long)gCurEqIdx]];
+    [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
+    [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
     [user synchronize];
 }
 
@@ -57,9 +57,9 @@
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     // Saves changes in the application's managed object context before the application terminates.
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
-    [user setInteger:gCurEqIdx forKey:@"gCurEqIdx"];
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurE];
-    [user setObject:data forKey:[NSString stringWithFormat:@"equation%li", (long)gCurEqIdx]];
+    [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
+    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
+    [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
     [user synchronize];
     [self saveContext];
 }

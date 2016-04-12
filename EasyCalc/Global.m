@@ -15,15 +15,16 @@
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
+#import "CalcBoard.h"
 
 
-NSMutableArray *gEquationList;
-NSInteger gCurEqIdx = 0;
-Equation *gCurE;
-CGFloat gBaseCharWidthTbl[3][16];
-CGFloat gExpoCharWidthTbl[3][16];
+NSMutableArray *gCalcBoardList;
+NSInteger gCurCBIdx = 0;
+CalcBoard *gCurCB;
+CGFloat gCharWidthTbl[4][16];
+CGFloat gCharHeightTbl[4];
 
-@implementation NSMutableArray (Reverse)
+@implementation NSMutableArray (EasyCalc)
 - (void)reverse {
     if ([self count] <= 1)
         return;
@@ -37,170 +38,100 @@ CGFloat gExpoCharWidthTbl[3][16];
         j--;
     }
 }
+
+
 @end
 
-int getBaseFontSize(int level) {
+int getFontSize(int level) {
     if (level == 0) {
         return 30;
     } else if (level == 1) {
-        return 20;
-    } else {
         return 15;
+    } else if (level == 2) {
+        return 7;
+    } else {
+        return 4;
     }
 }
 
-void initCharWidthTbl(void) {
-    
-    for (int j = 0; j < 3; j++) {
-        int i, baseFS = getBaseFontSize(j);
+void initCharSizeTbl(void) {
+    for (int j = 0; j < 4; j++) {
+        int i, fontSize = getFontSize(j);
+        UIFont *font = [UIFont systemFontOfSize:fontSize];
         
-        UIFont *baseFont = [UIFont systemFontOfSize:baseFS];
-        UIFont *superscriptFont = [UIFont systemFontOfSize:baseFS/2];
+        gCharHeightTbl[j] = font.lineHeight;
         
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)baseFont.fontName, baseFont.pointSize, NULL);
+        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
         for (i = 0; i < 10; i++) {
             NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-            gBaseCharWidthTbl[j][i] = [attStr size].width;
+            gCharWidthTbl[j][i] = [attStr size].width;
         }
         
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"+"];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"-"];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"×"];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@"("];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         attStr = [[NSMutableAttributedString alloc] initWithString:@")"];
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gBaseCharWidthTbl[j][i++] = [attStr size].width;
-        
-        CFRelease(ctFont);
-        
-        ctFont = CTFontCreateWithName((CFStringRef)superscriptFont.fontName, superscriptFont.pointSize, NULL);
-        for (i = 0; i < 10; i++) {
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-            gExpoCharWidthTbl[j][i] = [attStr size].width;
-        }
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"+"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"-"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"×"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"("];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@")"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gExpoCharWidthTbl[j][i++] = [attStr size].width;
+        gCharWidthTbl[j][i++] = [attStr size].width;
         
         CFRelease(ctFont);
     }
-    
 }
 
-CGFloat getCharWidth(int level, int base_expo, NSString *s) {
-    if (base_expo == IS_BASE) {
-        if ([s isEqual:@"0"]) {
-            return gBaseCharWidthTbl[level][0];
-        } else if ([s isEqual:@"1"]) {
-            return gBaseCharWidthTbl[level][1];
-        } else if ([s isEqual:@"2"]) {
-            return gBaseCharWidthTbl[level][2];
-        } else if ([s isEqual:@"3"]) {
-            return gBaseCharWidthTbl[level][3];
-        } else if ([s isEqual:@"4"]) {
-            return gBaseCharWidthTbl[level][4];
-        } else if ([s isEqual:@"5"]) {
-            return gBaseCharWidthTbl[level][5];
-        } else if ([s isEqual:@"6"]) {
-            return gBaseCharWidthTbl[level][6];
-        } else if ([s isEqual:@"7"]) {
-            return gBaseCharWidthTbl[level][7];
-        } else if ([s isEqual:@"8"]) {
-            return gBaseCharWidthTbl[level][8];
-        } else if ([s isEqual:@"9"]) {
-            return gBaseCharWidthTbl[level][9];
-        } else if ([s isEqual:@"."]) {
-            return gBaseCharWidthTbl[level][10];
-        } else if ([s isEqual:@"+"]) {
-            return gBaseCharWidthTbl[level][11];
-        } else if ([s isEqual:@"-"]) {
-            return gBaseCharWidthTbl[level][12];
-        } else if ([s isEqual:@"×"]) {
-            return gBaseCharWidthTbl[level][13];
-        } else if ([s isEqual:@"("]) {
-            return gBaseCharWidthTbl[level][14];
-        } else if ([s isEqual:@")"]) {
-            return gBaseCharWidthTbl[level][15];
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return 0.0;
-        }
+CGFloat getCharWidth(int level, NSString *s) {
+    if ([s isEqual:@"0"]) {
+        return gCharWidthTbl[level][0];
+    } else if ([s isEqual:@"1"]) {
+        return gCharWidthTbl[level][1];
+    } else if ([s isEqual:@"2"]) {
+        return gCharWidthTbl[level][2];
+    } else if ([s isEqual:@"3"]) {
+        return gCharWidthTbl[level][3];
+    } else if ([s isEqual:@"4"]) {
+        return gCharWidthTbl[level][4];
+    } else if ([s isEqual:@"5"]) {
+        return gCharWidthTbl[level][5];
+    } else if ([s isEqual:@"6"]) {
+        return gCharWidthTbl[level][6];
+    } else if ([s isEqual:@"7"]) {
+        return gCharWidthTbl[level][7];
+    } else if ([s isEqual:@"8"]) {
+        return gCharWidthTbl[level][8];
+    } else if ([s isEqual:@"9"]) {
+        return gCharWidthTbl[level][9];
+    } else if ([s isEqual:@"."]) {
+        return gCharWidthTbl[level][10];
+    } else if ([s isEqual:@"+"]) {
+        return gCharWidthTbl[level][11];
+    } else if ([s isEqual:@"-"]) {
+        return gCharWidthTbl[level][12];
+    } else if ([s isEqual:@"×"]) {
+        return gCharWidthTbl[level][13];
+    } else if ([s isEqual:@"("]) {
+        return gCharWidthTbl[level][14];
+    } else if ([s isEqual:@")"]) {
+        return gCharWidthTbl[level][15];
     } else {
-        if ([s isEqual:@"0"]) {
-            return gExpoCharWidthTbl[level][0];
-        } else if ([s isEqual:@"1"]) {
-            return gExpoCharWidthTbl[level][1];
-        } else if ([s isEqual:@"2"]) {
-            return gExpoCharWidthTbl[level][2];
-        } else if ([s isEqual:@"3"]) {
-            return gExpoCharWidthTbl[level][3];
-        } else if ([s isEqual:@"4"]) {
-            return gExpoCharWidthTbl[level][4];
-        } else if ([s isEqual:@"5"]) {
-            return gExpoCharWidthTbl[level][5];
-        } else if ([s isEqual:@"6"]) {
-            return gExpoCharWidthTbl[level][6];
-        } else if ([s isEqual:@"7"]) {
-            return gExpoCharWidthTbl[level][7];
-        } else if ([s isEqual:@"8"]) {
-            return gExpoCharWidthTbl[level][8];
-        } else if ([s isEqual:@"9"]) {
-            return gExpoCharWidthTbl[level][9];
-        } else if ([s isEqual:@"."]) {
-            return gExpoCharWidthTbl[level][10];
-        } else if ([s isEqual:@"+"]) {
-            return gExpoCharWidthTbl[level][11];
-        } else if ([s isEqual:@"-"]) {
-            return gExpoCharWidthTbl[level][12];
-        } else if ([s isEqual:@"×"]) {
-            return gExpoCharWidthTbl[level][13];
-        } else if ([s isEqual:@"("]) {
-            return gExpoCharWidthTbl[level][14];
-        } else if ([s isEqual:@")"]) {
-            return gExpoCharWidthTbl[level][15];
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return 0.0;
-        }
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return 0.0;
     }
 }
 

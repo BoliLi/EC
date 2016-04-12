@@ -14,6 +14,7 @@
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
+#import "CalcBoard.h"
 
 @implementation WrapedEqTxtLyr
 @synthesize guid;
@@ -27,25 +28,23 @@
 @synthesize content;
 @synthesize left_parenth;
 @synthesize right_parenth;
+@synthesize fontLvl;
 
 -(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc {
     self = [super init];
     if (self) {
+        CalcBoard *calcB = E.par;
         self.ancestor = E;
         self.guid = E.guid_cnt++;
-        self.roll = E.curRoll;
-        
-        if (E.curFont == E.baseFont) {
-            is_base_expo = IS_BASE;
-        } else {
-            is_base_expo = IS_EXPO;
-        }
+        self.roll = calcB.curRoll;
+        self.is_base_expo = calcB.base_or_expo;
+        self.fontLvl = calcB.curFontLvl;
         
         CGPoint org = inputPos;
         CGFloat w = 0.0;
         
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: pfx];
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.curFont.fontName, E.curFont.pointSize, NULL);
+        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, pfx.length)];
         CGSize strSize = [attStr size];
         
@@ -54,14 +53,14 @@
         self.title.backgroundColor = [UIColor clearColor].CGColor;
         self.title.frame = CGRectMake(org.x, org.y, strSize.width, strSize.height);
         self.title.string = attStr;
-        [E.view.layer addSublayer:self.title];
+        [calcB.view.layer addSublayer:self.title];
         
         org.x += strSize.width;
         w += strSize.width;
         
         self.left_parenth = [[Parentheses alloc] init:org :E :LEFT_PARENTH :vc];
         self.left_parenth.parent = self;
-        [E.view.layer addSublayer:self.left_parenth];
+        [calcB.view.layer addSublayer:self.left_parenth];
         [self.left_parenth setNeedsDisplay];
         
         org.x += self.left_parenth.frame.size.width;
@@ -79,18 +78,18 @@
         
         layer.c_idx = 0;
         [self.content.children addObject:layer];
-        [E.view.layer addSublayer:layer];
-        E.curTxtLyr = layer;
-        E.curBlk = layer;
+        [calcB.view.layer addSublayer:layer];
+        calcB.curTxtLyr = layer;
+        calcB.curBlk = layer;
         
-        self.parent = E.curParent;
+        self.parent = calcB.curParent;
         
         org.x += layer.mainFrame.size.width;
         w += layer.mainFrame.size.width;
         
         self.right_parenth = [[Parentheses alloc] init:org :E :RIGHT_PARENTH :vc];
         self.right_parenth.parent = self;
-        [E.view.layer addSublayer:self.right_parenth];
+        [calcB.view.layer addSublayer:self.right_parenth];
         [self.right_parenth setNeedsDisplay];
         
         w += self.right_parenth.frame.size.width;
@@ -111,11 +110,10 @@
         self.content = [coder decodeObjectForKey:@"content"];
         self.left_parenth = [coder decodeObjectForKey:@"left_parenth"];
         self.right_parenth = [coder decodeObjectForKey:@"right_parenth"];
+        self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
     }
     return self;
 }
-
-
 
 - (void)encodeWithCoder:(NSCoder *)coder {
     [coder encodeInt:self.roll forKey:@"roll"];
@@ -126,6 +124,27 @@
     [coder encodeObject:self.content forKey:@"content"];
     [coder encodeObject:self.left_parenth forKey:@"left_parenth"];
     [coder encodeObject:self.right_parenth forKey:@"right_parenth"];
+    [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    WrapedEqTxtLyr *copy = [[[self class] allocWithZone :zone] init];
+    copy.c_idx = self.c_idx;
+    copy.roll = self.roll;
+    
+    copy.title = [[CATextLayer alloc] init];
+    copy.title.contentsScale = [UIScreen mainScreen].scale;
+    copy.title.backgroundColor = [UIColor clearColor].CGColor;
+    copy.title.frame = self.title.frame;
+    copy.title.string = [self.title.string copy];
+    
+    copy.content = [self.content copy];
+    copy.left_parenth = [self.left_parenth copy];
+    copy.right_parenth = [self.right_parenth copy];
+    copy.mainFrame = self.mainFrame;
+    copy.is_base_expo = self.is_base_expo;
+    copy.fontLvl = self.fontLvl;
+    return copy;
 }
 
 -(void) updateFrame:(BOOL)updateParenth {
@@ -139,6 +158,45 @@
     CGFloat newW = self.title.frame.size.width + self.left_parenth.frame.size.width + self.content.mainFrame.size.width + self.right_parenth.frame.size.width;
     CGFloat newH = self.content.mainFrame.size.height;
     self.mainFrame = CGRectMake(self.mainFrame.origin.x, self.mainFrame.origin.y, newW, newH);
+}
+
+- (void)updateCopyBlock:(Equation *)e {
+    ancestor = e;
+    guid = e.guid_cnt++;
+    content.parent = self;
+    
+    CalcBoard *calcB = e.par;
+    [calcB.view.layer addSublayer:self.title];
+    
+    [content updateCopyBlock:e];
+    left_parenth.parent = self;
+    [left_parenth updateCopyBlock:e];
+    right_parenth.parent = self;
+    [right_parenth updateCopyBlock:e];
+}
+
+- (void)updateSize:(int)lvl {
+    if (self.fontLvl == lvl) {
+        return;
+    }
+    
+    UIFont *font = [UIFont systemFontOfSize:getFontSize(lvl)];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.title.string string]];
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+    CFRelease(ctFont);
+    
+    CGRect f = self.title.frame;
+    f.size = [attStr size];
+    self.title.frame = f;
+    
+    self.title.string = attStr;
+    
+    [self.content updateSize:lvl];
+    
+    [self updateFrame:YES];
+    
+    self.fontLvl = lvl;
 }
 
 -(void) destroy {

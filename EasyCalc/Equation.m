@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "Utils.h"
+#import "CalcBoard.h"
 
 
 @class EquationTextLayer;
@@ -23,26 +24,10 @@
 @implementation Equation
 @synthesize guid_cnt;
 @synthesize root;
-@synthesize curParent;
-@synthesize curBlk;
-@synthesize curTxtLyr;
-@synthesize curRoll;
-@synthesize curMode;
-@synthesize baseFont;
-@synthesize superscriptFont;
-@synthesize curFont;
-@synthesize baseCharWidth;
-@synthesize baseCharHight;
-@synthesize expoCharWidth;
-@synthesize expoCharHight;
-@synthesize curFontH;
-@synthesize curFontW;
-@synthesize insertCIdx;
-@synthesize view;
-@synthesize txtInsIdx;
-@synthesize downLeftBasePoint;
-@synthesize hasResult;
-@synthesize zoomInLvl;
+@synthesize par;
+@synthesize equalsign;
+@synthesize result;
+@synthesize maxRootHeight;
 
 //-(id) init {
 //    self = [super init];
@@ -88,74 +73,131 @@
 //    return self;
 //}
 
--(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc {
+//-(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc {
+//    self = [super init];
+//    if (self) {
+//        guid_cnt = 0;
+//        curRoll = ROLL_NUMERATOR;
+//        curMode = MODE_INPUT;
+//        curTxtLyr = curBlk = nil;
+//        txtInsIdx = 0;
+//        downLeftBasePoint = downLeft;
+//        hasResult = NO;
+//        zoomInLvl = 0;
+//        
+//        baseFont = [UIFont systemFontOfSize: 30];
+//        superscriptFont = [UIFont systemFontOfSize:15];
+//        curFont = baseFont;
+//        
+//        baseCharWidth = gBaseCharWidthTbl[0][8];
+//        baseCharHight = baseFont.lineHeight;
+//        
+//        expoCharWidth = gExpoCharWidthTbl[0][8];
+//        expoCharHight = superscriptFont.lineHeight;
+//        
+//        curFontW = baseCharWidth;
+//        curFontH = baseCharHight;
+//        
+//        DisplayView *dspView = [[DisplayView alloc] initWithFrame:dspFrame];
+//        dspView.backgroundColor = [UIColor lightGrayColor];
+//        dspView.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 3.0);
+//        dspView.directionalLockEnabled = YES;
+//        dspView.bounces = NO;
+//        
+//        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
+//        tapGesture.numberOfTapsRequired = 1;
+//        tapGesture.numberOfTouchesRequired = 1;
+//        [dspView addGestureRecognizer:tapGesture];
+//        
+////        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeRight:)];
+////        right.numberOfTouchesRequired = 1;
+////        right.direction = UISwipeGestureRecognizerDirectionRight;
+////        [dspView addGestureRecognizer:right];
+////        
+////        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeLeft:)];
+////        left.numberOfTouchesRequired = 1;
+////        left.direction = UISwipeGestureRecognizerDirectionLeft;
+////        [dspView addGestureRecognizer:left];
+//        
+//        dspView.swipLBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+//        dspView.swipLBtn.titleLabel.font = [UIFont systemFontOfSize: 30];
+//        dspView.swipLBtn.showsTouchWhenHighlighted = YES;
+//        [dspView.swipLBtn setTitle:@"<" forState:UIControlStateNormal];
+//        dspView.swipLBtn.frame = CGRectMake(0, dspFrame.size.height / 2.0, 20, 20);
+//        [dspView.swipLBtn addTarget:vc action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+//        [dspView addSubview:dspView.swipLBtn];
+//        
+//        dspView.swipRBtn = [UIButton buttonWithType:UIButtonTypeSystem];
+//        dspView.swipRBtn.titleLabel.font = [UIFont systemFontOfSize: 30];
+//        dspView.swipRBtn.showsTouchWhenHighlighted = YES;
+//        [dspView.swipRBtn setTitle:@">" forState:UIControlStateNormal];
+//        dspView.swipRBtn.frame = CGRectMake(dspFrame.size.width - 20, dspFrame.size.height / 2.0, 20, 20);
+//        [dspView.swipRBtn addTarget:vc action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+//        [dspView addSubview:dspView.swipRBtn];
+//        
+//        CGPoint rootPos = CGPointMake(downLeft.x, downLeft.y - baseCharHight - 1.0);
+//        
+//        CALayer *clayer = [CALayer layer];
+//        clayer.contentsScale = [UIScreen mainScreen].scale;
+//        clayer.name = @"cursorLayer";
+//        clayer.hidden = NO;
+//        clayer.backgroundColor = [UIColor clearColor].CGColor;
+//        clayer.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, baseCharHight);
+//        clayer.delegate = vc;
+//        [dspView.layer addSublayer:clayer];
+//        
+//        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+//        anim.fromValue = [NSNumber numberWithBool:YES];
+//        anim.toValue = [NSNumber numberWithBool:NO];
+//        anim.duration = 0.5;
+//        anim.autoreverses = YES;
+//        anim.repeatCount = HUGE_VALF;
+//        [clayer addAnimation:anim forKey:nil];
+//        [clayer setNeedsDisplay];
+//
+//        root = [[EquationBlock alloc] init:rootPos :self];
+//        root.roll = ROLL_ROOT;
+//        root.parent = nil;
+//        root.ancestor = self;
+//        curParent = root;
+//
+//        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :rootPos :self :TEXTLAYER_EMPTY];
+//        layer.parent = root;
+//        root.numerFrame = layer.frame;
+//        root.mainFrame = layer.frame;
+//        
+//        layer.c_idx = 0;
+//        [root.children addObject:layer];
+//        [dspView.layer addSublayer:layer];
+//        curTxtLyr = layer;
+//        curBlk = layer;
+//
+//        dspView.cursor = clayer;
+//        dspView.inpOrg = clayer.frame.origin;
+//        view = dspView;
+//        
+//        
+//    }
+//    return self;
+//}
+
+-(id) init : (CalcBoard *)calcB : (ViewController *)vc {
     self = [super init];
     if (self) {
         guid_cnt = 0;
-        curRoll = ROLL_NUMERATOR;
-        curMode = MODE_INPUT;
-        curTxtLyr = curBlk = nil;
-        txtInsIdx = 0;
-        downLeftBasePoint = downLeft;
-        hasResult = NO;
-        zoomInLvl = 0;
+        par = calcB;
+        equalsign = nil;
+        result = nil;
+        maxRootHeight = calcB.curFontH;
         
-        baseFont = [UIFont systemFontOfSize: 30];
-        superscriptFont = [UIFont systemFontOfSize:15];
-        curFont = baseFont;
+        CGPoint rootPos = CGPointMake(calcB.downLeftBasePoint.x, calcB.downLeftBasePoint.y - calcB.curFontH - 1.0);
         
-        baseCharWidth = gBaseCharWidthTbl[0][8];
-        baseCharHight = baseFont.lineHeight;
-        
-        expoCharWidth = gExpoCharWidthTbl[0][8];
-        expoCharHight = superscriptFont.lineHeight;
-        
-        curFontW = baseCharWidth;
-        curFontH = baseCharHight;
-        
-        DisplayView *dspView = [[DisplayView alloc] initWithFrame:dspFrame];
-        dspView.backgroundColor = [UIColor lightGrayColor];
-        UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
-        tapGesture.numberOfTapsRequired = 1;
-        tapGesture.numberOfTouchesRequired = 1;
-        [dspView addGestureRecognizer:tapGesture];
-        
-        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeRight:)];
-        right.numberOfTouchesRequired = 1;
-        right.direction = UISwipeGestureRecognizerDirectionRight;
-        [dspView addGestureRecognizer:right];
-        
-        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:vc action:@selector(handleDspViewSwipeLeft:)];
-        left.numberOfTouchesRequired = 1;
-        left.direction = UISwipeGestureRecognizerDirectionLeft;
-        [dspView addGestureRecognizer:left];
-        
-        CGPoint rootPos = CGPointMake(downLeft.x, downLeft.y - baseCharHight - 1.0);
-        
-        CALayer *clayer = [CALayer layer];
-        clayer.contentsScale = [UIScreen mainScreen].scale;
-        clayer.name = @"cursorLayer";
-        clayer.hidden = NO;
-        clayer.backgroundColor = [UIColor clearColor].CGColor;
-        clayer.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, baseCharHight);
-        clayer.delegate = vc;
-        [dspView.layer addSublayer:clayer];
-        
-        CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
-        anim.fromValue = [NSNumber numberWithBool:YES];
-        anim.toValue = [NSNumber numberWithBool:NO];
-        anim.duration = 0.5;
-        anim.autoreverses = YES;
-        anim.repeatCount = HUGE_VALF;
-        [clayer addAnimation:anim forKey:nil];
-        [clayer setNeedsDisplay];
-
         root = [[EquationBlock alloc] init:rootPos :self];
         root.roll = ROLL_ROOT;
         root.parent = nil;
         root.ancestor = self;
-        curParent = root;
-
+        calcB.curParent = root;
+        
         EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :rootPos :self :TEXTLAYER_EMPTY];
         layer.parent = root;
         root.numerFrame = layer.frame;
@@ -163,15 +205,9 @@
         
         layer.c_idx = 0;
         [root.children addObject:layer];
-        [dspView.layer addSublayer:layer];
-        curTxtLyr = layer;
-        curBlk = layer;
-
-        dspView.cursor = clayer;
-        dspView.inpOrg = clayer.frame.origin;
-        view = dspView;
-        
-        [self addObserver:self forKeyPath:@"curFont" options:NSKeyValueObservingOptionNew context:nil];
+        [calcB.view.layer addSublayer:layer];
+        calcB.curTxtLyr = layer;
+        calcB.curBlk = layer;
     }
     return self;
 }
@@ -182,28 +218,9 @@
     if (self) {
         self.guid_cnt = [coder decodeIntForKey:@"guid_cnt"];
         self.root = [coder decodeObjectForKey:@"root"];
-        self.curParent = [coder decodeObjectForKey:@"curParent"];
-        self.curBlk = [coder decodeObjectForKey:@"curBlk"];
-        self.curTxtLyr = [coder decodeObjectForKey:@"curTxtLyr"];
-        self.curRoll = [coder decodeIntForKey:@"curRoll"];
-        self.curMode = [coder decodeIntForKey:@"curMode"];
-        self.baseFont = [coder decodeObjectForKey:@"baseFont"];
-        self.superscriptFont = [coder decodeObjectForKey:@"superscriptFont"];
-        self.curFont = [coder decodeObjectForKey:@"curFont"];
-        self.baseCharWidth = [coder decodeDoubleForKey:@"baseCharWidth"];
-        self.baseCharHight = [coder decodeDoubleForKey:@"baseCharHight"];
-        self.expoCharWidth = [coder decodeDoubleForKey:@"expoCharWidth"];
-        self.expoCharHight = [coder decodeDoubleForKey:@"expoCharHight"];
-        self.curFontH = [coder decodeDoubleForKey:@"curFontH"];
-        self.curFontW = [coder decodeDoubleForKey:@"curFontW"];
-        self.insertCIdx = [coder decodeIntegerForKey:@"insertCIdx"];
-        self.view = [coder decodeObjectForKey:@"view"];
-        self.txtInsIdx = [coder decodeIntForKey:@"txtInsIdx"];
-        self.downLeftBasePoint = [coder decodeCGPointForKey:@"downLeftBasePoint"];
-        self.hasResult = [coder decodeBoolForKey:@"hasResult"];
-        self.zoomInLvl = [coder decodeIntForKey:@"zoomInLvl"];
-        
-        [self addObserver:self forKeyPath:@"curFont" options:NSKeyValueObservingOptionNew context:nil];
+        self.equalsign = [coder decodeObjectForKey:@"equalsign"];
+        self.result = [coder decodeObjectForKey:@"result"];
+        self.maxRootHeight = [coder decodeDoubleForKey:@"maxRootHeight"];
     }
     return self;
 }
@@ -212,28 +229,11 @@
 {
     [coder encodeInt:self.guid_cnt forKey:@"guid_cnt"];
     [coder encodeObject:self.root forKey:@"root"];
-    [coder encodeObject:self.curParent forKey:@"curParent"];
-    [coder encodeObject:self.curBlk forKey:@"curBlk"];
-    if (self.curTxtLyr != nil) {
-        [coder encodeObject:self.curTxtLyr forKey:@"curTxtLyr"];
+    if (self.result != nil) {
+        [coder encodeObject:self.equalsign forKey:@"equalsign"];
+        [coder encodeObject:self.result forKey:@"result"];
     }
-    [coder encodeInt:self.curRoll forKey:@"curRoll"];
-    [coder encodeInt:self.curMode forKey:@"curMode"];
-    [coder encodeObject:self.baseFont forKey:@"baseFont"];
-    [coder encodeObject:self.superscriptFont forKey:@"superscriptFont"];
-    [coder encodeObject:self.curFont forKey:@"curFont"];
-    [coder encodeDouble:self.baseCharWidth forKey:@"baseCharWidth"];
-    [coder encodeDouble:self.baseCharHight forKey:@"baseCharHight"];
-    [coder encodeDouble:self.expoCharWidth forKey:@"expoCharWidth"];
-    [coder encodeDouble:self.expoCharHight forKey:@"expoCharHight"];
-    [coder encodeDouble:self.curFontH forKey:@"curFontH"];
-    [coder encodeDouble:self.curFontW forKey:@"curFontW"];
-    [coder encodeInteger:self.insertCIdx forKey:@"insertCIdx"];
-    [coder encodeObject:self.view forKey:@"view"];
-    [coder encodeInt:self.txtInsIdx forKey:@"txtInsIdx"];
-    [coder encodeCGPoint:self.downLeftBasePoint forKey:@"downLeftBasePoint"];
-    [coder encodeBool:self.hasResult forKey:@"hasResult"];
-    [coder encodeInt:self.zoomInLvl forKey:@"zoomInLvl"];
+    [coder encodeDouble:self.maxRootHeight forKey:@"maxRootHeight"];
 }
 
 -(void) dumpObj : (EquationBlock *)parentBlock {
@@ -253,7 +253,7 @@
             }
         } else if ([cb isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *bar = cb;
-            NSLog(@"%s~%@~id:%i~Cidx:%lu~~~~~~~~~", __FUNCTION__, bar, bar.guid, (unsigned long)bar.c_idx);
+            NSLog(@"%s~%@~id:%i~Cidx:%lu~%@~~~~~~~~", __FUNCTION__, bar, bar.guid, (unsigned long)bar.c_idx, NSStringFromCGRect(bar.frame));
         } else if ([cb isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *block = cb;
             [self dumpObj:block];
@@ -279,13 +279,21 @@
 
 -(void) dumpEverything : (EquationBlock *)eb {
     [self dumpObj:eb];
-    NSLog(@"%s>~%@~%@~%@~%i~%lu~%i~~~~~", __FUNCTION__, self.curParent, self.curBlk, self.curTxtLyr, self.curMode, (unsigned long)self.insertCIdx, self.txtInsIdx);
+    NSLog(@"%s>~%@~%@~%@~%i~%lu~%i~~~~~", __FUNCTION__, self.par.curParent, self.par.curBlk, self.par.curTxtLyr, self.par.curMode, (unsigned long)self.par.insertCIdx, self.par.txtInsIdx);
 }
 
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point {
     
     if (!CGRectContainsPoint(rootB.mainFrame, point)) {
-        return nil;
+        if (self.result != nil && CGRectContainsPoint(self.result.frame, point)) {
+            return self.result;
+        } else {
+            return nil;
+        }
+    }
+    
+    if (rootB.bar != nil && CGRectContainsPoint(rootB.bar.frame, point)) {
+        return rootB;
     }
     
     for (id child in rootB.children) {
@@ -321,10 +329,7 @@
                 }
             }
         } else if ([child isMemberOfClass: [FractionBarLayer class]]) {
-            FractionBarLayer *bar = child;
-            if (CGRectContainsPoint(bar.frame, point)) {
-                return bar;
-            }
+            continue;
         } else if ([child isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wtl = child;
             if (CGRectContainsPoint(wtl.mainFrame, point)) {
@@ -350,44 +355,38 @@
 -(void)removeElement:(id)blk {
     if ([blk isMemberOfClass: [EquationBlock class]]) {
         EquationBlock *eb = blk;
-        Equation *e = eb.ancestor;
+        CalcBoard *calcB = self.par;
         
-        CGFloat fontH = 0.0;
-        
-        if (eb.is_base_expo == IS_BASE) {
-            fontH = e.baseCharHight;
-        } else {
-            fontH = e.expoCharHight;
-        }
+        CGFloat fontH = gCharHeightTbl[eb.fontLvl];
         
         if (eb.roll == ROLL_ROOT) {
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
             [eb.children removeAllObjects];
             [eb.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             eb.mainFrame = eb.numerFrame = l.frame;
             eb.denomFrame = CGRectMake(0, 0, 0, 0);
             eb.numerTopHalf = eb.numerBtmHalf = l.frame.size.height / 2.0;
             eb.denomTopHalf = eb.denomBtmHalf = 0.0;
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else if (eb.roll == ROLL_ROOT_ROOT) {
             RadicalBlock *rb = eb.parent;
             CGFloat orgWidth = rb.frame.size.width;
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
             [eb.children removeAllObjects];
             [eb.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             eb.mainFrame = eb.numerFrame = l.frame;
             eb.denomFrame = CGRectMake(0, 0, 0, 0);
             eb.numerTopHalf = eb.numerBtmHalf = l.frame.size.height / 2.0;
@@ -398,21 +397,21 @@
             
             [rb.parent updateFrameWidth:rb.frame.size.width - orgWidth :rb.roll];
             [rb.parent updateFrameHeightS1:rb];
-            [e.root adjustElementPosition];
+            [self.root adjustElementPosition];
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else if (eb.roll == ROLL_EXPO_ROOT) {
             EquationTextLayer *parLayer = eb.parent;
             CGFloat orgWidth = parLayer.mainFrame.size.width;
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = eb;
             l.c_idx = 0;
             [eb destroy];
             [eb.children removeAllObjects];
             [eb.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             eb.mainFrame = eb.numerFrame = l.frame;
             eb.denomFrame = CGRectMake(0, 0, 0, 0);
             eb.numerTopHalf = eb.numerBtmHalf = l.frame.size.height / 2.0;
@@ -422,9 +421,9 @@
             
             [parLayer.parent updateFrameWidth:parLayer.mainFrame.size.width - orgWidth :parLayer.roll];
             [parLayer.parent updateFrameHeightS1:parLayer];
-            [e.root adjustElementPosition];
+            [self.root adjustElementPosition];
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else if (eb.roll == ROLL_WRAP_ROOT) {
             // To be done
         } else if ([eb.parent isMemberOfClass: [EquationBlock class]]) {
@@ -432,59 +431,59 @@
             CGFloat orgWidth = eb.mainFrame.size.width;
             if (parent.children.count == 1) {
                 CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = ROLL_NUMERATOR;
                 l.parent = parent;
                 l.c_idx = 0;
                 [eb destroy];
                 [parent.children removeObjectAtIndex:0];
                 [parent.children addObject:l];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else {
                 if (eb.c_idx == parent.children.count - 1 && [[parent.children objectAtIndex:eb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                     /* Case:  @ @
                               ---
                                *  */
                     CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-                    EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                     l.roll = eb.roll;
                     l.parent = parent;
                     l.c_idx = eb.c_idx;
                     [eb destroy];
                     [parent.children removeLastObject];
                     [parent.children addObject:l];
-                    [e.view.layer addSublayer:l];
+                    [calcB.view.layer addSublayer:l];
                     
                     [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                     [parent updateFrameHeightS1:l];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
-                    cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                    cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
                 } else if(eb.c_idx == 0 && [[parent.children objectAtIndex:eb.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                     /* Case:  *
                              ---
                              @ @ */
                     CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
-                    EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                     l.roll = eb.roll;
                     l.parent = parent;
                     l.c_idx = 0;
                     [eb destroy];
                     [parent.children removeObjectAtIndex:0];
                     [parent.children insertObject:l atIndex:0];
-                    [e.view.layer addSublayer: l];
+                    [calcB.view.layer addSublayer: l];
                     
                     [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                     [parent updateFrameHeightS1:l];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
-                    cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                    cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
                 } else {
                     /* Case:  @ @
                               ---
@@ -497,48 +496,48 @@
                         
                         [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
-                        [e.root adjustElementPosition];
+                        [self.root adjustElementPosition];
                         
                         id b = parent.children.firstObject;
                         if ([b isMemberOfClass:[EquationBlock class]]) {
                             EquationBlock *eb1 = b;
-                            e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = eb1.roll;
+                            calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = eb1.roll;
                         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                             EquationTextLayer *l = b;
-                            e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                            e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                            e.curTxtLyr = l;
-                            e.curRoll = l.roll;
-                            e.txtInsIdx = 0;
+                            calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                            calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                            calcB.curTxtLyr = l;
+                            calcB.curRoll = l.roll;
+                            calcB.txtInsIdx = 0;
                         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                             RadicalBlock *rb1 = b;
-                            e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = rb1.roll;
+                            calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = rb1.roll;
                         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                             WrapedEqTxtLyr *wetl = b;
-                            e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = wetl.roll;
+                            calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = wetl.roll;
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = p.roll;
+                            calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = p.roll;
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                             return;
                         }
-                        e.curMode = MODE_INSERT;
-                        e.insertCIdx = 0;
-                        e.curParent = parent;
-                        e.curBlk = b;
+                        calcB.curMode = MODE_INSERT;
+                        calcB.insertCIdx = 0;
+                        calcB.curParent = parent;
+                        calcB.curBlk = b;
                     } else if ([[parent.children objectAtIndex:eb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                         [eb destroy];
                         [parent.children removeObjectAtIndex:eb.c_idx];
@@ -546,48 +545,48 @@
                         
                         [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:[parent.children objectAtIndex:eb.c_idx]];
-                        [e.root adjustElementPosition];
+                        [self.root adjustElementPosition];
                         
                         id b = [parent.children objectAtIndex:eb.c_idx];
                         if ([b isMemberOfClass:[EquationBlock class]]) {
                             EquationBlock *eb1 = b;
-                            e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = eb1.roll;
+                            calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = eb1.roll;
                         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                             EquationTextLayer *l = b;
-                            e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                            e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                            e.curTxtLyr = l;
-                            e.curRoll = l.roll;
-                            e.txtInsIdx = 0;
+                            calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                            calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                            calcB.curTxtLyr = l;
+                            calcB.curRoll = l.roll;
+                            calcB.txtInsIdx = 0;
                         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                             RadicalBlock *rb1 = b;
-                            e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = rb1.roll;
+                            calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = rb1.roll;
                         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                             WrapedEqTxtLyr *wetl = b;
-                            e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = wetl.roll;
+                            calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = wetl.roll;
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                            e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                            e.curTxtLyr = nil;
-                            e.curRoll = p.roll;
+                            calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                            calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                            calcB.curTxtLyr = nil;
+                            calcB.curRoll = p.roll;
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                             return;
                         }
-                        e.curMode = MODE_INSERT;
-                        e.insertCIdx = eb.c_idx;
-                        e.curParent = parent;
-                        e.curBlk = b;
+                        calcB.curMode = MODE_INSERT;
+                        calcB.insertCIdx = eb.c_idx;
+                        calcB.curParent = parent;
+                        calcB.curBlk = b;
                     } else {
                         [eb destroy];
                         [parent.children removeObjectAtIndex:eb.c_idx];
@@ -596,27 +595,27 @@
                         id b = [parent.children objectAtIndex:eb.c_idx - 1];
                         [parent updateFrameWidth:-orgWidth :eb.roll];
                         [parent updateFrameHeightS1:b];
-                        [e.root adjustElementPosition];
+                        [self.root adjustElementPosition];
                         
                         if ([b isMemberOfClass:[EquationBlock class]]) {
                             EquationBlock *eb = b;
                             if (eb.bar != nil) {
-                                cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                             } else {
-                                cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                             }
                         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                             EquationTextLayer *l = b;
-                            cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                             RadicalBlock *rb = b;
-                            cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                             WrapedEqTxtLyr *wetl = b;
-                            cfgEqnBySlctBlk(e, wetl, CGPointMake(wetl.mainFrame.origin.x + wetl.mainFrame.size.width - 1.0, wetl.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, wetl, CGPointMake(wetl.mainFrame.origin.x + wetl.mainFrame.size.width - 1.0, wetl.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
@@ -633,16 +632,10 @@
             return;
         }
         EquationBlock *parent = l.parent;
-        Equation *e = l.ancestor;
+        CalcBoard *calcB = self.par;
         CGFloat orgWidth = l.mainFrame.size.width;
         
-        CGFloat fontH = 0.0;
-        
-        if (l.is_base_expo == IS_BASE) {
-            fontH = e.baseCharHight;
-        } else {
-            fontH = e.expoCharHight;
-        }
+        CGFloat fontH = gCharHeightTbl[l.fontLvl];
         
         if (parent.children.count == 1) {
             if (l.type == TEXTLAYER_EMPTY) {
@@ -658,7 +651,7 @@
                         parent.denomTopHalf = parent.denomBtmHalf = 0.0;
                     }
                 } else if (parent.roll == ROLL_ROOT_ROOT) {
-                    [e removeElement:parent.parent];
+                    [self removeElement:parent.parent];
                 } else if (parent.roll == ROLL_EXPO_ROOT) {
                     EquationTextLayer *parLayer = parent.parent;
                     [parent destroy];
@@ -666,29 +659,29 @@
                     [parLayer updateFrameBaseOnBase];
                     [parLayer.parent updateFrameWidth:-orgWidth :parLayer.roll];
                     [parLayer.parent updateFrameHeightS1:parLayer];
-                    [e.root adjustElementPosition];
-                    cfgEqnBySlctBlk(e, parLayer, CGPointMake(parLayer.frame.origin.x + parLayer.frame.size.width - 1.0, parLayer.frame.origin.y + 1.0));
+                    [self.root adjustElementPosition];
+                    cfgEqnBySlctBlk(self, parLayer, CGPointMake(parLayer.frame.origin.x + parLayer.frame.size.width - 1.0, parLayer.frame.origin.y + 1.0));
                 } else if (parent.roll == ROLL_WRAP_ROOT) {
-                    [e removeElement:parent.parent];
+                    [self removeElement:parent.parent];
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 }
             } else {
                 CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 el.roll = l.roll;
                 el.parent = parent;
                 el.c_idx = 0;
                 [l destroy];
                 [parent.children removeAllObjects];
                 [parent.children addObject:el];
-                [e.view.layer addSublayer: el];
+                [calcB.view.layer addSublayer: el];
                 
                 [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                 [parent updateFrameHeightS1:el];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
             }
         } else {
             if (l.c_idx == parent.children.count - 1 && [[parent.children objectAtIndex:l.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
@@ -732,27 +725,27 @@
                                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                             }
                         }
-                        [e.root adjustElementPosition];
+                        [self.root adjustElementPosition];
                         id b = [parent.children lastObject];
                         if ([b isMemberOfClass:[EquationBlock class]]) {
                             EquationBlock *eb = b;
                             if (eb.bar != nil) {
-                                cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                             } else {
-                                cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                             }
                         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                             EquationTextLayer *l = b;
-                            cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                             RadicalBlock *rb = b;
-                            cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                             WrapedEqTxtLyr *l = b;
-                            cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
@@ -797,46 +790,46 @@
                         
                         id b = [eb.children objectAtIndex:parent.c_idx + cnt - 2];
                         [eb updateFrameHeightS1:b];
-                        [e.root adjustElementPosition];
+                        [self.root adjustElementPosition];
                         if ([b isMemberOfClass:[EquationBlock class]]) {
                             EquationBlock *eb = b;
                             if (eb.bar != nil) {
-                                cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                             } else {
-                                cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                                cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                             }
                         } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                             EquationTextLayer *l = b;
-                            cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                             RadicalBlock *rb = b;
-                            cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                             WrapedEqTxtLyr *l = b;
-                            cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
                     }
                 } else {
                     CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                    EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                     el.roll = l.roll;
                     el.parent = parent;
                     el.c_idx = l.c_idx;
                     [l destroy];
                     [parent.children removeLastObject];
                     [parent.children addObject:el];
-                    [e.view.layer addSublayer: el];
+                    [calcB.view.layer addSublayer: el];
                     
                     [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                     [parent updateFrameHeightS1:el];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
-                    cfgEqnBySlctBlk(e, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
+                    cfgEqnBySlctBlk(self, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
                 }
             } else if(l.c_idx == 0 && [[parent.children objectAtIndex:l.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  *
@@ -846,34 +839,28 @@
                     if (parent.roll == ROLL_ROOT) {
                         return;  // Do nothing
                     } else {
-                        id pre = getPrevBlk(e, l);
+                        id pre = getPrevBlk(self, l);
                         if (pre != nil) {
                             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                                 EquationTextLayer *layer = pre;
                                 if (layer.is_base_expo == l.is_base_expo) {
-                                    (void)locaLastTxtLyr(e, pre);
+                                    (void)locaLastTxtLyr(self, pre);
                                 } else { //Switch from expo to base in a same text layer
-                                    e.curTxtLyr = layer;
-                                    e.curBlk = layer;
-                                    e.curParent = layer.parent;
-                                    e.curRoll = layer.roll;
-                                    e.curMode = MODE_INSERT;
-                                    e.insertCIdx = layer.c_idx + 1;
-                                    e.txtInsIdx = (int)layer.strLenTbl.count - 1;
+                                    calcB.curTxtLyr = layer;
+                                    calcB.curBlk = layer;
+                                    calcB.curParent = layer.parent;
+                                    calcB.curRoll = layer.roll;
+                                    calcB.curMode = MODE_INSERT;
+                                    calcB.insertCIdx = layer.c_idx + 1;
+                                    calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
                                     
-                                    if (layer.is_base_expo == IS_BASE) {
-                                        e.curFont = e.baseFont;
-                                    } else if (layer.is_base_expo == IS_EXPO) {
-                                        e.curFont = e.superscriptFont;
-                                    } else {
-                                        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                                    }
+                                    [calcB updateFontInfo:layer.fontLvl];
                                     
-                                    e.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
-                                    e.view.cursor.frame = CGRectMake(e.view.inpOrg.x, e.view.inpOrg.y, CURSOR_W, fontH);
+                                    calcB.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
+                                    calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, fontH);
                                 }
                             } else {
-                                (void)locaLastTxtLyr(e, pre);
+                                (void)locaLastTxtLyr(self, pre);
                             }
                         } else {
                             return;
@@ -882,20 +869,20 @@
                     
                 } else {
                     CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                    EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                    EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                     el.roll = l.roll;
                     el.parent = parent;
                     el.c_idx = l.c_idx;
                     [l destroy];
                     [parent.children removeObjectAtIndex:0];
                     [parent.children insertObject:el atIndex:0];
-                    [e.view.layer addSublayer: el];
+                    [calcB.view.layer addSublayer: el];
                     
                     [parent updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
                     [parent updateFrameHeightS1:el];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
-                    cfgEqnBySlctBlk(e, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
+                    cfgEqnBySlctBlk(self, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
                 }
             } else {
                 /* Case:  @ @
@@ -908,52 +895,52 @@
                     
                     [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = parent.children.firstObject;
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
                         if (l.type == TEXTLAYER_EMPTY || l.type == TEXTLAYER_NUM) {
-                            e.curTxtLyr = l;
+                            calcB.curTxtLyr = l;
                         } else {
-                            e.curTxtLyr = nil;
+                            calcB.curTxtLyr = nil;
                         }
-                        e.txtInsIdx = 0;
-                        e.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
+                        calcB.curRoll = l.roll;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl = b;
-                        e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = 0;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = 0;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else if ([[parent.children objectAtIndex:l.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                     [l destroy];
                     [parent.children removeObjectAtIndex:l.c_idx];
@@ -961,48 +948,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:l.c_idx]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = [parent.children objectAtIndex:l.c_idx];
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl = b;
-                        e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = l.c_idx;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = l.c_idx;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else {
                     [l destroy];
                     [parent.children removeObjectAtIndex:l.c_idx];
@@ -1011,27 +998,27 @@
                     id b = [parent.children objectAtIndex:l.c_idx - 1];
                     [parent updateFrameWidth:-orgWidth :l.roll];
                     [parent updateFrameHeightS1:b];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb = b;
                         if (eb.bar != nil) {
-                            cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                         } else {
-                            cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                         }
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb = b;
-                        cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1044,72 +1031,66 @@
             return;
         }
         EquationBlock *parent = rb.parent;
-        Equation *e = rb.ancestor;
+        CalcBoard *calcB = self.par;
         CGFloat orgWidth = rb.frame.size.width;
         
-        CGFloat fontH = 0.0;
-        
-        if (rb.is_base_expo == IS_BASE) {
-            fontH = e.baseCharHight;
-        } else {
-            fontH = e.expoCharHight;
-        }
+        CGFloat fontH = gCharHeightTbl[rb.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = parent;
             l.c_idx = 0;
             [rb destroy];
             [parent.children removeObjectAtIndex:0];
             [parent.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             
             [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
             [parent updateFrameHeightS1:l];
-            [e.root adjustElementPosition];
+            [self.root adjustElementPosition];
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else {
             if (rb.c_idx == parent.children.count - 1 && [[parent.children objectAtIndex:rb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  @ @
                           ---
                            *  */
                 CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = rb.roll;
                 l.parent = parent;
                 l.c_idx = rb.c_idx;
                 [rb destroy];
                 [parent.children removeLastObject];
                 [parent.children addObject:l];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else if(rb.c_idx == 0 && [[parent.children objectAtIndex:rb.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  *
                          ---
                          @ @ */
                 CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = rb.roll;
                 l.parent = parent;
                 l.c_idx = 0;
                 [rb destroy];
                 [parent.children removeObjectAtIndex:0];
                 [parent.children insertObject:l atIndex:0];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else {
                 /* Case:  @ @
                           ---
@@ -1121,48 +1102,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = parent.children.firstObject;
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl = b;
-                        e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = 0;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = 0;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else if ([[parent.children objectAtIndex:rb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                     [rb destroy];
                     [parent.children removeObjectAtIndex:rb.c_idx];
@@ -1170,48 +1151,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:rb.c_idx]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = [parent.children objectAtIndex:rb.c_idx];
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl = b;
-                        e.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = rb.c_idx;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = rb.c_idx;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else {
                     [rb destroy];
                     [parent.children removeObjectAtIndex:rb.c_idx];
@@ -1220,27 +1201,27 @@
                     id b = [parent.children objectAtIndex:rb.c_idx - 1];
                     [parent updateFrameWidth:-orgWidth :rb.roll];
                     [parent updateFrameHeightS1:b];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb = b;
                         if (eb.bar != nil) {
-                            cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                         } else {
-                            cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                         }
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb = b;
-                        cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1253,71 +1234,65 @@
             return;
         }
         EquationBlock *parent = wetl.parent;
-        Equation *e = wetl.ancestor;
+        CalcBoard *calcB = self.par;
         CGFloat orgWidth = wetl.mainFrame.size.width;
-        CGFloat fontH = 0.0;
-        
-        if (wetl.is_base_expo == IS_BASE) {
-            fontH = e.baseCharHight;
-        } else {
-            fontH = e.expoCharHight;
-        }
+        CGFloat fontH = gCharHeightTbl[wetl.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = parent;
             l.c_idx = 0;
             [wetl destroy];
             [parent.children removeObjectAtIndex:0];
             [parent.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             
             [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
             [parent updateFrameHeightS1:l];
-            [e.root adjustElementPosition];
+            [self.root adjustElementPosition];
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else {
             if (wetl.c_idx == parent.children.count - 1 && [[parent.children objectAtIndex:wetl.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  @ @
                           ---
                            *  */
                 CGPoint p = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = wetl.roll;
                 l.parent = parent;
                 l.c_idx = wetl.c_idx;
                 [wetl destroy];
                 [parent.children removeLastObject];
                 [parent.children addObject:l];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else if(wetl.c_idx == 0 && [[parent.children objectAtIndex:wetl.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  *
                          ---
                          @ @ */
                 CGPoint p = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = wetl.roll;
                 l.parent = parent;
                 l.c_idx = 0;
                 [wetl destroy];
                 [parent.children removeObjectAtIndex:0];
                 [parent.children insertObject:l atIndex:0];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else {
                 /* Case:  @ @
                           ---
@@ -1329,48 +1304,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :wetl.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = parent.children.firstObject;
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl1 = b;
-                        e.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl1.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl1.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = 0;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = 0;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else if ([[parent.children objectAtIndex:wetl.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                     [wetl destroy];
                     [parent.children removeObjectAtIndex:wetl.c_idx];
@@ -1378,48 +1353,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :wetl.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:wetl.c_idx]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = [parent.children objectAtIndex:wetl.c_idx];
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl1 = b;
-                        e.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl1.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl1.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = wetl.c_idx;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = wetl.c_idx;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else {
                     [wetl destroy];
                     [parent.children removeObjectAtIndex:wetl.c_idx];
@@ -1428,27 +1403,27 @@
                     id b = [parent.children objectAtIndex:wetl.c_idx - 1];
                     [parent updateFrameWidth:-orgWidth :wetl.roll];
                     [parent updateFrameHeightS1:b];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb = b;
                         if (eb.bar != nil) {
-                            cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                         } else {
-                            cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                         }
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb = b;
-                        cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 0.5, rb.frame.origin.y + 0.5));
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl1 = b;
-                        cfgEqnBySlctBlk(e, wetl1, CGPointMake(wetl1.mainFrame.origin.x + wetl1.mainFrame.size.width - 1.0, wetl1.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, wetl1, CGPointMake(wetl1.mainFrame.origin.x + wetl1.mainFrame.size.width - 1.0, wetl1.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1461,72 +1436,66 @@
             return;
         }
         EquationBlock *parent = parenth.parent;
-        Equation *e = parenth.ancestor;
+        CalcBoard *calcB = self.par;
         CGFloat orgWidth = parenth.frame.size.width;
         
-        CGFloat fontH = 0.0;
-        
-        if (parenth.is_base_expo == IS_BASE) {
-            fontH = e.baseCharHight;
-        } else {
-            fontH = e.expoCharHight;
-        }
+        CGFloat fontH = gCharHeightTbl[parent.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(parenth.frame.origin.x, parenth.frame.origin.y + parenth.frame.size.height - fontH);
-            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+            EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
             l.roll = ROLL_NUMERATOR;
             l.parent = parent;
             l.c_idx = 0;
             [parenth destroy];
             [parent.children removeObjectAtIndex:0];
             [parent.children addObject:l];
-            [e.view.layer addSublayer: l];
+            [calcB.view.layer addSublayer: l];
             
             [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
             [parent updateFrameHeightS1:l];
-            [e.root adjustElementPosition];
+            [self.root adjustElementPosition];
             
-            cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+            cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
         } else {
             if (parenth.c_idx == parent.children.count - 1 && [[parent.children objectAtIndex:parenth.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  @ @
                           ---
                            *  */
                 CGPoint p = CGPointMake(parenth.frame.origin.x, parenth.frame.origin.y + parenth.frame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = parenth.roll;
                 l.parent = parent;
                 l.c_idx = parenth.c_idx;
                 [parenth destroy];
                 [parent.children removeLastObject];
                 [parent.children addObject:l];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else if(parenth.c_idx == 0 && [[parent.children objectAtIndex:parenth.c_idx + 1] isMemberOfClass:[FractionBarLayer class]]) {
                 /* Case:  *
                          ---
                          @ @ */
                 CGPoint p = CGPointMake(parenth.frame.origin.x, parenth.frame.origin.y + parenth.frame.size.height - fontH);
-                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :e :TEXTLAYER_EMPTY];
+                EquationTextLayer *l = [[EquationTextLayer alloc] init:@"_" :p :self :TEXTLAYER_EMPTY];
                 l.roll = parenth.roll;
                 l.parent = parent;
                 l.c_idx = 0;
                 [parenth destroy];
                 [parent.children removeObjectAtIndex:0];
                 [parent.children insertObject:l atIndex:0];
-                [e.view.layer addSublayer: l];
+                [calcB.view.layer addSublayer: l];
                 
                 [parent updateFrameWidth:l.frame.size.width - orgWidth :l.roll];
                 [parent updateFrameHeightS1:l];
-                [e.root adjustElementPosition];
+                [self.root adjustElementPosition];
                 
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                cfgEqnBySlctBlk(self, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
             } else {
                 /* Case:  @ @
                           ---
@@ -1538,48 +1507,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :parenth.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:0]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = parent.children.firstObject;
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl1 = b;
-                        e.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl1.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl1.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = 0;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = 0;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else if ([[parent.children objectAtIndex:parenth.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                     [parenth destroy];
                     [parent.children removeObjectAtIndex:parenth.c_idx];
@@ -1587,48 +1556,48 @@
                     
                     [parent updateFrameWidth:-orgWidth :parenth.roll];
                     [parent updateFrameHeightS1:[parent.children objectAtIndex:parenth.c_idx]];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     id b = [parent.children objectAtIndex:parenth.c_idx];
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb1 = b;
-                        e.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = eb1.roll;
+                        calcB.view.inpOrg = CGPointMake(eb1.mainFrame.origin.x, eb1.numerFrame.origin.y + eb1.numerFrame.size.height - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(eb1.mainFrame.origin.x, eb1.mainFrame.origin.y, CURSOR_W, eb1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = eb1.roll;
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        e.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
-                        e.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
-                        e.curTxtLyr = l;
-                        e.curRoll = l.roll;
-                        e.txtInsIdx = 0;
+                        calcB.view.inpOrg = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                        calcB.view.cursor.frame = CGRectMake(l.frame.origin.x, l.frame.origin.y, CURSOR_W, l.frame.size.height);
+                        calcB.curTxtLyr = l;
+                        calcB.curRoll = l.roll;
+                        calcB.txtInsIdx = 0;
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb1 = b;
-                        e.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = rb1.roll;
+                        calcB.view.inpOrg = CGPointMake(rb1.frame.origin.x, rb1.frame.origin.y + rb1.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(rb1.frame.origin.x, rb1.frame.origin.y, CURSOR_W, rb1.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = rb1.roll;
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl1 = b;
-                        e.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = wetl1.roll;
+                        calcB.view.inpOrg = CGPointMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y + wetl1.mainFrame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(wetl1.mainFrame.origin.x, wetl1.mainFrame.origin.y, CURSOR_W, wetl1.mainFrame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = wetl1.roll;
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        e.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
-                        e.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
-                        e.curTxtLyr = nil;
-                        e.curRoll = p.roll;
+                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - fontH / 2.0);;
+                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.curTxtLyr = nil;
+                        calcB.curRoll = p.roll;
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         return;
                     }
-                    e.curMode = MODE_INSERT;
-                    e.insertCIdx = parenth.c_idx;
-                    e.curParent = parent;
-                    e.curBlk = b;
+                    calcB.curMode = MODE_INSERT;
+                    calcB.insertCIdx = parenth.c_idx;
+                    calcB.curParent = parent;
+                    calcB.curBlk = b;
                 } else {
                     [parenth destroy];
                     [parent.children removeObjectAtIndex:parenth.c_idx];
@@ -1637,27 +1606,27 @@
                     id b = [parent.children objectAtIndex:parenth.c_idx - 1];
                     [parent updateFrameWidth:-orgWidth :parenth.roll];
                     [parent updateFrameHeightS1:b];
-                    [e.root adjustElementPosition];
+                    [self.root adjustElementPosition];
                     
                     if ([b isMemberOfClass:[EquationBlock class]]) {
                         EquationBlock *eb = b;
                         if (eb.bar != nil) {
-                            cfgEqnBySlctBlk(e, eb.bar, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.bar.frame.origin.x + eb.bar.frame.size.width - 1.0, eb.bar.frame.origin.y + 1.0));
                         } else {
-                            cfgEqnBySlctBlk(e, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
+                            cfgEqnBySlctBlk(self, eb, CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width - 1.0, eb.mainFrame.origin.y + eb.mainFrame.size.height - 1.0));
                         }
                     } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
                         EquationTextLayer *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[RadicalBlock class]]) {
                         RadicalBlock *rb = b;
-                        cfgEqnBySlctBlk(e, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, rb, CGPointMake(rb.frame.origin.x + rb.frame.size.width - 1.0, rb.frame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *l = b;
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
+                        cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1669,18 +1638,26 @@
     }
 }
 
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
-    if ([keyPath isEqual: @"curFont"]) {
-        Equation *E = object;
-        UIFont *newFont = [change objectForKey:@"new"];
-        if (newFont == E.baseFont) {
-            E.curFontW = E.baseCharWidth;
-            E.curFontH = E.baseCharHight;
-        } else if (newFont == E.superscriptFont) {
-            E.curFontW = E.expoCharWidth;
-            E.curFontH = E.expoCharHight;
-        } else
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+-(void) moveUp : (CGFloat)distance {
+    [self.root moveUp:distance];
+    if (self.result != nil) {
+        self.result.frame = CGRectOffset(self.result.frame, 0.0, -distance);
+        self.result.mainFrame = self.result.frame;
+        self.equalsign.frame = CGRectOffset(self.equalsign.frame, 0.0, -distance);
+        self.equalsign.mainFrame = self.equalsign.frame;
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+}
+
+-(void) destroy {
+    [self.root destroy];
+    self.root = nil;
+    if (self.result != nil) {
+        [self.equalsign destroy];
+        self.equalsign = nil;
+        [self.result destroy];
+        self.result = nil;
     }
 }
 @end

@@ -29,4 +29,5 @@
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
 -(void)handleDspViewSwipeRight: (UISwipeGestureRecognizer *)gesture;
 -(void)handleDspViewSwipeLeft: (UISwipeGestureRecognizer *)gesture;
+-(void)btnClicked: (UIButton *)btn;
 @end

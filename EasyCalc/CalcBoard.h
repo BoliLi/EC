@@ -7,13 +7,32 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @class Equation;
 @class DisplayView;
+@class EquationTextLayer;
+@class ViewController;
 
 @interface CalcBoard : NSObject <NSCoding>
 @property DisplayView *view;
 @property NSMutableArray *eqList;
-@property int curEqIdx;
 @property Equation *curEq;
+@property CGPoint downLeftBasePoint;
+@property id curParent;
+@property id curBlk;
+@property EquationTextLayer *curTxtLyr;
+@property int curRoll;
+@property int curMode;
+@property UIFont *curFont;
+@property CGFloat curFontH;
+@property CGFloat curFontW;
+@property NSUInteger insertCIdx;
+@property int txtInsIdx;
+@property int base_or_expo;
+@property int curFontLvl;
+
+-(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
+-(void) resetParam;
+-(void)updateFontInfo: (int)lvl;
 @end

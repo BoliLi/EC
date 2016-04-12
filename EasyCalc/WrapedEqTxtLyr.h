@@ -26,8 +26,11 @@
 @property Parentheses *right_parenth;
 @property CGRect mainFrame;
 @property int is_base_expo;
+@property int fontLvl;
 
 -(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc;
 -(void) updateFrame:(BOOL)updateParenth;
+- (void)updateSize:(int)lvl;
+- (void)updateCopyBlock:(Equation *)e;
 -(void) destroy;
 @end

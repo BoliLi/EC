@@ -8,7 +8,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
-@interface FractionBarLayer : CALayer <NSCoding>
+@interface FractionBarLayer : CALayer <NSCoding, NSCopying>
 
 @property int guid;
 @property NSUInteger c_idx;
@@ -17,5 +17,6 @@
 @property int is_base_expo;
 
 -(id) init :(Equation *)e :(ViewController *)vc;
+- (void)updateCopyBlock:(Equation *)e;
 -(void) destroy;
 @end

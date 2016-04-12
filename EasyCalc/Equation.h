@@ -17,31 +17,18 @@
 @interface Equation : NSObject <NSCoding>
 @property int guid_cnt;
 @property EquationBlock *root;
-@property id curParent;
-@property id curBlk;
-@property EquationTextLayer *curTxtLyr;
-@property int curRoll;
-@property int curMode;
-@property UIFont *baseFont;
-@property UIFont *superscriptFont;
-@property UIFont *curFont;
-@property CGFloat baseCharWidth;
-@property CGFloat baseCharHight;
-@property CGFloat expoCharWidth;
-@property CGFloat expoCharHight;
-@property CGFloat curFontH;
-@property CGFloat curFontW;
-@property NSUInteger insertCIdx;
-@property DisplayView *view;
-@property int txtInsIdx;
-@property CGPoint downLeftBasePoint;
-@property BOOL hasResult;
-@property int zoomInLvl;
+@property (weak) CalcBoard *par;
+@property EquationTextLayer *equalsign;
+@property EquationTextLayer *result;
+@property CGFloat maxRootHeight;
 
 //-(id) init;
--(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
+//-(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
+-(id) init : (CalcBoard *)calcB : (ViewController *)vc;
 -(void) dumpObj : (EquationBlock *)parentBlock;
 -(void) dumpEverything : (EquationBlock *)eb;
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point;
 -(void)removeElement:(id)blk;
+-(void) moveUp : (CGFloat)distance;
+-(void) destroy;
 @end

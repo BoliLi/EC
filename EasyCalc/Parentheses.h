@@ -20,5 +20,6 @@
 @property int l_or_r;
 
 -(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc;
+- (void)updateCopyBlock:(Equation *)e;
 -(void) destroy;
 @end

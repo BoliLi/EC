@@ -28,6 +28,7 @@
 #define RIGHT_PARENTH 1
 
 #define PARENTH_HW_R 5.0
+#define FRACTION_BAR_H_R 3.0
 
 #define IS_BASE 0
 #define IS_EXPO 1
@@ -45,6 +46,11 @@
 #define MODE_DUMP_RADICAL 3
 #define MODE_DUMP_EXPO 4
 #define MODE_DUMP_WETL 5
+#define MODE_REPLACE_ROOT 6
+#define MODE_REPLACE_RADICAL 7
+#define MODE_REPLACE_EXPO 8
+#define MODE_REPLACE_WETL 9
+
 #define RADICAL_MARGINE_T 3.0
 #define RADICAL_MARGINE_B 1.0
 #define RADICAL_MARGINE_L_PERC 0.502
@@ -54,19 +60,19 @@
 #define BASECHARHIGHT 23.9
 #define CURSOR_W 3.0
 
-extern NSMutableArray *gEquationList;
-extern NSInteger gCurEqIdx;
-extern Equation *gCurE;
-extern CGFloat gBaseCharWidthTbl[3][16];
-extern CGFloat gExpoCharWidthTbl[3][16];
+extern NSMutableArray *gCalcBoardList;
+extern NSInteger gCurCBIdx;
+extern CalcBoard *gCurCB;
+extern CGFloat gCharWidthTbl[4][16];
+extern CGFloat gCharHeightTbl[4];
 
-@interface NSMutableArray (Reverse)
+@interface NSMutableArray (EasyCalc)
 - (void)reverse;
 @end
 
 
 void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock);
-int getBaseFontSize(int level);
-void initCharWidthTbl(void);
-CGFloat getCharWidth(int level, int base_expo, NSString *s);
+int getFontSize(int level);
+void initCharSizeTbl(void);
+CGFloat getCharWidth(int level, NSString *s);
 #endif /* Global_h */

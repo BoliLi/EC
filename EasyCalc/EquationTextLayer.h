@@ -22,11 +22,12 @@
 @property int is_base_expo;
 @property int type;
 @property NSMutableArray *strLenTbl;
+@property int fontLvl;
 
 //-(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
 //-(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t;
--(CGFloat) addNumChar:(NSString *)str;
+-(CGFloat) addNumStr:(NSString *)str;
 -(CGFloat) insertNumChar:(NSString *)str at:(int)idx;
 -(CGFloat) delNumCharAt:(int)idx;
 -(int) getTxtInsIdx: (CGPoint) p;
@@ -34,5 +35,7 @@
 -(void) updateFrameBaseOnExpo;
 -(BOOL) isExpoEmpty;
 -(void) updateStrLenTbl;
+- (void)updateSize:(int)lvl;
+- (void)updateCopyBlock:(Equation *)e;
 -(void) destroy;
 @end

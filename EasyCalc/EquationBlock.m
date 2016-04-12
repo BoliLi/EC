@@ -14,6 +14,7 @@
 #import "FractionBarLayer.h"
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
+#import "CalcBoard.h"
 
 @implementation EquationBlock
 @synthesize children;
@@ -31,20 +32,19 @@
 @synthesize denomTopHalf;
 @synthesize denomBtmHalf;
 @synthesize is_base_expo;
+@synthesize fontLvl;
 
 -(id) init : (Equation *)e {
     self = [super init];
     if (self) {
+        CalcBoard *calcB = e.par;
+        
         self.ancestor = e;
         self.children = [NSMutableArray array];
         self.guid = e.guid_cnt++;
-        self.roll = e.curRoll;
-        
-        if (e.curFont == e.baseFont) {
-            is_base_expo = IS_BASE;
-        } else {
-            is_base_expo = IS_EXPO;
-        }
+        self.roll = calcB.curRoll;
+        self.is_base_expo = calcB.base_or_expo;
+        self.fontLvl = calcB.curFontLvl;
     }
     return self;
 }
@@ -52,21 +52,19 @@
 -(id) init : (CGPoint)inputPos : (Equation *)e {
     self = [super init];
     if (self) {
+        CalcBoard *calcB = e.par;
+    
         self.ancestor = e;
         self.children = [NSMutableArray array];
         self.guid = e.guid_cnt++;
-        self.roll = e.curRoll;
+        self.roll = calcB.curRoll;
         
-        self.numerFrame = CGRectMake(inputPos.x, inputPos.y, e.curFontW, e.curFontH);
+        self.numerFrame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontW, calcB.curFontH);
         self.mainFrame = self.numerFrame;
-        self.numerTopHalf = e.curFontH / 2.0;
-        self.numerBtmHalf = e.curFontH / 2.0;
-        
-        if (e.curFont == e.baseFont) {
-            is_base_expo = IS_BASE;
-        } else {
-            is_base_expo = IS_EXPO;
-        }
+        self.numerTopHalf = calcB.curFontH / 2.0;
+        self.numerBtmHalf = calcB.curFontH / 2.0;
+        self.is_base_expo = calcB.base_or_expo;
+        self.fontLvl = calcB.curFontLvl;
     }
     return self;
 }
@@ -87,6 +85,7 @@
         self.denomTopHalf = [coder decodeDoubleForKey:@"denomTopHalf"];
         self.denomBtmHalf = [coder decodeDoubleForKey:@"denomBtmHalf"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+        self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
     }
     return self;
 }
@@ -107,12 +106,46 @@
     [coder encodeDouble:self.denomTopHalf forKey:@"denomTopHalf"];
     [coder encodeDouble:self.denomBtmHalf forKey:@"denomBtmHalf"];
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+    [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+}
+
+- (void)copyChildrenTo:(EquationBlock *)newEB {
+    NSMutableArray *copyArr = [NSMutableArray array];
+    
+    for (id blk in self.children) {
+        id cpy = [blk copy];
+        [copyArr addObject:cpy];
+        if ([blk isMemberOfClass:[FractionBarLayer class]]) {
+            newEB.bar = cpy;
+        }
+    }
+    newEB.children = copyArr;
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, copyArr);
+}
+
+- (id)copyWithZone:(NSZone *)zone {
+    EquationBlock *copy = [[[self class] allocWithZone :zone] init];
+    [self copyChildrenTo:copy];
+    copy.mainFrame = self.mainFrame;
+    copy.numerFrame = self.numerFrame;
+    copy.denomFrame = self.denomFrame;
+    copy.c_idx = self.c_idx;
+    copy.roll = self.roll;
+    copy.numerTopHalf = self.numerTopHalf;
+    copy.numerBtmHalf = self.numerBtmHalf;
+    copy.denomTopHalf = self.denomTopHalf;
+    copy.denomBtmHalf = self.denomBtmHalf;
+    copy.is_base_expo = self.is_base_expo;
+    copy.fontLvl = self.fontLvl;
+    return copy;
 }
 
 -(void) reorganize : (Equation *)anc : (ViewController *)vc {
     if (self.roll == ROLL_ROOT) {
         self.parent = nil;
     }
+    
+    CalcBoard *calcB = anc.par;
     
     NSUInteger cidx = 0;
     for (id b in self.children) {
@@ -128,7 +161,7 @@
             l.c_idx = cidx++;
             l.parent = self;
             l.ancestor = anc;
-            [anc.view.layer addSublayer:l];
+            [calcB.view.layer addSublayer:l];
             if (l.expo != nil) {
                 [l.expo reorganize:anc :vc];
             }
@@ -138,11 +171,11 @@
             rb.parent = self;
             rb.ancestor = anc;
             rb.delegate = vc;
-            [anc.view.layer addSublayer: rb];
+            [calcB.view.layer addSublayer: rb];
             [rb setNeedsDisplay];
             
             if (rb.rootNum != nil) {
-                [anc.view.layer addSublayer: rb.rootNum];
+                [calcB.view.layer addSublayer: rb.rootNum];
             }
             
             [rb.content reorganize:anc :vc];
@@ -153,18 +186,18 @@
             fb.parent = self;
             fb.ancestor = anc;
             fb.delegate = vc;
-            [anc.view.layer addSublayer: fb];
+            [calcB.view.layer addSublayer: fb];
             [fb setNeedsDisplay];
         } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = b;
             wetl.c_idx = cidx++;
             wetl.parent = self;
             wetl.ancestor = anc;
-            [anc.view.layer addSublayer: wetl.title];
-            [anc.view.layer addSublayer: wetl.left_parenth];
+            [calcB.view.layer addSublayer: wetl.title];
+            [calcB.view.layer addSublayer: wetl.left_parenth];
             wetl.left_parenth.delegate = vc;
             [wetl.left_parenth setNeedsDisplay];
-            [anc.view.layer addSublayer: wetl.right_parenth];
+            [calcB.view.layer addSublayer: wetl.right_parenth];
             wetl.left_parenth.delegate = vc;
             [wetl.right_parenth setNeedsDisplay];
             
@@ -175,8 +208,50 @@
             p.parent = self;
             p.ancestor = anc;
             p.delegate = vc;
-            [anc.view.layer addSublayer: p];
+            [calcB.view.layer addSublayer: p];
             [p setNeedsDisplay];
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    }
+}
+
+- (void)updateCopyBlock:(Equation *)e {
+    ancestor = e;
+    guid = e.guid_cnt++;
+    
+    for (id b in self.children) {
+        if ([b isMemberOfClass:[RadicalBlock class]]) {
+            RadicalBlock *rb = b;
+            
+            rb.parent = self;
+            [rb updateCopyBlock:e];
+        } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
+            FractionBarLayer *fb = b;
+            
+            bar = fb;
+            fb.parent = self;
+            [fb updateCopyBlock:e];
+        } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *etl = b;
+            
+            etl.parent = self;
+            [etl updateCopyBlock:e];
+        } else if ([b isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock *eb = b;
+            
+            eb.parent = self;
+            [eb updateCopyBlock:e];
+        } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            
+            wetl.parent = self;
+            [wetl updateCopyBlock:e];
+        } else if ([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            
+            p.parent = self;
+            [p updateCopyBlock:e];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -757,6 +832,7 @@
             wetl.left_parenth.frame = CGRectOffset(wetl.left_parenth.frame, 0.0, -distance);
             [wetl.content moveUp:distance];
             wetl.right_parenth.frame = CGRectOffset(wetl.right_parenth.frame, 0.0, -distance);
+            wetl.mainFrame = CGRectOffset(wetl.mainFrame, 0.0, -distance);
         } else if ([block isMemberOfClass: [Parentheses class]]) {
             Parentheses *p = block;
             p.frame = CGRectOffset(p.frame, 0.0, -distance);
@@ -765,7 +841,7 @@
     }
 }
 
--(void) updateElementSize: (Equation *)E {
+-(void) updateSize:(int)lvl {
     CGFloat nTop = 0.0, nBtm = 0.0, dTop = 0.0, dBtm = 0.0, nWidth = 0.0, dWidth = 0.0;
     CGFloat hstack[32];
     CGFloat maxh = 0.0;
@@ -774,40 +850,8 @@
     for (id block in self.children) {
         if ([block isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *l = block;
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[l.string string]];
             
-            if (l.is_base_expo == IS_BASE) {
-                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.baseFont.fontName, E.baseFont.pointSize, NULL);
-                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
-                CFRelease(ctFont);
-                
-                CGRect f = l.frame;
-                f.size = [attStr size];
-                l.frame = f;
-                
-                l.string = attStr;
-                
-                if (l.expo != nil) {
-                    [l.expo updateElementSize:E];
-                    [l updateFrameBaseOnBase];
-                } else {
-                    l.mainFrame = l.frame;
-                }
-            } else {
-                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
-                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
-                CFRelease(ctFont);
-                
-                CGRect f = l.frame;
-                f.size = [attStr size];
-                l.frame = f;
-                
-                l.string = attStr;
-                
-                l.mainFrame = l.frame;
-            }
-            
-            [l updateStrLenTbl];
+            [l updateSize:lvl];
             
             if (maxh < l.mainFrame.size.height && idx > 0) {
                 maxh = l.mainFrame.size.height;
@@ -837,15 +881,9 @@
         } else if ([block isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *fb = block;
             
-            if (fb.is_base_expo == IS_BASE) {
-                CGRect f = fb.frame;
-                f.size.height = E.baseCharHight / 2.0;
-                fb.frame = f;
-            } else {
-                CGRect f = fb.frame;
-                f.size.height = E.expoCharHight / 2.0;
-                fb.frame = f;
-            }
+            CGRect f = fb.frame;
+            f.size.height = gCharHeightTbl[lvl] / FRACTION_BAR_H_R;
+            fb.frame = f;
             
             while (idx > 0) {    // Handle unpaired parenth
                 Parentheses *lp = [pstack objectAtIndex:idx - 1];
@@ -872,7 +910,7 @@
         } else if ([block isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *eb = block;
             
-            [eb updateElementSize:E];
+            [eb updateSize:lvl];
             
             if (maxh < eb.mainFrame.size.height && idx > 0) {
                 maxh = eb.mainFrame.size.height;
@@ -902,24 +940,7 @@
         } else if ([block isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *rb = block;
             
-            [rb.content updateElementSize:E];
-            
-            [rb updateFrame];
-            
-            [rb setNeedsDisplay];
-            
-            if (rb.rootNum != nil) {
-                NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[rb.rootNum.string string]];
-                CTFontRef ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
-                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
-                CFRelease(ctFont);
-                
-                CGRect f = rb.rootNum.frame;
-                f.size = [attStr size];
-                rb.rootNum.frame = f;
-                
-                rb.rootNum.string = attStr;
-            }
+            [rb updateSize:lvl];
             
             if (maxh < rb.frame.size.height && idx > 0) {
                 maxh = rb.frame.size.height;
@@ -949,27 +970,7 @@
         } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = block;
             
-            CTFontRef ctFont;
-            if (wetl.is_base_expo == IS_BASE) {
-                ctFont = CTFontCreateWithName((CFStringRef)E.baseFont.fontName, E.baseFont.pointSize, NULL);
-            } else {
-                ctFont = CTFontCreateWithName((CFStringRef)E.superscriptFont.fontName, E.superscriptFont.pointSize, NULL);
-            }
-            
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[wetl.title.string string]];
-            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
-            
-            CGRect f = wetl.title.frame;
-            f.size = [attStr size];
-            wetl.title.frame = f;
-            
-            wetl.title.string = attStr;
-            
-            CFRelease(ctFont);
-            
-            [wetl.content updateElementSize:E];
-            
-            [wetl updateFrame:YES];
+            [wetl updateSize:lvl];
             
             if (maxh < wetl.mainFrame.size.height && idx > 0) {
                 maxh = wetl.mainFrame.size.height;
@@ -1060,6 +1061,8 @@
     self.numerFrame = CGRectMake(orgP.x, orgP.y, nWidth, nTop + nBtm);
     self.denomFrame = CGRectMake(orgP.x, orgP.y + self.numerFrame.size.height, dWidth, dTop + dBtm);
     self.mainFrame = CGRectUnion(self.numerFrame, self.denomFrame);
+    
+    self.fontLvl = lvl;
 }
 
 -(void) adjustElementPosition {

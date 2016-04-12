@@ -26,6 +26,7 @@
 @property CGFloat denomTopHalf;
 @property CGFloat denomBtmHalf;
 @property int is_base_expo;
+@property int fontLvl;
 
 -(id) init : (Equation *)e;
 -(id) init : (CGPoint)inputPos : (Equation *)e;
@@ -36,7 +37,9 @@
 -(void) updateCIdx;
 -(void) destroy;
 -(void) moveUp : (CGFloat)distance;
--(void) updateElementSize: (Equation *)E;
 -(void) adjustElementPosition;
 -(void) reorganize : (Equation *)anc : (ViewController *)vc;
+- (void)updateSize:(int)lvl;
+- (void)updateCopyBlock:(Equation *)e;
+- (void)copyChildrenTo:(EquationBlock *)newEB;
 @end

@@ -8,7 +8,15 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DisplayView : UIView <NSCoding>
+@class ViewController;
+@class CalcBoard;
+
+@interface DisplayView : UIScrollView <NSCoding>
 @property CALayer *cursor;
 @property CGPoint inpOrg;
+@property UIButton *swipLBtn;
+@property UIButton *swipRBtn;
+@property (weak) CalcBoard *par;
+
+-(id) init : (CalcBoard *)calcB : (CGRect)dspFrame : (ViewController *)vc;
 @end
