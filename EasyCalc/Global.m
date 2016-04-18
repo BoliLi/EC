@@ -54,6 +54,18 @@ int getFontSize(int level) {
     }
 }
 
+CGFloat getLineWidth(int level) {
+    if (level == 0) {
+        return 2.0;
+    } else if (level == 1) {
+        return 1.0;
+    } else if (level == 2) {
+        return 0.5;
+    } else {
+        return 0.5;
+    }
+}
+
 void initCharSizeTbl(void) {
     for (int j = 0; j < 4; j++) {
         int i, fontSize = getFontSize(j);
@@ -250,6 +262,10 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
             layer.delegate = vc;
             [view.layer addSublayer: layer];
             [layer setNeedsDisplay];
+            
+            if (p.expo != nil) {
+                drawFrame(vc, view, p.expo);
+            }
         }
     }
 }

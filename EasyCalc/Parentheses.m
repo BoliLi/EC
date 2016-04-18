@@ -24,6 +24,9 @@
 @synthesize is_base_expo;
 @synthesize ancestor;
 @synthesize l_or_r;
+@synthesize expo;
+@synthesize mainFrame;
+@synthesize fontLvl;
 
 -(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc {
     self = [super init];
@@ -39,8 +42,11 @@
         self.roll = calcB.curRoll;
         self.l_or_r = l_r;
         self.is_base_expo = calcB.base_or_expo;
+        self.expo = nil;
         
         self.frame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
+        self.mainFrame = self.frame;
+        self.fontLvl = calcB.curFontLvl;
     }
     return self;
 }
@@ -53,6 +59,9 @@
         self.roll = [coder decodeIntForKey:@"roll"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.l_or_r = [coder decodeIntForKey:@"l_or_r"];
+        self.expo = [coder decodeObjectForKey:@"expo"];
+        self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
+        self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
     }
     return self;
 }
@@ -64,6 +73,11 @@
     [coder encodeInt:self.roll forKey:@"roll"];
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeInt:self.l_or_r forKey:@"l_or_r"];
+    if (self.expo != nil) {
+        [coder encodeObject:self.expo forKey:@"expo"];
+    }
+    [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
+    [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -78,6 +92,11 @@
     copy.contentsScale = [UIScreen mainScreen].scale;
     copy.name = [self.name copy];
     copy.hidden = NO;
+    if (self.expo != nil) {
+        copy.expo = [self.expo copy];
+    }
+    copy.mainFrame = self.mainFrame;
+    copy.fontLvl = self.fontLvl;
     return copy;
 }
 
@@ -85,12 +104,40 @@
     ancestor = e;
     guid = e.guid_cnt++;
     
+    if (expo != nil) {
+        expo.parent = self;
+        [expo updateCopyBlock:e];
+    }
+    
     CalcBoard *calcB = e.par;
     [calcB.view.layer addSublayer:self];
     [self setNeedsDisplay];
 }
 
+-(void) updateFrameBaseOnBase {
+    if (self.expo != nil) {
+        CGRect frame = self.expo.mainFrame;
+        
+        frame.origin.y = self.frame.origin.y + gCharHeightTbl[self.expo.fontLvl] / 2.0 - frame.size.height;
+        frame.origin.x = self.frame.origin.x + self.frame.size.width;
+        self.expo.mainFrame = frame;
+        self.mainFrame = CGRectUnion(frame, self.frame);
+    } else {
+        self.mainFrame = self.frame;
+    }
+}
+
+-(void) updateFrameBaseOnExpo {
+    CGRect f = self.frame;
+    f.origin.x = self.expo.mainFrame.origin.x - f.size.width;
+    f.origin.y = self.expo.mainFrame.origin.y + self.expo.mainFrame.size.height - gCharHeightTbl[self.expo.fontLvl] / 2.0;
+    self.mainFrame = CGRectUnion(f, self.expo.mainFrame);
+}
+
 -(void) destroy {
+    if (self.expo != nil) {
+        [self.expo destroy];
+    }
     [self removeFromSuperlayer];
 }
 @end

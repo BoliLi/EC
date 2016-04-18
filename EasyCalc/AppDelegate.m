@@ -10,6 +10,7 @@
 #import "Global.h"
 #import "Equation.h"
 #import "ViewController.h"
+#import "CalcBoard.h"
 
 @interface AppDelegate ()
 
@@ -47,6 +48,14 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
+    [gCurCB.view.cursor removeAllAnimations];
+    CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+    anim.fromValue = [NSNumber numberWithBool:YES];
+    anim.toValue = [NSNumber numberWithBool:NO];
+    anim.duration = 0.5;
+    anim.autoreverses = YES;
+    anim.repeatCount = HUGE_VALF;
+    [gCurCB.view.cursor addAnimation:anim forKey:nil];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {

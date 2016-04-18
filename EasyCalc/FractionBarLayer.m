@@ -23,6 +23,7 @@
 @synthesize parent;
 @synthesize ancestor;
 @synthesize is_base_expo;
+@synthesize fontLvl;
 
 -(id) init :(Equation *)e :(ViewController *)vc {
     self = [super init];
@@ -34,6 +35,7 @@
         self.guid = e.guid_cnt++;
         self.delegate = vc;
         is_base_expo = calcB.base_or_expo;
+        fontLvl = calcB.curFontLvl;
     }
     return self;
 }
@@ -44,6 +46,7 @@
     if (self) {
         self.guid = [coder decodeIntForKey:@"guid"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
+        self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
     }
     return self;
 }
@@ -53,6 +56,7 @@
     [super encodeWithCoder:coder];
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
+    [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -64,6 +68,7 @@
     copy.contentsScale = [UIScreen mainScreen].scale;
     copy.name = [self.name copy];
     copy.hidden = NO;
+    copy.fontLvl = self.fontLvl;
     return copy;
 }
 

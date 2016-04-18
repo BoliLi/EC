@@ -12,8 +12,6 @@
 #import <CoreText/CoreText.h>
 #import "ViewController.h"
 
-
-#define TEXTLAYER_SPACING 3.0
 #define TEXTLAYER_NUM 0
 #define TEXTLAYER_OP 1
 #define TEXTLAYER_EMPTY 2
@@ -73,6 +71,7 @@ extern CGFloat gCharHeightTbl[4];
 
 void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock);
 int getFontSize(int level);
+CGFloat getLineWidth(int level);
 void initCharSizeTbl(void);
 CGFloat getCharWidth(int level, NSString *s);
 #endif /* Global_h */

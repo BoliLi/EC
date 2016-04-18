@@ -18,8 +18,13 @@
 @property int roll;
 @property int is_base_expo;
 @property int l_or_r;
+@property EquationBlock *expo;
+@property CGRect mainFrame;
+@property int fontLvl;
 
 -(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;
+-(void) updateFrameBaseOnBase;
+-(void) updateFrameBaseOnExpo;
 -(void) destroy;
 @end

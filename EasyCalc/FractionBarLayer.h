@@ -15,6 +15,7 @@
 @property (weak) id parent;
 @property (weak) Equation *ancestor;
 @property int is_base_expo;
+@property int fontLvl;
 
 -(id) init :(Equation *)e :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;

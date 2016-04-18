@@ -268,8 +268,14 @@
             [self dumpObj:wtl.content];
             NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, wtl, wtl.guid);
         } else if ([cb isMemberOfClass: [Parentheses class]]) {
-            Parentheses *block = cb;
-            NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]~~~~~", __FUNCTION__, block, block.guid, (unsigned long)block.c_idx, block.roll, block.frame.origin.x, block.frame.origin.y, block.frame.size.width, block.frame.size.height);
+            Parentheses *p = cb;
+            if (p.expo != nil) {
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
+                [self dumpObj:p.expo];
+                NSLog(@"%s~%@~id:%i~<<<<<<<<<", __FUNCTION__, p, p.guid);
+            } else {
+                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
+            }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
@@ -342,8 +348,19 @@
             }
         } else if ([child isMemberOfClass: [Parentheses class]]) {
             Parentheses *p = child;
-            if (CGRectContainsPoint(p.frame, point)) {
-                return p;
+            EquationBlock *expo = p.expo;
+            if (p.expo != nil) {
+                if (CGRectContainsPoint(p.mainFrame, point)) { // In the main frame
+                    if (CGRectContainsPoint(expo.mainFrame, point)) { // In expo
+                        return [self lookForElementByPoint :expo :point];
+                    } else { // In base or blank
+                        return p;
+                    }
+                }
+            } else {
+                if (CGRectContainsPoint(p.mainFrame, point)) { // In the main frame
+                    return p;
+                }
             }
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -615,7 +632,7 @@
                             cfgEqnBySlctBlk(self, wetl, CGPointMake(wetl.mainFrame.origin.x + wetl.mainFrame.size.width - 1.0, wetl.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
@@ -745,7 +762,7 @@
                             cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
@@ -809,7 +826,7 @@
                             cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                         } else if ([b isMemberOfClass:[Parentheses class]]) {
                             Parentheses *p = b;
-                            cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                            cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                         } else {
                             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                         }
@@ -844,7 +861,7 @@
                             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                                 EquationTextLayer *layer = pre;
                                 if (layer.is_base_expo == l.is_base_expo) {
-                                    (void)locaLastTxtLyr(self, pre);
+                                    (void)locaLastLyr(self, pre);
                                 } else { //Switch from expo to base in a same text layer
                                     calcB.curTxtLyr = layer;
                                     calcB.curBlk = layer;
@@ -860,7 +877,7 @@
                                     calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, fontH);
                                 }
                             } else {
-                                (void)locaLastTxtLyr(self, pre);
+                                (void)locaLastLyr(self, pre);
                             }
                         } else {
                             return;
@@ -1018,7 +1035,7 @@
                         cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1221,7 +1238,7 @@
                         cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1423,7 +1440,7 @@
                         cfgEqnBySlctBlk(self, wetl1, CGPointMake(wetl1.mainFrame.origin.x + wetl1.mainFrame.size.width - 1.0, wetl1.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -1437,7 +1454,7 @@
         }
         EquationBlock *parent = parenth.parent;
         CalcBoard *calcB = self.par;
-        CGFloat orgWidth = parenth.frame.size.width;
+        CGFloat orgWidth = parenth.mainFrame.size.width;
         
         CGFloat fontH = gCharHeightTbl[parent.fontLvl];
         
@@ -1626,7 +1643,7 @@
                         cfgEqnBySlctBlk(self, l, CGPointMake(l.mainFrame.origin.x + l.mainFrame.size.width - 1.0, l.mainFrame.origin.y + 1.0));
                     } else if ([b isMemberOfClass:[Parentheses class]]) {
                         Parentheses *p = b;
-                        cfgEqnBySlctBlk(self, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 0.5, p.frame.origin.y + 0.5));
+                        cfgEqnBySlctBlk(self, p, CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width - 0.5, p.mainFrame.origin.y + 0.5));
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }

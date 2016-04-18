@@ -9,11 +9,11 @@
 #ifndef Utils_h
 #define Utils_h
 
-EquationTextLayer *locaLastTxtLyr(Equation *e, id blk);
+id locaLastLyr(Equation *e, id blk);
 //EquationTextLayer *findPrevTxtLayer(Equation *e, id blk);
 id getPrevBlk(Equation *E, id curBlk);
 void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint);
 bool rectContainsRect(CGRect rect1, CGRect rect2);
-NSMutableString *equationToString(EquationBlock *parent);
+NSMutableString *equationToString(EquationBlock *parent, int *i);
 NSNumber *calculate(NSMutableString *input);
 #endif /* Utils_h */

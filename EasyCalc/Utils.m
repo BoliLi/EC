@@ -24,7 +24,7 @@
 #import "DDMathOperator.h"
 #import "DDMathOperatorSet.h"
 
-EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
+id locaLastLyr(Equation *e, id blk) {
 //    if ([blk isMemberOfClass:[EquationTextLayer class]]) {
 //        EquationTextLayer *layer = blk;
 //        if (layer.expo == nil) {
@@ -53,8 +53,12 @@ EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
             EquationBlock *eb = ((WrapedEqTxtLyr *)blk).content;
             blk = eb.children.lastObject;
         } else if ([blk isMemberOfClass:[Parentheses class]]) {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return nil;
+            Parentheses *p = blk;
+            if (p.expo != nil) {
+                blk = p.expo.children.lastObject;
+            } else {
+                break;
+            }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             return nil;
@@ -62,37 +66,142 @@ EquationTextLayer *locaLastTxtLyr(Equation *e, id blk) {
     } while (blk != nil);
     
     if (blk != nil) {
-        EquationTextLayer *layer = blk;
-        EquationBlock *par = layer.parent;
-        CalcBoard *calcB = e.par;
-        calcB.curTxtLyr = layer;
-        calcB.curBlk = layer;
-        calcB.curParent = layer.parent;
-        calcB.curRoll = layer.roll;
-        if (layer.c_idx == par.children.count - 1) {
-            calcB.curMode = MODE_INPUT;
-        } else {
-            calcB.curMode = MODE_INSERT;
+        if ([blk isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *layer = blk;
+            EquationBlock *par = layer.parent;
+            CalcBoard *calcB = e.par;
+            calcB.curTxtLyr = layer;
+            calcB.curBlk = layer;
+            calcB.curParent = layer.parent;
+            calcB.curRoll = layer.roll;
+            if (layer.c_idx == par.children.count - 1) {
+                calcB.curMode = MODE_INPUT;
+            } else {
+                calcB.curMode = MODE_INSERT;
+            }
+            
+            calcB.insertCIdx = layer.c_idx + 1;
+            calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
+            
+            calcB.base_or_expo = layer.is_base_expo;
+            [calcB updateFontInfo:layer.fontLvl];
+            
+            if (layer.type == TEXTLAYER_EMPTY) {
+                calcB.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
+                calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, calcB.curFontH);
+            } else {
+                calcB.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
+                calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, calcB.curFontH);
+            }
+        } else { //[Parentheses class]
+            Parentheses *p = blk;
+            EquationBlock *par = p.parent;
+            CalcBoard *calcB = e.par;
+            calcB.curTxtLyr = nil;
+            calcB.curBlk = p;
+            calcB.curParent = par;
+            calcB.curRoll = p.roll;
+            if (p.c_idx == par.children.count - 1) {
+                calcB.curMode = MODE_INPUT;
+            } else {
+                calcB.curMode = MODE_INSERT;
+            }
+            
+            calcB.insertCIdx = p.c_idx + 1;
+            calcB.txtInsIdx = 1;
+            
+            calcB.base_or_expo = p.is_base_expo;
+            [calcB updateFontInfo:p.fontLvl];
+            
+            calcB.view.inpOrg = CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width, p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0);
+            calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, calcB.curFontH);
         }
         
-        calcB.insertCIdx = layer.c_idx + 1;
-        calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
-        
-        calcB.base_or_expo = layer.is_base_expo;
-        [calcB updateFontInfo:layer.fontLvl];
-        
-        if (layer.type == TEXTLAYER_EMPTY) {
-            calcB.view.inpOrg = CGPointMake(layer.frame.origin.x, layer.frame.origin.y);
-            calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, calcB.curFontH);
-        } else {
-            calcB.view.inpOrg = CGPointMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y);
-            calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, calcB.view.inpOrg.y, CURSOR_W, calcB.curFontH);
-        }
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
     
     return blk;
+}
+
+void handlePrevBlk(Equation *e, id preBlk) {
+    BOOL needRemove = YES;
+    
+    do {
+        if ([preBlk isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock *eb = preBlk;
+            preBlk = eb.children.lastObject;
+            needRemove = NO;
+        } else if ([preBlk isMemberOfClass:[RadicalBlock class]]) {
+            EquationBlock *eb = ((RadicalBlock *)preBlk).content;
+            preBlk = eb.children.lastObject;
+            needRemove = NO;
+        } else if ([preBlk isMemberOfClass:[FractionBarLayer class]]) {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        } else if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *layer = preBlk;
+            if (layer.expo != nil) {
+                preBlk = layer.expo.children.lastObject;
+                needRemove = NO;
+            } else {
+                break;
+            }
+        } else if ([preBlk isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            EquationBlock *eb = ((WrapedEqTxtLyr *)preBlk).content;
+            preBlk = eb.children.lastObject;
+            needRemove = NO;
+        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = preBlk;
+            if (p.expo != nil) {
+                preBlk = p.expo.children.lastObject;
+                needRemove = NO;
+            } else {
+                break;
+            }
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    } while (preBlk != nil);
+    
+    if (preBlk != nil) {
+        if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = preBlk;
+            if (needRemove) {
+                if (l.type == TEXTLAYER_EMPTY) {
+                    cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+                } else if (l.type == TEXTLAYER_OP) {
+                    [e removeElement:l];
+                } else {
+                    if (l.strLenTbl.count == 2) { // 1 char num
+                        [e removeElement:l];
+                    } else {
+                        CGFloat orgW = l.mainFrame.size.width;
+                        [l delNumCharAt:(int)l.strLenTbl.count - 1];
+                        CGFloat incrWidth = l.mainFrame.size.width - orgW;
+                        [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
+                        [e.root adjustElementPosition];
+                        cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                    }
+                }
+            } else {
+                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+            }
+        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = preBlk;
+            if (needRemove) {
+                [e removeElement:p];
+            } else {
+                cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
+            }
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    return;
 }
 
 id getPrevBlk(Equation *E, id curBlk) {
@@ -156,6 +265,8 @@ id getPrevBlk(Equation *E, id curBlk) {
                 }
             }
         } else if ([eb.parent isMemberOfClass:[EquationTextLayer class]]) {
+            return eb.parent;
+        } else if ([eb.parent isMemberOfClass:[Parentheses class]]) {
             return eb.parent;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -257,7 +368,7 @@ id getPrevBlk(Equation *E, id curBlk) {
 //            if (eb.c_idx == 0) {
 //                return findPrevTxtLayer(e, par);
 //            } else {
-//                return locaLastTxtLyr(e, [par.children objectAtIndex:eb.c_idx - 1]);
+//                return locaLastLyr(e, [par.children objectAtIndex:eb.c_idx - 1]);
 //            }
 //        } else if ([eb.parent isMemberOfClass:[RadicalBlock class]]) {
 //            RadicalBlock *rb = eb.parent;
@@ -265,7 +376,7 @@ id getPrevBlk(Equation *E, id curBlk) {
 //            if (rb.c_idx == 0) {
 //                return findPrevTxtLayer(e, par);
 //            } else {
-//                return locaLastTxtLyr(e, [par.children objectAtIndex:rb.c_idx - 1]);
+//                return locaLastLyr(e, [par.children objectAtIndex:rb.c_idx - 1]);
 //            }
 //        } else if ([eb.parent isMemberOfClass:[WrapedEqTxtLyr class]]) {
 //            WrapedEqTxtLyr *wetl = eb.parent;
@@ -273,7 +384,7 @@ id getPrevBlk(Equation *E, id curBlk) {
 //            if (wetl.c_idx == 0) {
 //                return findPrevTxtLayer(e, par);
 //            } else {
-//                return locaLastTxtLyr(e, [par.children objectAtIndex:wetl.c_idx - 1]);
+//                return locaLastLyr(e, [par.children objectAtIndex:wetl.c_idx - 1]);
 //            }
 //        } else if ([eb.parent isMemberOfClass:[EquationTextLayer class]]) {
 //            return eb.parent;
@@ -287,7 +398,7 @@ id getPrevBlk(Equation *E, id curBlk) {
 //        if (rb.c_idx == 0) {
 //            return findPrevTxtLayer(e, par);
 //        } else {
-//            return locaLastTxtLyr(e, [par.children objectAtIndex:rb.c_idx - 1]);
+//            return locaLastLyr(e, [par.children objectAtIndex:rb.c_idx - 1]);
 //        }
 //    } else if ([blk isMemberOfClass:[WrapedEqTxtLyr class]]) {
 //        WrapedEqTxtLyr *wetl = blk;
@@ -296,19 +407,19 @@ id getPrevBlk(Equation *E, id curBlk) {
 //        if (wetl.c_idx == 0) {
 //            return findPrevTxtLayer(e, par);
 //        } else {
-//            return locaLastTxtLyr(e, [par.children objectAtIndex:wetl.c_idx - 1]);
+//            return locaLastLyr(e, [par.children objectAtIndex:wetl.c_idx - 1]);
 //        }
 //    } else if ([blk isMemberOfClass:[FractionBarLayer class]]) {
 //        FractionBarLayer *bar = blk;
 //        EquationBlock *par = bar.parent;
-//        return locaLastTxtLyr(e, [par.children objectAtIndex:bar.c_idx - 1]);
+//        return locaLastLyr(e, [par.children objectAtIndex:bar.c_idx - 1]);
 //    } else if ([blk isMemberOfClass:[EquationTextLayer class]]) {
 //        EquationTextLayer *layer = blk;
 //        EquationBlock *par = layer.parent;
 //        if (layer.c_idx == 0) {
 //            return findPrevTxtLayer(e, par);
 //        } else {
-//            return locaLastTxtLyr(e, [par.children objectAtIndex:layer.c_idx - 1]);
+//            return locaLastLyr(e, [par.children objectAtIndex:layer.c_idx - 1]);
 //        }
 //    } else {
 //        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -682,16 +793,16 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                         calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0);
                         calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
                     } else {
-                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0);
-                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.view.inpOrg = CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width, p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0);
+                        calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
                     }
                 } else if (calcB.curRoll == ROLL_DENOMINATOR) {
                     if (calcB.curMode == MODE_INSERT) {
                         calcB.view.inpOrg = CGPointMake(p.frame.origin.x, p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0);
                         calcB.view.cursor.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, CURSOR_W, p.frame.size.height);
                     } else {
-                        calcB.view.inpOrg = CGPointMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0);
-                        calcB.view.cursor.frame = CGRectMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                        calcB.view.inpOrg = CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width, p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0);
+                        calcB.view.cursor.frame = CGRectMake(calcB.view.inpOrg.x, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
                     }
                 } else {
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -985,10 +1096,10 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
                     calcB.curBlk = wetl1;
                 } else if ([b isMemberOfClass:[Parentheses class]]) {
                     Parentheses *p = b;
-                    CGFloat x = p.frame.origin.x + p.frame.size.width;
-                    CGFloat y = p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0;
+                    CGFloat x = p.mainFrame.origin.x + p.mainFrame.size.width;
+                    CGFloat y = p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0;
                     calcB.view.inpOrg = CGPointMake(x, y);
-                    calcB.view.cursor.frame = CGRectMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                    calcB.view.cursor.frame = CGRectMake(x, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
                     calcB.curParent = wetl.content;
                     calcB.curRoll = p.roll;
                     calcB.curTxtLyr = nil;
@@ -1051,10 +1162,10 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             } else {
                 calcB.curMode = MODE_INPUT;
                 calcB.insertCIdx = p.c_idx + 1;
-                CGFloat x = p.frame.origin.x + p.frame.size.width;
-                CGFloat y = p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0;
+                CGFloat x = p.mainFrame.origin.x + p.mainFrame.size.width;
+                CGFloat y = p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0;
                 calcB.view.inpOrg = CGPointMake(x, y);
-                calcB.view.cursor.frame = CGRectMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(x, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
             }
         } else {
             if (curPoint.x < p.frame.origin.x + p.frame.size.width / 2.0) {
@@ -1067,10 +1178,10 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             } else {
                 calcB.curMode = MODE_INSERT;
                 calcB.insertCIdx = p.c_idx + 1;
-                CGFloat x = p.frame.origin.x + p.frame.size.width;
-                CGFloat y = p.frame.origin.y + p.frame.size.height / 2.0 - calcB.curFontH / 2.0;
+                CGFloat x = p.mainFrame.origin.x + p.mainFrame.size.width;
+                CGFloat y = p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0;
                 calcB.view.inpOrg = CGPointMake(x, y);
-                calcB.view.cursor.frame = CGRectMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y, CURSOR_W, p.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(x, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
             }
         }
         calcB.curParent = p.parent;
@@ -1083,10 +1194,13 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
-NSMutableString *equationToString(EquationBlock *parent) {
+NSMutableString *calcParenth(EquationBlock *parent, int *i) {
     NSMutableString *ret = [NSMutableString stringWithCapacity:256];
+    BOOL firstLeftP = YES;
+    BOOL isCidx0 = NO;
     
-    for (id b in parent.children) {
+    while (*i < parent.children.count) {
+        id b = [parent.children objectAtIndex:*i];
         if ([b isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *eb = b;
             
@@ -1095,7 +1209,8 @@ NSMutableString *equationToString(EquationBlock *parent) {
             }
             
             [ret appendString:@"("];
-            [ret appendString:equationToString(b)];
+            int j = 0;
+            [ret appendString:equationToString(b, &j)];
             [ret appendString:@")"];
             
             if (eb.c_idx == parent.children.count - 1) {
@@ -1111,7 +1226,8 @@ NSMutableString *equationToString(EquationBlock *parent) {
                 [ret appendString:@"pow("];
                 [ret appendString:[l.string string]];
                 [ret appendString:@","];
-                [ret appendString:equationToString(l.expo)];
+                int j = 0;
+                [ret appendString:equationToString(l.expo, &j)];
                 [ret appendString:@")"];
             } else {
                 [ret appendString:[l.string string]];
@@ -1129,11 +1245,13 @@ NSMutableString *equationToString(EquationBlock *parent) {
             
             if (rb.rootNum != nil) {
                 [ret appendString:@"cuberoot("];
-                [ret appendString:equationToString(rb.content)];
+                int j = 0;
+                [ret appendString:equationToString(rb.content, &j)];
                 [ret appendString:@")"];
             } else {
                 [ret appendString:@"sqrt("];
-                [ret appendString:equationToString(rb.content)];
+                int j = 0;
+                [ret appendString:equationToString(rb.content, &j)];
                 [ret appendString:@")"];
             }
             
@@ -1151,7 +1269,8 @@ NSMutableString *equationToString(EquationBlock *parent) {
             
             [ret appendString:[wetl.title.string string]];
             [ret appendString:@"("];
-            [ret appendString:equationToString(wetl.content)];
+            int j = 0;
+            [ret appendString:equationToString(wetl.content, &j)];
             [ret appendString:@")"];
             
             if (wetl.c_idx == parent.children.count - 1) {
@@ -1161,13 +1280,39 @@ NSMutableString *equationToString(EquationBlock *parent) {
             Parentheses *p = b;
             
             if (p.c_idx == 0) {
-                [ret appendString:@"("];
+                isCidx0 = YES;
             }
             
             if (p.l_or_r == LEFT_PARENTH) {
-                [ret appendString:@"("];
+                if (firstLeftP) {
+                    firstLeftP = NO;
+                    [ret appendString:@"("];
+                } else {
+                    [ret appendString:calcParenth(parent, i)];
+                }
             } else {
-                [ret appendString:@")"];
+                if (p.expo == nil) {
+                    if (isCidx0) {
+                        [ret insertString:@"(" atIndex:0];
+                    }
+                    [ret appendString:@")"];
+                } else {
+                    int k = 0;
+                    if (isCidx0) {
+                        [ret insertString:@"(" atIndex:k++];
+                    }
+                    [ret insertString:@"pow" atIndex:k];
+                    [ret appendString:@","];
+                    int j = 0;
+                    [ret appendString:equationToString(p.expo, &j)];
+                    [ret appendString:@")"];
+                }
+                
+                if (p.c_idx == parent.children.count - 1) {
+                    [ret appendString:@")"];
+                }
+                
+                return ret;
             }
             
             if (p.c_idx == parent.children.count - 1) {
@@ -1176,6 +1321,101 @@ NSMutableString *equationToString(EquationBlock *parent) {
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
+        (*i)++;
+    }
+    if (isCidx0) {
+        [ret insertString:@"(" atIndex:0];
+    }
+    return ret;
+}
+
+NSMutableString *equationToString(EquationBlock *parent, int *i) {
+    NSMutableString *ret = [NSMutableString stringWithCapacity:256];
+    
+    while (*i < parent.children.count) {
+        id b = [parent.children objectAtIndex:*i];
+        if ([b isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *eb = b;
+            
+            if (eb.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
+            [ret appendString:@"("];
+            int j = 0;
+            [ret appendString:equationToString(b, &j)];
+            [ret appendString:@")"];
+            
+            if (eb.c_idx == parent.children.count - 1) {
+                [ret appendString:@")"];
+            }
+        } else if ([b isMemberOfClass: [EquationTextLayer class]]) {
+            EquationTextLayer *l = b;
+            if (l.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
+            if (l.expo != nil) {
+                [ret appendString:@"pow("];
+                [ret appendString:[l.string string]];
+                [ret appendString:@","];
+                int j = 0;
+                [ret appendString:equationToString(l.expo, &j)];
+                [ret appendString:@")"];
+            } else {
+                [ret appendString:[l.string string]];
+            }
+            
+            if (l.c_idx == parent.children.count - 1) {
+                [ret appendString:@")"];
+            }
+        } else if ([b isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *rb = b;
+            
+            if (rb.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
+            if (rb.rootNum != nil) {
+                [ret appendString:@"cuberoot("];
+                int j = 0;
+                [ret appendString:equationToString(rb.content, &j)];
+                [ret appendString:@")"];
+            } else {
+                [ret appendString:@"sqrt("];
+                int j = 0;
+                [ret appendString:equationToString(rb.content, &j)];
+                [ret appendString:@")"];
+            }
+            
+            if (rb.c_idx == parent.children.count - 1) {
+                [ret appendString:@")"];
+            }
+        } else if ([b isMemberOfClass: [FractionBarLayer class]]) {
+            [ret appendString:@")/("];
+        } else if ([b isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            
+            if (wetl.c_idx == 0) {
+                [ret appendString:@"("];
+            }
+            
+            [ret appendString:[wetl.title.string string]];
+            [ret appendString:@"("];
+            int j = 0;
+            [ret appendString:equationToString(wetl.content, &j)];
+            [ret appendString:@")"];
+            
+            if (wetl.c_idx == parent.children.count - 1) {
+                [ret appendString:@")"];
+            }
+        } else if ([b isMemberOfClass: [Parentheses class]]) {
+            [ret appendString:calcParenth(parent, i)];
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+        
+        (*i)++;
     }
     
     return ret;
