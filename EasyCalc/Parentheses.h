@@ -21,10 +21,12 @@
 @property EquationBlock *expo;
 @property CGRect mainFrame;
 @property int fontLvl;
+@property BOOL isCopy;
 
 -(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;
+-(void) moveCopy:(CGPoint)dest;
 -(void) destroy;
 @end

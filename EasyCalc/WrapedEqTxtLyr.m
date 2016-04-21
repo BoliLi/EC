@@ -29,6 +29,7 @@
 @synthesize left_parenth;
 @synthesize right_parenth;
 @synthesize fontLvl;
+@synthesize isCopy;
 
 -(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc {
     self = [super init];

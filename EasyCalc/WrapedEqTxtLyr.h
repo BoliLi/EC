@@ -27,10 +27,12 @@
 @property CGRect mainFrame;
 @property int is_base_expo;
 @property int fontLvl;
+@property BOOL isCopy;
 
 -(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc;
 -(void) updateFrame:(BOOL)updateParenth;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
+-(void) moveCopy:(CGPoint)dest;
 -(void) destroy;
 @end

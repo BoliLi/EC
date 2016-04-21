@@ -23,11 +23,13 @@
 @property int is_base_expo;
 @property EquationTextLayer *rootNum;
 @property int fontLvl;
+@property BOOL isCopy;
 
 -(id) init :(Equation *)e :(ViewController *)vc;
 -(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt :(ViewController *)vc;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrame;
+-(void) moveCopy:(CGPoint)dest;
 -(void) destroy;
 @end

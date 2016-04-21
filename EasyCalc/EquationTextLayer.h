@@ -23,6 +23,7 @@
 @property int type;
 @property NSMutableArray *strLenTbl;
 @property int fontLvl;
+@property BOOL isCopy;
 
 //-(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
@@ -38,5 +39,6 @@
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) moveFrom:(CGPoint)orgF :(CGPoint)desF;
+-(void) moveCopy:(CGPoint)dest;
 -(void) destroy;
 @end

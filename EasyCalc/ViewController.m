@@ -3556,7 +3556,7 @@ static UIView *testview;
         CGPoint pos = CGPointMake(f.size.width, f.origin.y + (f.size.height / 2.0) - (gCurCB.curFontH / 2.0));
         
         gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
-        gCurCB.curEq.equalsign.opacity = 0.0;
+        //gCurCB.curEq.equalsign.opacity = 0.0;
         [gCurCB.view.layer addSublayer:gCurCB.curEq.equalsign];
         
         pos.x += gCurCB.curEq.equalsign.frame.size.width;
@@ -3573,10 +3573,11 @@ static UIView *testview;
         animation.fillMode = kCAFillModeForwards;
         animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
         
-        [gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
+        //[gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
         [gCurCB.curEq.result addAnimation:animation forKey:nil];
         
-        
+        CGPoint point = CGPointMake(gCurCB.curEq.equalsign.position.x, gCurCB.curEq.equalsign.position.y - 30);
+        [gCurCB.curEq.equalsign moveFrom:gCurCB.curEq.equalsign.position :point];
         
         [gCurCB.eqList addObject:gCurCB.curEq];
         

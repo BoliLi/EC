@@ -29,6 +29,7 @@
 @synthesize type;
 @synthesize strLenTbl;
 @synthesize fontLvl;
+@synthesize isCopy;
 
 //-(id) init : (Equation *)e {
 //    self = [super init];
@@ -407,23 +408,37 @@
 
 -(void) moveFrom:(CGPoint)orgF :(CGPoint)desF {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-    animation.duration = 0.5;
+    animation.duration = 0.75;
     animation.delegate = self;
     animation.fromValue = [NSValue valueWithCGPoint:orgF];
     animation.toValue = [NSValue valueWithCGPoint:desF];
     [animation setValue:[NSValue valueWithCGPoint:desF] forKey:@"Dest"];
     [animation setTimingFunction:easeOutBack];
     [self addAnimation:animation forKey:nil];
+    //self.opacity = 0.0;
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.position = desF;
+    [CATransaction commit];
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
 }
 
-
--(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+-(void) moveCopy:(CGPoint)dest {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.duration = 0.75;
+    animation.delegate = self;
+    animation.toValue = [NSValue valueWithCGPoint:dest];
+    [animation setTimingFunction:easeOutBack];
+    [self addAnimation:animation forKey:nil];
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    self.position=[[anim valueForKey:@"Dest"] CGPointValue];
+    self.position = dest;
     [CATransaction commit];
+}
+
+-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
     
+    self.opacity = 1.0;
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
 }
 

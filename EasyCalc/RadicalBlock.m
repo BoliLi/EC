@@ -26,6 +26,7 @@
 @synthesize ancestor;
 @synthesize rootNum;
 @synthesize fontLvl;
+@synthesize isCopy;
 
 -(id) init :(Equation *)e :(ViewController *)vc {
     self = [super init];

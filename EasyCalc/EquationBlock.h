@@ -27,6 +27,7 @@
 @property CGFloat denomBtmHalf;
 @property int is_base_expo;
 @property int fontLvl;
+@property BOOL isCopy;
 
 -(id) init : (Equation *)e;
 -(id) init : (CGPoint)inputPos : (Equation *)e;
@@ -42,4 +43,5 @@
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 - (void)copyChildrenTo:(EquationBlock *)newEB;
+-(void) moveCopy:(CGPoint)dest;
 @end

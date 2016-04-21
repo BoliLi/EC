@@ -16,8 +16,10 @@
 @property (weak) Equation *ancestor;
 @property int is_base_expo;
 @property int fontLvl;
+@property BOOL isCopy;
 
 -(id) init :(Equation *)e :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;
+-(void) moveCopy:(CGPoint)dest;
 -(void) destroy;
 @end

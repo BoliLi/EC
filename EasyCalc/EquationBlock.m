@@ -33,6 +33,7 @@
 @synthesize denomBtmHalf;
 @synthesize is_base_expo;
 @synthesize fontLvl;
+@synthesize isCopy;
 
 -(id) init : (Equation *)e {
     self = [super init];
@@ -1221,6 +1222,10 @@
                 frame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (layer.frame.size.height / 2.0);
                 frame.origin.x = curNumX;
                 layer.frame = frame;
+//                CGPoint dest = CGPointMake(curNumX + layer.frame.size.width / 2.0, self.numerFrame.origin.y + self.numerTopHalf);
+//                NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(layer.position), NSStringFromCGRect(layer.frame));
+//                [layer moveFrom:layer.position :dest];
+//                NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(layer.position), NSStringFromCGRect(layer.frame));
                 [layer updateFrameBaseOnBase];
                 curNumX += layer.mainFrame.size.width;
             } else if (layer.roll == ROLL_DENOMINATOR) {
@@ -1390,6 +1395,48 @@
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
+    }
+}
+
+-(void) moveCopy:(CGPoint)dest {
+    self.mainFrame = CGRectMake(dest.x - self.mainFrame.size.width / 2.0, dest.y - self.mainFrame.size.height, self.mainFrame.size.width, self.mainFrame.size.height);
+    CGFloat curNumX = 0.0; // Track the layer/block orgin x
+    CGFloat curDenX = 0.0; // Track the layer/block orgin x
+    CGRect frame = self.numerFrame;
+    frame.origin.y = self.mainFrame.origin.y;
+    frame.origin.x = dest.x - (frame.size.width / 2.0);
+    self.numerFrame = frame;
+    curNumX = frame.origin.x;
+    
+    if (self.bar != nil) {
+        frame = self.denomFrame;
+        frame.origin.y = self.mainFrame.origin.y + self.numerFrame.size.height;
+        frame.origin.x = dest.x - (frame.size.width / 2.0);
+        self.denomFrame = frame;
+        curDenX = frame.origin.x;
+    }
+    
+    for (id block in self.children) {
+        if ([block isMemberOfClass: [EquationTextLayer class]]) {
+            EquationTextLayer *l = block;
+            
+        } else if ([block isMemberOfClass: [FractionBarLayer class]]) {
+            FractionBarLayer *fb = block;
+            
+        } else if ([block isMemberOfClass: [EquationBlock class]]) {
+            EquationBlock *eb = block;
+            
+        } else if ([block isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *rb = block;
+            
+        } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = block;
+            
+        } else if ([block isMemberOfClass: [Parentheses class]]) {
+            Parentheses *p = block;
+            
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
 }
 
