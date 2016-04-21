@@ -15,15 +15,7 @@
 
 static NSString *const LayerEasingFunctionsKey = @"ui+ef_LayerEasingFunctionsKey";
 
-@interface  CALayer (Easing)
 
-- (void)easing_addAnimation:(CAAnimation *)anim forKey:(NSString *)key;
-
-- (void)setEasingFunction:(CAMediaTimingFunction*)function forKeyPath:(NSString *)layerKeyPath;
-
-- (void)removeEasingFunctionForKeyPath:(NSString *)layerKeyPath;
-
-@end
 
 @implementation CALayer (Easing)
 

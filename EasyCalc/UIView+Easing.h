@@ -47,3 +47,14 @@
 - (void)removeEasingFunctionForKeyPath:(NSString *)keyPath;
 
 @end
+
+@interface  CALayer (Easing)
+
+- (void)easing_addAnimation:(CAAnimation *)anim forKey:(NSString *)key;
+
+- (void)setEasingFunction:(CAMediaTimingFunction*)function forKeyPath:(NSString *)layerKeyPath;
+
+- (void)removeEasingFunctionForKeyPath:(NSString *)layerKeyPath;
+
+@end
+

@@ -166,7 +166,6 @@
         copy.rootNum = [self.rootNum copy];
     }
     copy.fontLvl = self.fontLvl;
-    
     copy.frame = self.frame;
     copy.delegate = self.delegate;
     copy.contentsScale = [UIScreen mainScreen].scale;

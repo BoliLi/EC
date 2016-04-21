@@ -553,6 +553,8 @@ static UIView *testview;
                 }
             }
         }
+        
+        [gCurCB.view updateContentView];
     }
 }
 
@@ -947,6 +949,8 @@ static UIView *testview;
     bn.frame = CGRectMake(4 * btnWidth, 3 * btnHeight, btnWidth, 2 * btnHeight);
     [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
     [mainKbView addSubview:bn];
+    
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.bounds));
 }
 
 - (void)didReceiveMemoryWarning {
@@ -1392,10 +1396,7 @@ static UIView *testview;
     gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
     gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     
-//    if (gCurCB.root.mainFrame.origin.x + gCurCB.root.mainFrame.size.width > scnWidth && gCurCB.zoomInLvl < 2) {
-//        gCurCB.zoomInLvl++;
-//        [self zoom];
-//    }
+    [gCurCB.view updateContentView];
     
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, [gCurCB.curTxtLyr.string string]);
 }
@@ -1596,10 +1597,8 @@ static UIView *testview;
         gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
         gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
         
-//        if (gCurCB.root.mainFrame.origin.x + gCurCB.root.mainFrame.size.width > scnWidth && gCurCB.zoomInLvl < 2) {
-//            gCurCB.zoomInLvl++;
-//            [self zoom];
-//        }
+        [gCurCB.view updateContentView];
+        
         NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, [tLayer.string string]);
     } else { //Handle "÷"
         if (gCurCB.insertCIdx == 0) {
@@ -2273,6 +2272,8 @@ static UIView *testview;
                 [eq moveUp:dis];
             }
         }
+        
+        [gCurCB.view updateContentView];
     }
     
 }
@@ -2487,6 +2488,8 @@ static UIView *testview;
             [eq moveUp:dis];
         }
     }
+    
+    [gCurCB.view updateContentView];
 }
 
 - (void)handlePowBtnClick {
@@ -2747,6 +2750,8 @@ static UIView *testview;
             [eq moveUp:dis];
         }
     }
+    
+    [gCurCB.view updateContentView];
 }
 
 - (void)handleParenthBtnClick : (int)l_r {
@@ -3069,6 +3074,8 @@ static UIView *testview;
             [eq moveUp:dis];
         }
     }
+    
+    [gCurCB.view updateContentView];
 }
 
 - (void)handleDelBtnClick {
@@ -3505,6 +3512,8 @@ static UIView *testview;
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
+    
+    [gCurCB.view updateContentView];
 }
 
 -(void)delBlock:(NSTimer *)timer{
@@ -3545,15 +3554,29 @@ static UIView *testview;
         
         CGRect f = gCurCB.curEq.root.mainFrame;
         CGPoint pos = CGPointMake(f.size.width, f.origin.y + (f.size.height / 2.0) - (gCurCB.curFontH / 2.0));
-        EquationTextLayer *l = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
-        gCurCB.curEq.equalsign = l;
-        [gCurCB.view.layer addSublayer:l];
         
-        pos.x += l.frame.size.width;
+        gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
+        gCurCB.curEq.equalsign.opacity = 0.0;
+        [gCurCB.view.layer addSublayer:gCurCB.curEq.equalsign];
         
-        l = [[EquationTextLayer alloc] init:[result stringValue] :pos :gCurCB.curEq :TEXTLAYER_NUM];
-        gCurCB.curEq.result = l;
-        [gCurCB.view.layer addSublayer:l];
+        pos.x += gCurCB.curEq.equalsign.frame.size.width;
+        
+        gCurCB.curEq.result = [[EquationTextLayer alloc] init:[result stringValue] :pos :gCurCB.curEq :TEXTLAYER_NUM];
+        gCurCB.curEq.result.opacity = 0.0;
+        [gCurCB.view.layer addSublayer:gCurCB.curEq.result];
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+        animation.fromValue = [NSNumber numberWithFloat:0.0];
+        animation.toValue = [NSNumber numberWithFloat:1.0];
+        animation.duration = 0.4;
+        animation.removedOnCompletion = NO;
+        animation.fillMode = kCAFillModeForwards;
+        animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+        
+        [gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
+        [gCurCB.curEq.result addAnimation:animation forKey:nil];
+        
+        
         
         [gCurCB.eqList addObject:gCurCB.curEq];
         
@@ -3564,6 +3587,8 @@ static UIView *testview;
         gCurCB.view.inpOrg = gCurCB.view.cursor.frame.origin;
         
         gCurCB.curEq = [[Equation alloc] init:gCurCB :self];
+        
+        [gCurCB.view updateContentView];
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
@@ -3586,6 +3611,8 @@ static UIView *testview;
     gCurCB.view.inpOrg = gCurCB.view.cursor.frame.origin;
 
     gCurCB.curEq = [[Equation alloc] init:gCurCB :self];
+    
+    [gCurCB.view updateContentView];
 }
 
 - (void)handleWETLInput: (NSString *)pfx {
@@ -3787,10 +3814,7 @@ static UIView *testview;
     gCurCB.view.inpOrg = ((EquationBlock *)gCurCB.curParent).mainFrame.origin;
     gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
     
-//    if ((gCurCB.root.mainFrame.origin.y < 0.0 || gCurCB.root.mainFrame.origin.x + gCurCB.root.mainFrame.size.width > scnWidth) && gCurCB.zoomInLvl < 2) {
-//        gCurCB.zoomInLvl++;
-//        [self zoom];
-//    }
+    [gCurCB.view updateContentView];
 }
 
 -(void)btnClicked: (UIButton *)btn {
@@ -3845,15 +3869,14 @@ static UIView *testview;
     } else if([[btn currentTitle]  isEqual: @"<-"]) {
         [self handleDelBtnClick];
     } else if([[btn currentTitle]  isEqual: @"·"]) {
-        //[self handleNumBtnClick: @"."];
-        CALayer *test = [[CALayer alloc] init];
-        test.contentsScale = [UIScreen mainScreen].scale;
-        test.frame = CGRectMake(10, 10, 10, 40);
-        test.name = @"parentheses";
-        test.delegate = self;
-        [gCurCB.view.layer addSublayer: test];
-        [test setNeedsDisplay];
+        
+        
     } else if([[btn currentTitle]  isEqual: @"%"]) {
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        CGPoint point = CGPointMake(gCurCB.curTxtLyr.position.x + 30, gCurCB.curTxtLyr.position.y);
+        NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(gCurCB.curTxtLyr.position));
+        [gCurCB.curTxtLyr moveFrom:gCurCB.curTxtLyr.position :point];
+        
     } else if([[btn currentTitle]  isEqual: @"="]) {
         [self handleReturnBtnClick];
     } else if([[btn currentTitle]  isEqual: @"save"]) {

@@ -19,4 +19,5 @@
 @property (weak) CalcBoard *par;
 
 -(id) init : (CalcBoard *)calcB : (CGRect)dspFrame : (ViewController *)vc;
+- (void)updateContentView;
 @end

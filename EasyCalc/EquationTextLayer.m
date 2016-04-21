@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "UIView+Easing.h"
 
 @implementation EquationTextLayer
 @synthesize parent;
@@ -402,6 +403,28 @@
     self.fontLvl = lvl;
     
     [self updateStrLenTbl];
+}
+
+-(void) moveFrom:(CGPoint)orgF :(CGPoint)desF {
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.duration = 0.5;
+    animation.delegate = self;
+    animation.fromValue = [NSValue valueWithCGPoint:orgF];
+    animation.toValue = [NSValue valueWithCGPoint:desF];
+    [animation setValue:[NSValue valueWithCGPoint:desF] forKey:@"Dest"];
+    [animation setTimingFunction:easeOutBack];
+    [self addAnimation:animation forKey:nil];
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
+}
+
+
+-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.position=[[anim valueForKey:@"Dest"] CGPointValue];
+    [CATransaction commit];
+    
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
 }
 
 -(void) destroy {

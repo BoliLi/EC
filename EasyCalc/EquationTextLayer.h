@@ -37,5 +37,6 @@
 -(void) updateStrLenTbl;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
+-(void) moveFrom:(CGPoint)orgF :(CGPoint)desF;
 -(void) destroy;
 @end

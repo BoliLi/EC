@@ -31,7 +31,7 @@
         par = calcB;
         
         self.backgroundColor = [UIColor lightGrayColor];
-        self.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 3.0);
+        self.contentSize = CGSizeMake(dspFrame.size.width * 5.0, dspFrame.size.height * 3.0);
         self.directionalLockEnabled = YES;
         self.bounces = YES;
         [self setContentOffset:CGPointMake(0, dspFrame.size.height * 2.0) animated:NO];
@@ -116,6 +116,16 @@
     swipRBtn.frame = CGRectMake(maxX - 20, midY, 20, 20);
 }
 
+- (void)updateContentView {
+    if (!CGRectContainsPoint(self.bounds, self.inpOrg)) {
+        CGFloat offX = self.inpOrg.x - self.bounds.size.width;
+        
+        if (offX < 0.0)
+            [self setContentOffset:CGPointMake(0.0, self.bounds.size.height * 2.0) animated:YES];
+        else
+            [self setContentOffset:CGPointMake(offX + 20.0, self.bounds.size.height * 2.0) animated:YES];
+    }
+}
 /*
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
