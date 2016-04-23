@@ -72,7 +72,10 @@ static UIView *testview;
                     [cb updateCIdx];
                     incrWidth -= gCurCB.curTxtLyr.mainFrame.size.width;
                     if ([copyBlock isMemberOfClass:[EquationBlock class]]) {
+                        EquationBlock *eb = copyBlock;
+                        
                         if (cb.roll == ROLL_ROOT) {
+                            eb.isCopy = NO;
                             gCurCB.curMode = MODE_REPLACE_ROOT;
                         } else if (cb.roll == ROLL_ROOT_ROOT) {
                             gCurCB.curMode = MODE_REPLACE_RADICAL;
@@ -93,7 +96,9 @@ static UIView *testview;
                         [cb updateCIdx];
                         incrWidth -= gCurCB.curTxtLyr.mainFrame.size.width;
                         if ([copyBlock isMemberOfClass:[EquationBlock class]]) {
+                            EquationBlock *eb = copyBlock;
                             if (cb.roll == ROLL_ROOT) {
+                                eb.isCopy = NO;
                                 gCurCB.curMode = MODE_REPLACE_ROOT;
                             } else if (cb.roll == ROLL_ROOT_ROOT) {
                                 gCurCB.curMode = MODE_REPLACE_RADICAL;
@@ -192,6 +197,7 @@ static UIView *testview;
                 eq.root = newRoot;
                 gCurCB.curParent = newRoot;
                 [gCurCB.curParent updateCIdx];
+                gCurCB.curRoll = ROLL_NUMERATOR;
             } else if(gCurCB.curMode == MODE_DUMP_RADICAL) {
                 RadicalBlock *rBlock = gCurCB.curParent;
                 EquationBlock *orgRootRoot = rBlock.content;
@@ -216,6 +222,7 @@ static UIView *testview;
                 rBlock.content = newRootRoot;
                 gCurCB.curParent = newRootRoot;
                 [gCurCB.curParent updateCIdx];
+                gCurCB.curRoll = ROLL_NUMERATOR;
             } else if(gCurCB.curMode == MODE_DUMP_EXPO) {
                 EquationTextLayer *layer = gCurCB.curParent;
                 EquationBlock *orgExpoRoot = layer.expo;
@@ -240,6 +247,7 @@ static UIView *testview;
                 layer.expo = newExpoRoot;
                 gCurCB.curParent = newExpoRoot;
                 [gCurCB.curParent updateCIdx];
+                gCurCB.curRoll = ROLL_NUMERATOR;
             } else if(gCurCB.curMode == MODE_DUMP_WETL) {
                 WrapedEqTxtLyr *wetl = gCurCB.curParent;
                 EquationBlock *orgWrapRoot = wetl.content;
@@ -264,6 +272,7 @@ static UIView *testview;
                 wetl.content = newWrapRoot;
                 gCurCB.curParent = newWrapRoot;
                 [gCurCB.curParent updateCIdx];
+                gCurCB.curRoll = ROLL_NUMERATOR;
             } else if(gCurCB.curMode == MODE_REPLACE_ROOT) {
                 [gCurCB.curEq.root destroy];
                 gCurCB.curEq.root = copyBlock;
@@ -3556,7 +3565,7 @@ static UIView *testview;
         CGPoint pos = CGPointMake(f.size.width, f.origin.y + (f.size.height / 2.0) - (gCurCB.curFontH / 2.0));
         
         gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
-        //gCurCB.curEq.equalsign.opacity = 0.0;
+        gCurCB.curEq.equalsign.opacity = 0.0;
         [gCurCB.view.layer addSublayer:gCurCB.curEq.equalsign];
         
         pos.x += gCurCB.curEq.equalsign.frame.size.width;
@@ -3573,11 +3582,9 @@ static UIView *testview;
         animation.fillMode = kCAFillModeForwards;
         animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
         
-        //[gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
+        [gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
         [gCurCB.curEq.result addAnimation:animation forKey:nil];
         
-        CGPoint point = CGPointMake(gCurCB.curEq.equalsign.position.x, gCurCB.curEq.equalsign.position.y - 30);
-        [gCurCB.curEq.equalsign moveFrom:gCurCB.curEq.equalsign.position :point];
         
         [gCurCB.eqList addObject:gCurCB.curEq];
         

@@ -64,6 +64,7 @@
         [self.strLenTbl addObject:@0.0];
         self.fontLvl = calcB.curFontLvl;
         self.is_base_expo = calcB.base_or_expo;
+        self.isCopy = NO;
         
         NSMutableAttributedString *attStr;
         CGSize newStrSize = CGSizeMake(0.0, 0.0);
@@ -149,6 +150,7 @@
     copy.backgroundColor = [UIColor clearColor].CGColor;
     copy.name = [self.name copy];
     copy.string = [self.string copy];
+    copy.isCopy = YES;
     return copy;
 }
 
@@ -407,39 +409,93 @@
 }
 
 -(void) moveFrom:(CGPoint)orgF :(CGPoint)desF {
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-    animation.duration = 0.75;
-    animation.delegate = self;
-    animation.fromValue = [NSValue valueWithCGPoint:orgF];
-    animation.toValue = [NSValue valueWithCGPoint:desF];
-    [animation setValue:[NSValue valueWithCGPoint:desF] forKey:@"Dest"];
-    [animation setTimingFunction:easeOutBack];
-    [self addAnimation:animation forKey:nil];
-    //self.opacity = 0.0;
-    [CATransaction begin];
-    [CATransaction setDisableActions:YES];
-    self.position = desF;
-    [CATransaction commit];
-    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
+    if (self.expo == nil) {
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.75;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:orgF];
+        animation.toValue = [NSValue valueWithCGPoint:desF];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = desF;
+        [CATransaction commit];
+        
+        self.mainFrame = self.frame;
+        NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
+    } else {
+        CGPoint baseOrg, expoOrg, baseDes, expoDes;
+        baseOrg.x = orgF.x - self.mainFrame.size.width / 2.0 + self.frame.size.width / 2.0;
+        baseOrg.y = orgF.y + self.mainFrame.size.height / 2.0 - self.frame.size.height / 2.0;
+        expoOrg.x = orgF.x + self.mainFrame.size.width / 2.0 - self.expo.mainFrame.size.width / 2.0;
+        expoOrg.y = orgF.y - self.mainFrame.size.height / 2.0 + self.expo.mainFrame.size.height / 2.0;
+        baseDes.x = desF.x - self.mainFrame.size.width / 2.0 + self.frame.size.width / 2.0;
+        baseDes.y = desF.y + self.mainFrame.size.height / 2.0 - self.frame.size.height / 2.0;
+        expoDes.x = desF.x + self.mainFrame.size.width / 2.0 - self.expo.mainFrame.size.width / 2.0;
+        expoDes.y = desF.y - self.mainFrame.size.height / 2.0 + self.expo.mainFrame.size.height / 2.0;
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.75;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:baseOrg];
+        animation.toValue = [NSValue valueWithCGPoint:baseDes];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = baseDes;
+        [CATransaction commit];
+        
+        // TODO: [self.expo moveFrom:]
+    }
+    
 }
 
 -(void) moveCopy:(CGPoint)dest {
-    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-    animation.duration = 0.75;
-    animation.delegate = self;
-    animation.toValue = [NSValue valueWithCGPoint:dest];
-    [animation setTimingFunction:easeOutBack];
-    [self addAnimation:animation forKey:nil];
-    [CATransaction begin];
-    [CATransaction setDisableActions:YES];
-    self.position = dest;
-    [CATransaction commit];
+    self.isCopy = NO;
+    self.mainFrame = CGRectMake(dest.x - self.frame.size.width / 2.0, dest.y + self.frame.size.height / 2.0 - self.mainFrame.size.height, self.mainFrame.size.width, self.mainFrame.size.height);
+    
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position), NSStringFromCGPoint(dest));
+    
+    if (self.expo == nil) {
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.5;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:self.position];
+        animation.toValue = [NSValue valueWithCGPoint:dest];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = dest;
+        [CATransaction commit];
+    } else {
+        
+        CGPoint expoPos;
+        expoPos.x = self.mainFrame.origin.x + self.mainFrame.size.width - self.expo.mainFrame.size.width / 2.0;
+        expoPos.y = self.mainFrame.origin.y + self.expo.mainFrame.size.height / 2.0;
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.75;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:self.position];
+        animation.toValue = [NSValue valueWithCGPoint:dest];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = dest;
+        [CATransaction commit];
+        
+        [self.expo moveCopy:expoPos];
+    }
 }
 
 -(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
     
-    self.opacity = 1.0;
-    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position));
+    //self.opacity = 1.0;
+    
 }
 
 -(void) destroy {

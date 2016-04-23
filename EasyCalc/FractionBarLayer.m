@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "UIView+Easing.h"
 
 @implementation FractionBarLayer
 
@@ -37,6 +38,7 @@
         self.delegate = vc;
         is_base_expo = calcB.base_or_expo;
         fontLvl = calcB.curFontLvl;
+        self.isCopy = NO;
     }
     return self;
 }
@@ -70,6 +72,7 @@
     copy.name = [self.name copy];
     copy.hidden = NO;
     copy.fontLvl = self.fontLvl;
+    copy.isCopy = YES;
     return copy;
 }
 
@@ -81,6 +84,24 @@
     CalcBoard *calcB = e.par;
     [calcB.view.layer addSublayer:self];
     [self setNeedsDisplay];
+}
+
+-(void) moveCopy:(CGPoint)dest {
+    self.isCopy = NO;
+    
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position), NSStringFromCGPoint(dest));
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.duration = 0.5;
+    animation.delegate = self;
+    animation.fromValue = [NSValue valueWithCGPoint:self.position];
+    animation.toValue = [NSValue valueWithCGPoint:dest];
+    [animation setTimingFunction:easeOutBack];
+    [self addAnimation:animation forKey:nil];
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.position = dest;
+    [CATransaction commit];
 }
 
 -(void) destroy {

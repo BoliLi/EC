@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "UIView+Easing.h"
 
 @implementation Parentheses
 @synthesize parent;
@@ -47,6 +48,7 @@
         self.frame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
         self.mainFrame = self.frame;
         self.fontLvl = calcB.curFontLvl;
+        self.isCopy = NO;
     }
     return self;
 }
@@ -97,6 +99,7 @@
     }
     copy.mainFrame = self.mainFrame;
     copy.fontLvl = self.fontLvl;
+    copy.isCopy = YES;
     return copy;
 }
 
@@ -132,6 +135,45 @@
     f.origin.x = self.expo.mainFrame.origin.x - f.size.width;
     f.origin.y = self.expo.mainFrame.origin.y + self.expo.mainFrame.size.height - gCharHeightTbl[self.expo.fontLvl] / 2.0;
     self.mainFrame = CGRectUnion(f, self.expo.mainFrame);
+}
+
+-(void) moveCopy:(CGPoint)dest {
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width / 2.0, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0)), NSStringFromCGPoint(dest));
+    
+    self.isCopy = NO;
+    self.mainFrame = CGRectMake(dest.x - self.frame.size.width / 2.0, dest.y + self.frame.size.height / 2.0 - self.mainFrame.size.height, self.mainFrame.size.width, self.mainFrame.size.height);
+    
+    if (self.expo == nil) {
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.5;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:self.position];
+        animation.toValue = [NSValue valueWithCGPoint:dest];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = dest;
+        [CATransaction commit];
+    } else {
+        CGPoint expoPos;
+        expoPos.x = self.mainFrame.origin.x + self.mainFrame.size.width - self.expo.mainFrame.size.width / 2.0;
+        expoPos.y = self.mainFrame.origin.y + self.expo.mainFrame.size.height / 2.0;
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.5;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:self.position];
+        animation.toValue = [NSValue valueWithCGPoint:dest];
+        [animation setTimingFunction:easeOutBack];
+        [self addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.position = dest;
+        [CATransaction commit];
+        
+        [self.expo moveCopy:expoPos];
+    }
 }
 
 -(void) destroy {

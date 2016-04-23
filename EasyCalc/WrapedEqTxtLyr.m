@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "UIView+Easing.h"
 
 @implementation WrapedEqTxtLyr
 @synthesize guid;
@@ -40,6 +41,7 @@
         self.roll = calcB.curRoll;
         self.is_base_expo = calcB.base_or_expo;
         self.fontLvl = calcB.curFontLvl;
+        self.isCopy = NO;
         
         CGPoint org = inputPos;
         CGFloat w = 0.0;
@@ -145,6 +147,7 @@
     copy.mainFrame = self.mainFrame;
     copy.is_base_expo = self.is_base_expo;
     copy.fontLvl = self.fontLvl;
+    copy.isCopy = YES;
     return copy;
 }
 
@@ -198,6 +201,40 @@
     [self updateFrame:YES];
     
     self.fontLvl = lvl;
+}
+
+-(void) moveCopy:(CGPoint)dest {
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width / 2.0, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0)), NSStringFromCGPoint(dest));
+    self.isCopy = NO;
+    self.mainFrame = CGRectMake(dest.x - self.mainFrame.size.width / 2.0, dest.y - self.mainFrame.size.height / 2.0, self.mainFrame.size.width, self.mainFrame.size.height);
+    
+    CGFloat curX = dest.x - self.mainFrame.size.width / 2.0;
+    
+    CGPoint tDest = CGPointMake(curX + self.title.frame.size.width / 2.0, dest.y);
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.duration = 0.5;
+    animation.delegate = self;
+    animation.fromValue = [NSValue valueWithCGPoint:self.title.position];
+    animation.toValue = [NSValue valueWithCGPoint:tDest];
+    [animation setTimingFunction:easeOutBack];
+    [self.title addAnimation:animation forKey:nil];
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.title.position = tDest;
+    [CATransaction commit];
+    curX += self.title.frame.size.width;
+    
+    CGPoint lpDest = CGPointMake(curX + self.left_parenth.frame.size.width / 2.0, dest.y);
+    [self.left_parenth moveCopy:lpDest];
+    curX += self.left_parenth.frame.size.width;
+    
+    CGPoint contDest = CGPointMake(curX + self.content.mainFrame.size.width / 2.0, dest.y);
+    [self.content moveCopy:contDest];
+    curX += self.content.mainFrame.size.width;
+    
+    CGPoint rpDest = CGPointMake(curX + self.left_parenth.frame.size.width / 2.0, dest.y);
+    [self.right_parenth moveCopy:rpDest];
+    curX += self.right_parenth.frame.size.width;
 }
 
 -(void) destroy {

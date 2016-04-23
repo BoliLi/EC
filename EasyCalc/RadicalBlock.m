@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "UIView+Easing.h"
 
 @implementation RadicalBlock
 @synthesize content;
@@ -40,7 +41,8 @@
         self.guid = e.guid_cnt++;
         self.roll = calcB.curRoll;
         self.fontLvl = calcB.curFontLvl;
-        is_base_expo = calcB.base_or_expo;
+        self.is_base_expo = calcB.base_or_expo;
+        self.isCopy = NO;
     }
     return self;
 }
@@ -57,6 +59,7 @@
         self.name = @"radical";
         self.hidden = NO;
         self.roll = calcB.curRoll;
+        self.isCopy = NO;
         
         CGRect frame;
         frame.size.height = RADICAL_MARGINE_T + calcB.curFontH + RADICAL_MARGINE_B;
@@ -172,6 +175,7 @@
     copy.contentsScale = [UIScreen mainScreen].scale;
     copy.name = [self.name copy];
     copy.hidden = NO;
+    copy.isCopy = YES;
     return copy;
 }
 
@@ -191,6 +195,50 @@
         CGRect f = self.rootNum.frame;
         self.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - 4.0, frame.origin.y, f.size.width, f.size.height);
     }
+}
+
+-(void) moveCopy:(CGPoint)dest {
+    self.isCopy = NO;
+    
+    CGPoint contDest;
+    
+    contDest.x = dest.x + self.frame.size.width / 2.0 - RADICAL_MARGINE_R - self.content.mainFrame.size.width / 2.0;
+    contDest.y = dest.y - self.frame.size.height / 2.0 + RADICAL_MARGINE_T + self.content.mainFrame.size.height / 2.0;
+    
+    if (self.rootNum != nil) {
+        CGPoint rootNumDest;
+        CGFloat ML = RADICAL_MARGINE_L_PERC * self.frame.size.height;
+        rootNumDest.x = dest.x - self.frame.size.width / 2.0 + ML / 2.0 - 4.0 + self.rootNum.frame.size.width / 2.0;
+        rootNumDest.y = dest.y - self.frame.size.height / 2.0 + self.rootNum.frame.size.height / 2.0;
+        
+        CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+        animation.duration = 0.75;
+        animation.delegate = self;
+        animation.fromValue = [NSValue valueWithCGPoint:self.rootNum.position];
+        animation.toValue = [NSValue valueWithCGPoint:rootNumDest];
+        [animation setTimingFunction:easeOutBack];
+        [self.rootNum addAnimation:animation forKey:nil];
+        [CATransaction begin];
+        [CATransaction setDisableActions:YES];
+        self.rootNum.position = rootNumDest;
+        [CATransaction commit];
+    }
+    
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position), NSStringFromCGPoint(dest));
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
+    animation.duration = 0.5;
+    animation.delegate = self;
+    animation.fromValue = [NSValue valueWithCGPoint:self.position];
+    animation.toValue = [NSValue valueWithCGPoint:dest];
+    [animation setTimingFunction:easeOutBack];
+    [self addAnimation:animation forKey:nil];
+    [CATransaction begin];
+    [CATransaction setDisableActions:YES];
+    self.position = dest;
+    [CATransaction commit];
+    
+    [self.content moveCopy:contDest];
 }
 
 -(void) destroy {
