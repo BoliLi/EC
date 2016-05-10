@@ -23,6 +23,7 @@ NSInteger gCurCBIdx = 0;
 CalcBoard *gCurCB;
 CGFloat gCharWidthTbl[4][16];
 CGFloat gCharHeightTbl[4];
+NSMutableArray *gTemplateList;
 
 @implementation NSMutableArray (EasyCalc)
 - (void)reverse {
@@ -38,9 +39,24 @@ CGFloat gCharHeightTbl[4];
         j--;
     }
 }
-
-
 @end
+
+@implementation UIButton (EasyCalc)
+- (UIImage *) buttonImageFromColor:(UIColor *)color {
+    CGRect rect = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height);
+    UIGraphicsBeginImageContext(rect.size);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetFillColorWithColor(context, [color CGColor]);
+    CGContextFillRect(context, rect);
+    UIImage *img = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    return img;
+}
+@end
+
+UIFont *getFont(int lvl) {
+    return [UIFont fontWithName:@"AvenirNextCondensed-UltraLight" size:getFontSize(lvl)];
+}
 
 int getFontSize(int level) {
     if (level == 0) {
@@ -68,8 +84,8 @@ CGFloat getLineWidth(int level) {
 
 void initCharSizeTbl(void) {
     for (int j = 0; j < 4; j++) {
-        int i, fontSize = getFontSize(j);
-        UIFont *font = [UIFont systemFontOfSize:fontSize];
+        int i;
+        UIFont *font = getFont(j);
         
         gCharHeightTbl[j] = font.lineHeight;
         
@@ -106,6 +122,12 @@ void initCharSizeTbl(void) {
         
         CFRelease(ctFont);
     }
+    
+    NSMutableString *str = [NSMutableString string];
+    for (int i = 0; i < 16; i++) {
+        [str appendString:[NSString stringWithFormat:@"%f ", gCharWidthTbl[0][i]]];
+    }
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, str);
 }
 
 CGFloat getCharWidth(int level, NSString *s) {
@@ -270,5 +292,15 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
     }
 }
 
+void drawStrLenTable(ViewController *vc, UIView *view, EquationTextLayer *etl) {
+    CALayer *layer = [CALayer layer];
+    layer.contentsScale = [UIScreen mainScreen].scale;
+    layer.name = @"drawStrLenTable";
+    layer.backgroundColor = [UIColor clearColor].CGColor;
+    layer.frame = etl.frame;
+    layer.delegate = vc;
+    [view.layer addSublayer: layer];
+    [layer setNeedsDisplay];
+}
 
 

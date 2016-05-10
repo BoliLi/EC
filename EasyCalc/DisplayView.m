@@ -39,8 +39,11 @@
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
         tapGesture.numberOfTapsRequired = 1;
         tapGesture.numberOfTouchesRequired = 1;
+        tapGesture.delegate = vc;
         [self addGestureRecognizer:tapGesture];
         
+        UILongPressGestureRecognizer *lpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:vc action:@selector(handleLongPress:)];
+        [self addGestureRecognizer:lpGesture];
 //        swipLBtn = [UIButton buttonWithType:UIButtonTypeSystem];
 //        swipLBtn.titleLabel.font = [UIFont systemFontOfSize: 30];
 //        swipLBtn.showsTouchWhenHighlighted = YES;

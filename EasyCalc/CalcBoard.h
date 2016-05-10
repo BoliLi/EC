@@ -35,4 +35,5 @@
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
 -(void) resetParam;
 -(void)updateFontInfo: (int)lvl;
+-(void) reorganize : (ViewController *)vc;
 @end

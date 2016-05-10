@@ -89,6 +89,7 @@
         self.denomBtmHalf = [coder decodeDoubleForKey:@"denomBtmHalf"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }
@@ -1186,11 +1187,17 @@
     self.denomTopHalf = dTop;
     self.denomBtmHalf = dBtm;
     self.numerFrame = CGRectMake(orgP.x, orgP.y, nWidth, nTop + nBtm);
-    self.denomFrame = CGRectMake(orgP.x, orgP.y + self.numerFrame.size.height, dWidth, dTop + dBtm);
-    self.mainFrame = CGRectUnion(self.numerFrame, self.denomFrame);
-    CGRect f = self.bar.frame;
-    f.size.width = self.mainFrame.size.width;
-    self.bar.frame = f;
+    if (self.bar != nil) {
+        self.denomFrame = CGRectMake(orgP.x, orgP.y + self.numerFrame.size.height, dWidth, dTop + dBtm);
+        self.mainFrame = CGRectUnion(self.numerFrame, self.denomFrame);
+        CGRect f = self.bar.frame;
+        f.size.width = self.mainFrame.size.width;
+        self.bar.frame = f;
+    } else {
+        self.denomFrame = CGRectZero;
+        self.mainFrame = self.numerFrame;
+    }
+    
     self.fontLvl = lvl;
 }
 

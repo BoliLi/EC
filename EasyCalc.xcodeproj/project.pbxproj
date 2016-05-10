@@ -7,6 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A902FC271CDB9DE200AFE7AD /* MGSwipeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = A902FC231CDB9DE200AFE7AD /* MGSwipeButton.m */; };
+		A902FC281CDB9DE200AFE7AD /* MGSwipeTableCell.m in Sources */ = {isa = PBXBuildFile; fileRef = A902FC251CDB9DE200AFE7AD /* MGSwipeTableCell.m */; };
+		A91CE8441CD0F80E0055353D /* QBPlasticPopupMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE8391CD0F80E0055353D /* QBPlasticPopupMenu.m */; };
+		A91CE8451CD0F80E0055353D /* QBPopupMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE83B1CD0F80E0055353D /* QBPopupMenu.m */; };
+		A91CE8461CD0F80E0055353D /* QBPopupMenuItem.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE83D1CD0F80E0055353D /* QBPopupMenuItem.m */; };
+		A91CE8471CD0F80E0055353D /* QBPopupMenuItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE83F1CD0F80E0055353D /* QBPopupMenuItemView.m */; };
+		A91CE8481CD0F80E0055353D /* QBPopupMenuOverlayView.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE8411CD0F80E0055353D /* QBPopupMenuOverlayView.m */; };
+		A91CE8491CD0F80E0055353D /* QBPopupMenuPagenatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = A91CE8431CD0F80E0055353D /* QBPopupMenuPagenatorView.m */; };
+		A91D82501CD7A1BE005D82B8 /* LRTextField.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D824F1CD7A1BE005D82B8 /* LRTextField.m */; };
+		A91D825A1CD7A1C9005D82B8 /* HTPressableButton.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82531CD7A1C9005D82B8 /* HTPressableButton.m */; };
+		A91D825B1CD7A1C9005D82B8 /* HTPressableButtonPrefs.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82551CD7A1C9005D82B8 /* HTPressableButtonPrefs.m */; };
+		A91D825C1CD7A1C9005D82B8 /* UIColor+HTColor.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82571CD7A1C9005D82B8 /* UIColor+HTColor.m */; };
+		A91D825D1CD7A1C9005D82B8 /* UIImage+HTButton.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82591CD7A1C9005D82B8 /* UIImage+HTButton.m */; };
+		A92A07241CDA616A00FA7FEC /* SaveTemplateDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = A92A07231CDA616A00FA7FEC /* SaveTemplateDialog.m */; };
 		A93F7CB21C62579900B994B4 /* WrapedEqTxtLyr.m in Sources */ = {isa = PBXBuildFile; fileRef = A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */; };
 		A94F42981C5DC5E5008F8EF5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = A94F42961C5DC5E5008F8EF5 /* LaunchScreen.storyboard */; };
 		A9589E2C1C13E847007F2C8B /* UIView+Easing.m in Sources */ = {isa = PBXBuildFile; fileRef = A9589E2B1C13E847007F2C8B /* UIView+Easing.m */; };
@@ -48,6 +62,7 @@
 		A997B6881C4D1D3F00DD2C31 /* DDParser.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6701C4D1D3F00DD2C31 /* DDParser.m */; };
 		A997B6891C4D1D3F00DD2C31 /* DDTypes.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6721C4D1D3F00DD2C31 /* DDTypes.m */; };
 		A997B68A1C4D1D3F00DD2C31 /* NSString+DDMathParsing.m in Sources */ = {isa = PBXBuildFile; fileRef = A997B6741C4D1D3F00DD2C31 /* NSString+DDMathParsing.m */; };
+		A9A59F911CDCF2A300BE3419 /* EquationTemplate.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A59F901CDCF2A300BE3419 /* EquationTemplate.m */; };
 		A9D841551CAC2D1900E88760 /* CalcBoard.m in Sources */ = {isa = PBXBuildFile; fileRef = A9D841541CAC2D1900E88760 /* CalcBoard.m */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +84,34 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A902FC221CDB9DE200AFE7AD /* MGSwipeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSwipeButton.h; sourceTree = "<group>"; };
+		A902FC231CDB9DE200AFE7AD /* MGSwipeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSwipeButton.m; sourceTree = "<group>"; };
+		A902FC241CDB9DE200AFE7AD /* MGSwipeTableCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MGSwipeTableCell.h; sourceTree = "<group>"; };
+		A902FC251CDB9DE200AFE7AD /* MGSwipeTableCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MGSwipeTableCell.m; sourceTree = "<group>"; };
+		A91CE8381CD0F80E0055353D /* QBPlasticPopupMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPlasticPopupMenu.h; sourceTree = "<group>"; };
+		A91CE8391CD0F80E0055353D /* QBPlasticPopupMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPlasticPopupMenu.m; sourceTree = "<group>"; };
+		A91CE83A1CD0F80E0055353D /* QBPopupMenu.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPopupMenu.h; sourceTree = "<group>"; };
+		A91CE83B1CD0F80E0055353D /* QBPopupMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPopupMenu.m; sourceTree = "<group>"; };
+		A91CE83C1CD0F80E0055353D /* QBPopupMenuItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPopupMenuItem.h; sourceTree = "<group>"; };
+		A91CE83D1CD0F80E0055353D /* QBPopupMenuItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPopupMenuItem.m; sourceTree = "<group>"; };
+		A91CE83E1CD0F80E0055353D /* QBPopupMenuItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPopupMenuItemView.h; sourceTree = "<group>"; };
+		A91CE83F1CD0F80E0055353D /* QBPopupMenuItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPopupMenuItemView.m; sourceTree = "<group>"; };
+		A91CE8401CD0F80E0055353D /* QBPopupMenuOverlayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPopupMenuOverlayView.h; sourceTree = "<group>"; };
+		A91CE8411CD0F80E0055353D /* QBPopupMenuOverlayView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPopupMenuOverlayView.m; sourceTree = "<group>"; };
+		A91CE8421CD0F80E0055353D /* QBPopupMenuPagenatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QBPopupMenuPagenatorView.h; sourceTree = "<group>"; };
+		A91CE8431CD0F80E0055353D /* QBPopupMenuPagenatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QBPopupMenuPagenatorView.m; sourceTree = "<group>"; };
+		A91D824E1CD7A1BE005D82B8 /* LRTextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LRTextField.h; sourceTree = "<group>"; };
+		A91D824F1CD7A1BE005D82B8 /* LRTextField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LRTextField.m; sourceTree = "<group>"; };
+		A91D82521CD7A1C9005D82B8 /* HTPressableButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTPressableButton.h; sourceTree = "<group>"; };
+		A91D82531CD7A1C9005D82B8 /* HTPressableButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTPressableButton.m; sourceTree = "<group>"; };
+		A91D82541CD7A1C9005D82B8 /* HTPressableButtonPrefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HTPressableButtonPrefs.h; sourceTree = "<group>"; };
+		A91D82551CD7A1C9005D82B8 /* HTPressableButtonPrefs.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HTPressableButtonPrefs.m; sourceTree = "<group>"; };
+		A91D82561CD7A1C9005D82B8 /* UIColor+HTColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+HTColor.h"; sourceTree = "<group>"; };
+		A91D82571CD7A1C9005D82B8 /* UIColor+HTColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HTColor.m"; sourceTree = "<group>"; };
+		A91D82581CD7A1C9005D82B8 /* UIImage+HTButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+HTButton.h"; sourceTree = "<group>"; };
+		A91D82591CD7A1C9005D82B8 /* UIImage+HTButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+HTButton.m"; sourceTree = "<group>"; };
+		A92A07221CDA616A00FA7FEC /* SaveTemplateDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SaveTemplateDialog.h; sourceTree = "<group>"; };
+		A92A07231CDA616A00FA7FEC /* SaveTemplateDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SaveTemplateDialog.m; sourceTree = "<group>"; };
 		A93F7CB01C62579900B994B4 /* WrapedEqTxtLyr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WrapedEqTxtLyr.h; sourceTree = "<group>"; };
 		A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WrapedEqTxtLyr.m; sourceTree = "<group>"; };
 		A94F42971C5DC5E5008F8EF5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -154,6 +197,8 @@
 		A997B6721C4D1D3F00DD2C31 /* DDTypes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DDTypes.m; sourceTree = "<group>"; };
 		A997B6731C4D1D3F00DD2C31 /* NSString+DDMathParsing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+DDMathParsing.h"; sourceTree = "<group>"; };
 		A997B6741C4D1D3F00DD2C31 /* NSString+DDMathParsing.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+DDMathParsing.m"; sourceTree = "<group>"; };
+		A9A59F8F1CDCF2A300BE3419 /* EquationTemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EquationTemplate.h; sourceTree = "<group>"; };
+		A9A59F901CDCF2A300BE3419 /* EquationTemplate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EquationTemplate.m; sourceTree = "<group>"; };
 		A9D841531CAC2D1900E88760 /* CalcBoard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CalcBoard.h; sourceTree = "<group>"; };
 		A9D841541CAC2D1900E88760 /* CalcBoard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CalcBoard.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -183,6 +228,60 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A902FC201CDB9DE200AFE7AD /* MGSwipeTableCell */ = {
+			isa = PBXGroup;
+			children = (
+				A902FC221CDB9DE200AFE7AD /* MGSwipeButton.h */,
+				A902FC231CDB9DE200AFE7AD /* MGSwipeButton.m */,
+				A902FC241CDB9DE200AFE7AD /* MGSwipeTableCell.h */,
+				A902FC251CDB9DE200AFE7AD /* MGSwipeTableCell.m */,
+			);
+			path = MGSwipeTableCell;
+			sourceTree = "<group>";
+		};
+		A91CE8371CD0F80E0055353D /* QBPopupMenu */ = {
+			isa = PBXGroup;
+			children = (
+				A91CE8381CD0F80E0055353D /* QBPlasticPopupMenu.h */,
+				A91CE8391CD0F80E0055353D /* QBPlasticPopupMenu.m */,
+				A91CE83A1CD0F80E0055353D /* QBPopupMenu.h */,
+				A91CE83B1CD0F80E0055353D /* QBPopupMenu.m */,
+				A91CE83C1CD0F80E0055353D /* QBPopupMenuItem.h */,
+				A91CE83D1CD0F80E0055353D /* QBPopupMenuItem.m */,
+				A91CE83E1CD0F80E0055353D /* QBPopupMenuItemView.h */,
+				A91CE83F1CD0F80E0055353D /* QBPopupMenuItemView.m */,
+				A91CE8401CD0F80E0055353D /* QBPopupMenuOverlayView.h */,
+				A91CE8411CD0F80E0055353D /* QBPopupMenuOverlayView.m */,
+				A91CE8421CD0F80E0055353D /* QBPopupMenuPagenatorView.h */,
+				A91CE8431CD0F80E0055353D /* QBPopupMenuPagenatorView.m */,
+			);
+			path = QBPopupMenu;
+			sourceTree = "<group>";
+		};
+		A91D824D1CD7A1BE005D82B8 /* LRTextField */ = {
+			isa = PBXGroup;
+			children = (
+				A91D824E1CD7A1BE005D82B8 /* LRTextField.h */,
+				A91D824F1CD7A1BE005D82B8 /* LRTextField.m */,
+			);
+			path = LRTextField;
+			sourceTree = "<group>";
+		};
+		A91D82511CD7A1C9005D82B8 /* HTPressableButton */ = {
+			isa = PBXGroup;
+			children = (
+				A91D82521CD7A1C9005D82B8 /* HTPressableButton.h */,
+				A91D82531CD7A1C9005D82B8 /* HTPressableButton.m */,
+				A91D82541CD7A1C9005D82B8 /* HTPressableButtonPrefs.h */,
+				A91D82551CD7A1C9005D82B8 /* HTPressableButtonPrefs.m */,
+				A91D82561CD7A1C9005D82B8 /* UIColor+HTColor.h */,
+				A91D82571CD7A1C9005D82B8 /* UIColor+HTColor.m */,
+				A91D82581CD7A1C9005D82B8 /* UIImage+HTButton.h */,
+				A91D82591CD7A1C9005D82B8 /* UIImage+HTButton.m */,
+			);
+			path = HTPressableButton;
+			sourceTree = "<group>";
+		};
 		A96222E31BFF0F690059FF51 = {
 			isa = PBXGroup;
 			children = (
@@ -207,8 +306,12 @@
 			isa = PBXGroup;
 			children = (
 				A94F42961C5DC5E5008F8EF5 /* LaunchScreen.storyboard */,
+				A902FC201CDB9DE200AFE7AD /* MGSwipeTableCell */,
+				A91D82511CD7A1C9005D82B8 /* HTPressableButton */,
+				A91D824D1CD7A1BE005D82B8 /* LRTextField */,
 				A997B6451C4D1D3F00DD2C31 /* DDMathParser */,
 				A9589E2A1C13E847007F2C8B /* UIView+Easing.h */,
+				A91CE8371CD0F80E0055353D /* QBPopupMenu */,
 				A9589E2B1C13E847007F2C8B /* UIView+Easing.m */,
 				A96222F21BFF0F690059FF51 /* AppDelegate.h */,
 				A96222F31BFF0F690059FF51 /* AppDelegate.m */,
@@ -225,6 +328,8 @@
 				A96223281BFF126C0059FF51 /* EquationTextLayer.h */,
 				A96223291BFF126C0059FF51 /* EquationTextLayer.m */,
 				A962232B1BFF128C0059FF51 /* EquationBlock.h */,
+				A9A59F8F1CDCF2A300BE3419 /* EquationTemplate.h */,
+				A9A59F901CDCF2A300BE3419 /* EquationTemplate.m */,
 				A962232C1BFF128C0059FF51 /* EquationBlock.m */,
 				A962232E1BFF12A20059FF51 /* Equation.h */,
 				A962232F1BFF12A20059FF51 /* Equation.m */,
@@ -240,6 +345,8 @@
 				A98556541C7F270300B8103C /* Parentheses.m */,
 				A9D841531CAC2D1900E88760 /* CalcBoard.h */,
 				A9D841541CAC2D1900E88760 /* CalcBoard.m */,
+				A92A07221CDA616A00FA7FEC /* SaveTemplateDialog.h */,
+				A92A07231CDA616A00FA7FEC /* SaveTemplateDialog.m */,
 			);
 			path = EasyCalc;
 			sourceTree = "<group>";
@@ -457,23 +564,34 @@
 			buildActionMask = 2147483647;
 			files = (
 				A962232A1BFF126C0059FF51 /* EquationTextLayer.m in Sources */,
+				A91CE8491CD0F80E0055353D /* QBPopupMenuPagenatorView.m in Sources */,
 				A997B6891C4D1D3F00DD2C31 /* DDTypes.m in Sources */,
+				A91CE8481CD0F80E0055353D /* QBPopupMenuOverlayView.m in Sources */,
+				A91D825B1CD7A1C9005D82B8 /* HTPressableButtonPrefs.m in Sources */,
 				A997B6861C4D1D3F00DD2C31 /* DDMathTokenInterpreter.m in Sources */,
 				A997B67F1C4D1D3F00DD2C31 /* DDExpression.m in Sources */,
+				A91CE8441CD0F80E0055353D /* QBPlasticPopupMenu.m in Sources */,
 				A96222F41BFF0F690059FF51 /* AppDelegate.m in Sources */,
 				A997B6761C4D1D3F00DD2C31 /* _DDFunctionEvaluator.m in Sources */,
+				A91D82501CD7A1BE005D82B8 /* LRTextField.m in Sources */,
 				A997B6841C4D1D3F00DD2C31 /* DDMathOperatorTypes.m in Sources */,
+				A902FC271CDB9DE200AFE7AD /* MGSwipeButton.m in Sources */,
 				A997B6831C4D1D3F00DD2C31 /* DDMathOperatorSet.m in Sources */,
+				A9A59F911CDCF2A300BE3419 /* EquationTemplate.m in Sources */,
 				A997B67D1C4D1D3F00DD2C31 /* _DDVariableExpression.m in Sources */,
 				A997B6801C4D1D3F00DD2C31 /* DDExpressionRewriter.m in Sources */,
 				A96223321BFF15840059FF51 /* Global.m in Sources */,
+				A91CE8451CD0F80E0055353D /* QBPopupMenu.m in Sources */,
 				A98122791C021F47002A1A75 /* Utils.m in Sources */,
 				A997B6881C4D1D3F00DD2C31 /* DDParser.m in Sources */,
 				A9589E2C1C13E847007F2C8B /* UIView+Easing.m in Sources */,
+				A902FC281CDB9DE200AFE7AD /* MGSwipeTableCell.m in Sources */,
 				A997B6791C4D1D3F00DD2C31 /* _DDNumberExpression.m in Sources */,
 				A96222F11BFF0F690059FF51 /* main.m in Sources */,
 				A962232D1BFF128C0059FF51 /* EquationBlock.m in Sources */,
 				A997B67E1C4D1D3F00DD2C31 /* DDEnumerator.m in Sources */,
+				A92A07241CDA616A00FA7FEC /* SaveTemplateDialog.m in Sources */,
+				A91CE8471CD0F80E0055353D /* QBPopupMenuItemView.m in Sources */,
 				A997B6781C4D1D3F00DD2C31 /* _DDMathTermResolver.m in Sources */,
 				A997B67B1C4D1D3F00DD2C31 /* _DDPrecisionFunctionEvaluator.m in Sources */,
 				A997B6821C4D1D3F00DD2C31 /* DDMathOperator.m in Sources */,
@@ -486,14 +604,18 @@
 				A98556551C7F270300B8103C /* Parentheses.m in Sources */,
 				A997B6751C4D1D3F00DD2C31 /* _DDDecimalFunctions.m in Sources */,
 				A997B6871C4D1D3F00DD2C31 /* DDMathTokenizer.m in Sources */,
+				A91D825D1CD7A1C9005D82B8 /* UIImage+HTButton.m in Sources */,
 				A997B6811C4D1D3F00DD2C31 /* DDMathEvaluator.m in Sources */,
 				A997B6851C4D1D3F00DD2C31 /* DDMathToken.m in Sources */,
 				A997B68A1C4D1D3F00DD2C31 /* NSString+DDMathParsing.m in Sources */,
+				A91CE8461CD0F80E0055353D /* QBPopupMenuItem.m in Sources */,
 				A96223211BFF12010059FF51 /* ViewController.m in Sources */,
+				A91D825A1CD7A1C9005D82B8 /* HTPressableButton.m in Sources */,
 				A96222F71BFF0F690059FF51 /* EasyCalc.xcdatamodeld in Sources */,
 				A997B67C1C4D1D3F00DD2C31 /* _DDRewriteRule.m in Sources */,
 				A997B6771C4D1D3F00DD2C31 /* _DDFunctionExpression.m in Sources */,
 				A93F7CB21C62579900B994B4 /* WrapedEqTxtLyr.m in Sources */,
+				A91D825C1CD7A1C9005D82B8 /* UIColor+HTColor.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

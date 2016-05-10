@@ -64,6 +64,7 @@
         self.expo = [coder decodeObjectForKey:@"expo"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }

@@ -18,11 +18,20 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "QBPopupMenu.h"
+#import "HTPressableButton.h"
+#import "UIColor+HTColor.h"
+#import "LRTextField.h"
+#import "SaveTemplateDialog.h"
+#import "MGSwipeTableCell.h"
+#import "MGSwipeButton.h"
+#import "EquationTemplate.h"
 
 static UIView *testview;
 
 @interface ViewController ()
-
+@property UITableView *tbv;
+@property UIVisualEffectView *blurBackground;
 @end
 
 @implementation ViewController
@@ -36,10 +45,307 @@ static UIView *testview;
 @synthesize statusBarHeight;
 @synthesize testeb;
 @synthesize delBtnLongPressTmr;
+@synthesize popMenu;
+@synthesize saveTempDlg;
+@synthesize tbv;
+@synthesize blurBackground;
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    if ([NSStringFromClass([touch.view class]) isEqualToString:@"UITableViewCellContentView"]) {
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
+- (void)keyboardWillShow:(NSNotification *)aNotification {
+    //获取键盘的高度
+    NSDictionary *userInfo = [aNotification userInfo];
+    NSValue *aValue = [userInfo objectForKey:UIKeyboardFrameEndUserInfoKey];
+    CGRect keyboardRect = [aValue CGRectValue];
+    int height = keyboardRect.size.height;
+    if (saveTempDlg.frame.origin.y + saveTempDlg.frame.size.height > self.view.bounds.size.height - height) {
+        CGRect f = saveTempDlg.frame;
+        f.origin.y = self.view.bounds.size.height - height - f.size.height;
+        saveTempDlg.frame = f;
+    }
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+}
+
+- (void)keyboardWillBeHidden:(NSNotification*)aNotification {
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+}
+
+-(void)saveTemplateOkClicked: (UIButton *)btn {
+    [self.view endEditing:YES];
+    
+    if (![saveTempDlg.textField.text isEqual: @""]) {
+        EquationTemplate *temp = [[EquationTemplate alloc] init];
+        temp.title = saveTempDlg.textField.text;
+        temp.root = [gCurCB.curEq.root copy];
+        [gTemplateList addObject:temp];
+        
+        [UIView animateWithDuration:.5 animations:^{
+            
+            [saveTempDlg setEasingFunction:easeInBack forKeyPath:@"center"];
+            [saveTempDlg setEasingFunction:easeOutQuint forKeyPath:@"transform"];
+            
+            // Move the view down
+            saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMaxY(self.view.bounds)+CGRectGetHeight(saveTempDlg.bounds));
+            
+            // ...and rotate it along the way
+            CGAffineTransform t = CGAffineTransformMakeRotation(M_PI * .3);
+            t = CGAffineTransformScale(t, .75, .75);
+            
+            saveTempDlg.transform = t;
+            
+        } completion:^(BOOL finished) {
+            
+            [saveTempDlg removeEasingFunctionForKeyPath:@"center"];
+            [saveTempDlg removeEasingFunctionForKeyPath:@"transform"];
+            
+            [saveTempDlg removeFromSuperview];
+            
+        }];
+        
+        [saveTempDlg.background removeFromSuperview];
+    }
+}
+
+-(void)saveTemplateCancelClicked: (UIButton *)btn {
+    [self.view endEditing:YES];
+    
+    [UIView animateWithDuration:.5 animations:^{
+        
+        [saveTempDlg setEasingFunction:easeInBack forKeyPath:@"center"];
+        [saveTempDlg setEasingFunction:easeOutQuint forKeyPath:@"transform"];
+        
+        // Move the view down
+        saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMaxY(self.view.bounds)+CGRectGetHeight(saveTempDlg.bounds));
+        
+        // ...and rotate it along the way
+        CGAffineTransform t = CGAffineTransformMakeRotation(M_PI * .3);
+        t = CGAffineTransformScale(t, .75, .75);
+        
+        saveTempDlg.transform = t;
+        
+    } completion:^(BOOL finished) {
+        
+        [saveTempDlg removeEasingFunctionForKeyPath:@"center"];
+        [saveTempDlg removeEasingFunctionForKeyPath:@"transform"];
+        
+        [saveTempDlg removeFromSuperview];
+        
+    }];
+    
+    [saveTempDlg.background removeFromSuperview];
+}
+
+- (void)handleSaveTemplate {
+    saveTempDlg = [[SaveTemplateDialog alloc] initWithFrame:CGRectMake(50, 50, self.view.bounds.size.width - 100, self.view.bounds.size.height - 300) :CGRectMake(0, statusBarHeight, scnWidth, scnHeight - statusBarHeight) :self];
+    
+    [self.view addSubview:saveTempDlg.background];
+    
+    [self.view addSubview:saveTempDlg];
+    
+    saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), 0);
+    saveTempDlg.transform = CGAffineTransformMakeScale(1., 1.);
+    
+    // Animate!
+    [UIView animateWithDuration:0.5 animations:^{
+        
+        [saveTempDlg setEasingFunction:easeOutBack forKeyPath:@"center"];
+        [saveTempDlg setEasingFunction:easeOutQuad forKeyPath:@"transform"];
+        
+        saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+        saveTempDlg.transform = CGAffineTransformIdentity;
+        
+    } completion:^(BOOL finished) {
+        
+        [saveTempDlg removeEasingFunctionForKeyPath:@"center"];
+        [saveTempDlg removeEasingFunctionForKeyPath:@"transform"];
+        
+    }];
+}
+
+-(NSArray*) swipeTableCell:(MGSwipeTableCell*) cell swipeButtonsForDirection:(MGSwipeDirection)direction
+             swipeSettings:(MGSwipeSettings*) swipeSettings expansionSettings:(MGSwipeExpansionSettings*) expansionSettings;
+{
+    if (direction == MGSwipeDirectionRightToLeft) {
+        swipeSettings.transition = MGSwipeTransition3D;
+        expansionSettings.buttonIndex = -1;
+        expansionSettings.fillOnTrigger = YES;
+        NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSMutableArray * result = [NSMutableArray array];
+        MGSwipeButton * button = [MGSwipeButton buttonWithTitle:@"Delete" backgroundColor:[UIColor redColor] callback:^BOOL(MGSwipeTableCell * sender){
+            NSLog(@"Convenience callback received (right).");
+            
+            return NO; //Don't autohide in delete button to improve delete expansion animation
+        }];
+        [result addObject:button];
+        return result;
+    }
+    return nil;
+}
+
+-(BOOL) swipeTableCell:(MGSwipeTableCell*) cell tappedButtonAtIndex:(NSInteger) index direction:(MGSwipeDirection)direction fromExpansion:(BOOL) fromExpansion
+{
+    NSLog(@"Delegate: button tapped, %@ position, index %d, from Expansion: %@",
+          direction == MGSwipeDirectionLeftToRight ? @"left" : @"right", (int)index, fromExpansion ? @"YES" : @"NO");
+    
+    if (direction == MGSwipeDirectionRightToLeft && index == 0) {
+        
+        //delete button
+        NSIndexPath * path = [tbv indexPathForCell:cell];
+        NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, path);
+        [gTemplateList removeObjectAtIndex:path.row];
+        [tbv deleteRowsAtIndexPaths:@[path] withRowAnimation:UITableViewRowAnimationLeft];
+        return NO; //Don't autohide to improve delete expansion animation
+    }
+    
+    return YES;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section; {
+    return gTemplateList.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    MGSwipeTableCell * cell;
+    static NSString * reuseIdentifier = @"programmaticCell";
+    cell = [tbv dequeueReusableCellWithIdentifier:reuseIdentifier];
+    if (!cell) {
+        cell = [[MGSwipeTableCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:reuseIdentifier];
+    }
+    
+    EquationTemplate *temp = [gTemplateList objectAtIndex:indexPath.row];
+    
+    cell.textLabel.text = temp.title;
+    cell.textLabel.font = [UIFont systemFontOfSize:16];
+    cell.detailTextLabel.text = temp.detailTitle;
+    cell.delegate = self;
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    
+    EquationTemplate *temp = [gTemplateList objectAtIndex:indexPath.row];
+    
+    NSLog(@"%s%i>~%li~~~~~~~~~~", __FUNCTION__, __LINE__, (long)indexPath.row);
+    [UIView animateWithDuration:.5 animations:^{
+        
+        [tbv setEasingFunction:easeInBack forKeyPath:@"center"];
+        [tbv setEasingFunction:easeOutQuint forKeyPath:@"transform"];
+        
+        // Move the view down
+        tbv.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMaxY(self.view.bounds)+CGRectGetHeight(tbv.bounds));
+        
+        // ...and rotate it along the way
+        CGAffineTransform t = CGAffineTransformMakeRotation(M_PI * .3);
+        t = CGAffineTransformScale(t, .75, .75);
+        
+        tbv.transform = t;
+        
+    } completion:^(BOOL finished) {
+        
+        [tbv removeEasingFunctionForKeyPath:@"center"];
+        [tbv removeEasingFunctionForKeyPath:@"transform"];
+        
+        [tbv removeFromSuperview];
+        [blurBackground removeFromSuperview];
+    }];
+    
+}
+
+-(void)tapAtBackground: (UITapGestureRecognizer *)gesture {
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+    
+    [UIView animateWithDuration:.5 animations:^{
+        
+        [tbv setEasingFunction:easeInBack forKeyPath:@"center"];
+        [tbv setEasingFunction:easeOutQuint forKeyPath:@"transform"];
+        
+        // Move the view down
+        tbv.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMaxY(self.view.bounds)+CGRectGetHeight(tbv.bounds));
+        
+        // ...and rotate it along the way
+        CGAffineTransform t = CGAffineTransformMakeRotation(M_PI * .3);
+        t = CGAffineTransformScale(t, .75, .75);
+        
+        tbv.transform = t;
+        
+    } completion:^(BOOL finished) {
+        
+        [tbv removeEasingFunctionForKeyPath:@"center"];
+        [tbv removeEasingFunctionForKeyPath:@"transform"];
+        
+        [tbv removeFromSuperview];
+        [blurBackground removeFromSuperview];
+    }];
+}
+
+- (void)handleOpenTemplate {
+    UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
+    blurBackground = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+    blurBackground.frame = CGRectMake(0, statusBarHeight, scnWidth, scnHeight - statusBarHeight);
+    [self.view addSubview:blurBackground];
+    
+    UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapAtBackground:)];
+    tapGesture.numberOfTapsRequired = 1;
+    tapGesture.numberOfTouchesRequired = 1;
+    tapGesture.delegate = self;
+    [blurBackground.contentView addGestureRecognizer:tapGesture];
+    
+    tbv = [[UITableView alloc] initWithFrame:CGRectMake(50, 50, self.view.bounds.size.width - 100, self.view.bounds.size.height - 100) style:UITableViewStylePlain];
+    tbv.layer.borderWidth = 1;
+    tbv.layer.cornerRadius = 10;
+    tbv.layer.masksToBounds = YES;
+    tbv.layer.borderColor = [[UIColor blackColor] CGColor];
+    tbv.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    tbv.dataSource = self;
+    tbv.delegate = self;
+    [self.view addSubview:tbv];
+    //[self.view bringSubviewToFront:_tableView];
+    
+    
+    tbv.center = CGPointMake(CGRectGetMidX(self.view.bounds), 0);
+    tbv.transform = CGAffineTransformMakeScale(1., 1.);
+    
+    // Animate!
+    [UIView animateWithDuration:0.5 animations:^{
+        
+        [tbv setEasingFunction:easeOutBack forKeyPath:@"center"];
+        [tbv setEasingFunction:easeOutQuad forKeyPath:@"transform"];
+        
+        tbv.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
+        tbv.transform = CGAffineTransformIdentity;
+        
+    } completion:^(BOOL finished) {
+        
+        [tbv removeEasingFunctionForKeyPath:@"center"];
+        [tbv removeEasingFunctionForKeyPath:@"transform"];
+        
+    }];
+}
+
+-(void)handleLongPress: (UILongPressGestureRecognizer *)gesture {
+    if (gesture.state == UIGestureRecognizerStateBegan) {
+        
+        [self.popMenu showInView:gCurCB.view targetRect:gCurCB.curEq.root.mainFrame animated:YES];
+        NSLog(@"%s%i>~%@~%@~%@~%@~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.popMenu.frame), NSStringFromCGRect(gCurCB.curEq.root.mainFrame), gCurCB.view.subviews, self.popMenu.subviews);
+    }
+}
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture {
     //NSUInteger touchNum = [gesture numberOfTouches];
     //NSUInteger tapNum = [gesture numberOfTapsRequired];
+    if (self.popMenu.isVisible) {
+        [self.popMenu dismissAnimated:YES];
+        return;
+    }
     CGPoint curPoint = [gesture locationOfTouch:0 inView: gCurCB.view];
     Equation *curEq = gCurCB.curEq;
     NSLog(@"%s%i~[%.1f, %.1f]~~~~~~~~~~", __FUNCTION__, __LINE__, curPoint.x, curPoint.y);
@@ -337,7 +643,11 @@ static UIView *testview;
                 [etl updateSize:gCurCB.curFontLvl];
                 [etl updateCopyBlock:curEq];
                 gCurCB.insertCIdx = etl.c_idx + 1;
-                gCurCB.curTxtLyr = etl;
+                if (etl.expo == nil) {
+                    gCurCB.curTxtLyr = etl;
+                } else {
+                    gCurCB.curTxtLyr = nil;
+                }
                 gCurCB.curBlk = etl;
                 gCurCB.txtInsIdx = (int)etl.strLenTbl.count - 1;
                 
@@ -715,7 +1025,7 @@ static UIView *testview;
         right.direction = UISwipeGestureRecognizerDirectionRight;
         [secondKbView addGestureRecognizer:right];
         
-        UIFont *buttonFont = [UIFont systemFontOfSize: 30];
+        UIFont *buttonFont = getFont(0);
         NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
         CGFloat btnHeight = scnHeight / 10;
         CGFloat btnWidth = scnWidth / 5;
@@ -745,7 +1055,7 @@ static UIView *testview;
 - (void)foreGroundInit: (CalcBoard *)firstCB {
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     NSString *ver = [user stringForKey:@"version"];
-#if 0
+#if 1
     if (ver != nil) {
 #else
     if (0) {
@@ -756,23 +1066,16 @@ static UIView *testview;
                 continue;
             }
             CalcBoard *cb = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:[NSString stringWithFormat: @"calcboard%li", (long)i]]];
-            [cb.curEq.root reorganize:cb.curEq :self];
+            [cb reorganize:self];
             
             UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
             tapGesture.numberOfTapsRequired = 1;
             tapGesture.numberOfTouchesRequired = 1;
             [cb.view addGestureRecognizer:tapGesture];
             
-//            UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeRight:)];
-//            right.numberOfTouchesRequired = 1;
-//            right.direction = UISwipeGestureRecognizerDirectionRight;
-//            [cb.view addGestureRecognizer:right];
-//            
-//            UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeLeft:)];
-//            left.numberOfTouchesRequired = 1;
-//            left.direction = UISwipeGestureRecognizerDirectionLeft;
-//            [cb.view addGestureRecognizer:left];
-            
+            UILongPressGestureRecognizer *lpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+            [cb.view addGestureRecognizer:lpGesture];
+
             [cb.view.layer addSublayer:cb.view.cursor];
             cb.view.cursor.delegate = self;
             [cb.view.cursor setNeedsDisplay];
@@ -805,8 +1108,8 @@ static UIView *testview;
     right.direction = UISwipeGestureRecognizerDirectionRight;
     [secondKbView addGestureRecognizer:right];
     
-    UIFont *buttonFont = [UIFont systemFontOfSize: 30];
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"COS", @"<", @">", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
+    UIFont *buttonFont = getFont(0);
+    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"COS", @"<", @">", @"STRL", @"blur", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 25; i++) {
@@ -843,7 +1146,7 @@ static UIView *testview;
     
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     NSString *ver = [user stringForKey:@"version"];
-#if 0
+#if 1
     if (ver != nil) {
 #else
     if (0) {
@@ -851,22 +1154,15 @@ static UIView *testview;
         NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
         gCurCBIdx = [user integerForKey:@"gCurCBIdx"];
         gCurCB = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:[NSString stringWithFormat: @"calcboard%li", (long)gCurCBIdx]]];
-        [gCurCB.curEq.root reorganize:gCurCB.curEq :self];
+        [gCurCB reorganize:self];
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
         tapGesture.numberOfTapsRequired = 1;
         tapGesture.numberOfTouchesRequired = 1;
         [gCurCB.view addGestureRecognizer:tapGesture];
         
-//        UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeRight:)];
-//        right.numberOfTouchesRequired = 1;
-//        right.direction = UISwipeGestureRecognizerDirectionRight;
-//        [gCurCB.view addGestureRecognizer:right];
-//        
-//        UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleDspViewSwipeLeft:)];
-//        left.numberOfTouchesRequired = 1;
-//        left.direction = UISwipeGestureRecognizerDirectionLeft;
-//        [gCurCB.view addGestureRecognizer:left];
+        UILongPressGestureRecognizer *lpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
+        [gCurCB.view addGestureRecognizer:lpGesture];
         
         CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
         anim.fromValue = [NSNumber numberWithBool:YES];
@@ -880,12 +1176,7 @@ static UIView *testview;
         [gCurCB.view.cursor setNeedsDisplay];
     } else {
         NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
-//        for (int i = 0; i < 16; i++) {
-//            gCurCB = [[Equation alloc] init:downLeft :dspFrame :self];
-//            [gCalcBoardList addObject:gCurCB];
-//            //[dspConView addSubview:gCurCB.view];
-//        }
-//        gCurCB = gCalcBoardList.firstObject;
+        gCurCBIdx = 0;
         gCurCB = [[CalcBoard alloc] init:downLeft :dspFrame :self];
     }
     
@@ -907,34 +1198,43 @@ static UIView *testview;
     left.direction = UISwipeGestureRecognizerDirectionLeft;
     [mainKbView addGestureRecognizer:left];
     
-    borderLayer = [CALayer layer];
-    borderLayer.contentsScale = [UIScreen mainScreen].scale;
-    borderLayer.name = @"btnBorderLayer";
-    borderLayer.backgroundColor = [UIColor clearColor].CGColor;
-    borderLayer.frame = CGRectMake(0, 0, scnWidth, scnHeight / 2);
-    borderLayer.delegate = self;
-    [mainKbView.layer addSublayer: borderLayer];
-    [borderLayer setNeedsDisplay];
+//    borderLayer = [CALayer layer];
+//    borderLayer.contentsScale = [UIScreen mainScreen].scale;
+//    borderLayer.name = @"btnBorderLayer";
+//    borderLayer.backgroundColor = [UIColor clearColor].CGColor;
+//    borderLayer.frame = CGRectMake(0, 0, scnWidth, scnHeight / 2);
+//    borderLayer.delegate = self;
+//    [mainKbView.layer addSublayer: borderLayer];
+//    [borderLayer setNeedsDisplay];
     
-    UIFont *buttonFont = [UIFont systemFontOfSize: 30];
+    UIFont *buttonFont = getFont(0);
     NSArray *btnTitleArr = [NSArray arrayWithObjects:@"DUMP", @"DEBUG", @"Root", @"<-", @"7", @"8", @"9", @"÷", @"4", @"5", @"6", @"×", @"1", @"2", @"3", @"-", @"%", @"0", @"·", @"+", @"x^", @"(", @")", @"=", nil];
     CGFloat btnHeight = scnHeight / 10;
     CGFloat btnWidth = scnWidth / 5;
     for (int i = 0; i < 20; i++) {
-        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
-        bn.tag = i + 10;
-        bn.titleLabel.font = buttonFont;
-        bn.showsTouchWhenHighlighted = YES;
-        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
         int j = i % 4;
         int k = i / 4;
-        bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
+        
+        HTPressableButton *bn = [[HTPressableButton alloc] initWithFrame:CGRectMake(j * btnWidth, k * btnHeight, btnWidth - 3.0, btnHeight) buttonStyle:HTPressableButtonStyleRounded];
+        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
+        bn.cornerRadius = 5;
+        bn.titleFont = buttonFont;
+        
+//        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
+//        bn.tag = i + 10;
+//        bn.titleLabel.font = buttonFont;
+//        bn.showsTouchWhenHighlighted = YES;
+//        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
+//        bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
+        
         [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+        
         if (i == 3) {
             UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(btnDelLongPress:)];
             longPress.minimumPressDuration = 1; //定义按的时间
             [bn addGestureRecognizer:longPress];
         }
+        
         [mainKbView addSubview:bn];
     }
     
@@ -960,6 +1260,18 @@ static UIView *testview;
     [mainKbView addSubview:bn];
     
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.bounds));
+    
+    QBPopupMenuItem *item = [QBPopupMenuItem itemWithTitle:@"Save" target:self action:@selector(handleSaveTemplate)];
+    QBPopupMenuItem *item2 = [QBPopupMenuItem itemWithTitle:@"Open" target:self action:@selector(handleOpenTemplate)];
+    NSArray *items = @[item, item2];
+    QBPopupMenu *popupMenu = [[QBPopupMenu alloc] initWithItems:items];
+    popupMenu.highlightedColor = [[UIColor colorWithRed:0 green:0.478 blue:1.0 alpha:1.0] colorWithAlphaComponent:0.8];
+    popMenu = popupMenu;
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillBeHidden:) name:UIKeyboardWillHideNotification object:nil];
+    
+    gTemplateList = [NSMutableArray array];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -1401,7 +1713,6 @@ static UIView *testview;
     /* Move cursor */
     CGFloat cursorOrgX = gCurCB.curTxtLyr.frame.origin.x + cursorOffset;
     CGFloat cursorOrgY = gCurCB.curTxtLyr.frame.origin.y;
-    NSLog(@"%s%i>~%.2f~~~~~~~~~~", __FUNCTION__, __LINE__, cursorOffset);
     gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
     gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     
@@ -3571,6 +3882,7 @@ static UIView *testview;
         pos.x += gCurCB.curEq.equalsign.frame.size.width;
         
         gCurCB.curEq.result = [[EquationTextLayer alloc] init:[result stringValue] :pos :gCurCB.curEq :TEXTLAYER_NUM];
+        [gCurCB.curEq.result updateStrLenTbl];
         gCurCB.curEq.result.opacity = 0.0;
         [gCurCB.view.layer addSublayer:gCurCB.curEq.result];
         
@@ -3877,8 +4189,7 @@ static UIView *testview;
     } else if([[btn currentTitle]  isEqual: @"<-"]) {
         [self handleDelBtnClick];
     } else if([[btn currentTitle]  isEqual: @"·"]) {
-        
-        
+        [self handleNumBtnClick: @"."];
     } else if([[btn currentTitle]  isEqual: @"%"]) {
         NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
         CGPoint point = CGPointMake(gCurCB.curTxtLyr.position.x + 30, gCurCB.curTxtLyr.position.y);
@@ -3938,6 +4249,16 @@ static UIView *testview;
         [self handleDspViewSwipeRight:nil];
     } else if([[btn currentTitle]  isEqual: @">"]) {
         [self handleDspViewSwipeLeft:nil];
+    } else if([[btn currentTitle]  isEqual: @"STRL"]) {
+        drawStrLenTable(self, gCurCB.view, gCurCB.curTxtLyr);
+    } else if([[btn currentTitle]  isEqual: @"blur"]) {
+        UIVisualEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleExtraLight];
+        
+        UIVisualEffectView *visualEffectView = [[UIVisualEffectView alloc] initWithEffect:blurEffect];
+        
+        visualEffectView.frame = CGRectMake(0, statusBarHeight, scnWidth, scnHeight - statusBarHeight);
+        
+        [self.view addSubview:visualEffectView];
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }
@@ -4040,7 +4361,20 @@ static UIView *testview;
             CGContextAddQuadCurveToPoint(ctx, layer.frame.size.width, layer.frame.size.height / 2.0, 2.0, layer.frame.size.height - 2.0);
             CGContextStrokePath(ctx);
         }
+    } else if ([layer.name isEqual: @"drawStrLenTable"]) {
+        CGContextSetRGBStrokeColor(ctx, 0, 1, 0, 1);
+        CGContextSetLineWidth(ctx, 0.5);
         
+        NSMutableString *str = [NSMutableString string];
+        
+        for (NSNumber *obj in gCurCB.curTxtLyr.strLenTbl) {
+            CGFloat len = [obj doubleValue];
+            CGPoint points[] = {CGPointMake(len, 0), CGPointMake(len, layer.frame.size.height)};
+            CGContextStrokeLineSegments(ctx, points, 2);
+            [str appendString:[NSString stringWithFormat:@"%f ", len]];
+        }
+        
+        NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, str);
     } else
         NSLog(@"%s%i>~~ERR~%@~~~~~~~~", __FUNCTION__, __LINE__, layer.name);
 }

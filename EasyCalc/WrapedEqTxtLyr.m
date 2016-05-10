@@ -114,6 +114,7 @@
         self.left_parenth = [coder decodeObjectForKey:@"left_parenth"];
         self.right_parenth = [coder decodeObjectForKey:@"right_parenth"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }
@@ -184,7 +185,7 @@
         return;
     }
     
-    UIFont *font = [UIFont systemFontOfSize:getFontSize(lvl)];
+    UIFont *font = getFont(lvl);
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.title.string string]];
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];

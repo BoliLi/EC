@@ -113,6 +113,7 @@
         self.type = [coder decodeIntForKey:@"type"];
         self.strLenTbl = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"strLenTbl"]];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }
@@ -385,7 +386,7 @@
     }
     
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.string string]];
-    UIFont *font = [UIFont systemFontOfSize:getFontSize(lvl)];
+    UIFont *font = getFont(lvl);
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
     CFRelease(ctFont);

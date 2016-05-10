@@ -285,7 +285,7 @@
 
 -(void) dumpEverything : (EquationBlock *)eb {
     [self dumpObj:eb];
-    NSLog(@"%s>~%@~%@~%@~%i~%lu~%i~~~~~", __FUNCTION__, self.par.curParent, self.par.curBlk, self.par.curTxtLyr, self.par.curMode, (unsigned long)self.par.insertCIdx, self.par.txtInsIdx);
+    NSLog(@"%s>~%@~%@~%@~%i~%lu~%i~%@~~~~", __FUNCTION__, self.par.curParent, self.par.curBlk, self.par.curTxtLyr, self.par.curMode, (unsigned long)self.par.insertCIdx, self.par.txtInsIdx, self.result);
 }
 
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point {

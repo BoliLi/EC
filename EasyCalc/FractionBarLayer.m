@@ -50,6 +50,7 @@
         self.guid = [coder decodeIntForKey:@"guid"];
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }

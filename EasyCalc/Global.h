@@ -63,15 +63,21 @@ extern NSInteger gCurCBIdx;
 extern CalcBoard *gCurCB;
 extern CGFloat gCharWidthTbl[4][16];
 extern CGFloat gCharHeightTbl[4];
+extern NSMutableArray *gTemplateList;
 
 @interface NSMutableArray (EasyCalc)
 - (void)reverse;
 @end
 
+@interface UIButton (EasyCalc)
+- (UIImage *) buttonImageFromColor:(UIColor *)color;
+@end
 
 void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock);
 int getFontSize(int level);
 CGFloat getLineWidth(int level);
 void initCharSizeTbl(void);
 CGFloat getCharWidth(int level, NSString *s);
+void drawStrLenTable(ViewController *vc, UIView *view, EquationTextLayer *etl);
+UIFont *getFont(int lvl);
 #endif /* Global_h */

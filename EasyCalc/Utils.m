@@ -1466,6 +1466,28 @@ NSNumber *calculate(NSMutableString *input) {
     return value;
 }
 
+void updateRoll(id b, int r) {
+    if ([b isMemberOfClass: [EquationTextLayer class]]) {
+        EquationTextLayer *layer = b;
+        layer.roll = r;
+    } else if ([b isMemberOfClass: [FractionBarLayer class]]) {
+        
+    } else if ([b isMemberOfClass: [EquationBlock class]]) {
+        EquationBlock *eb = b;
+        eb.roll = r;
+    } else if ([b isMemberOfClass: [RadicalBlock class]]) {
+        RadicalBlock *rb = b;
+        rb.roll = r;
+    } else if ([b isMemberOfClass: [WrapedEqTxtLyr class]]) {
+        WrapedEqTxtLyr *wetl = b;
+        wetl.roll = r;
+    } else if ([b isMemberOfClass: [Parentheses class]]) {
+        Parentheses *p = b;
+        p.roll = r;
+    } else
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+}
+
 bool rectContainsRect(CGRect rect1, CGRect rect2) {
     int x1 = (int)rect1.origin.x;
     int x2 = (int)rect2.origin.x;

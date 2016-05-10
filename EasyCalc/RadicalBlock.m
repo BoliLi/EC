@@ -143,6 +143,7 @@
         self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.rootNum = [coder decodeObjectForKey:@"rootNum"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
+        self.isCopy = NO;
     }
     return self;
 }
