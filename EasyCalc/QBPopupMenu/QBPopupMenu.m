@@ -174,7 +174,7 @@ static const NSTimeInterval kQBPopupMenuAnimationDuration = 0.2;
     
     // Show
     [view addSubview:self.overlayView];
-    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.overlayView.frame), NSStringFromCGRect(view.frame));
+    
     if (animated) {
         self.alpha = 0;
         [self.overlayView addSubview:self];
@@ -198,10 +198,6 @@ static const NSTimeInterval kQBPopupMenuAnimationDuration = 0.2;
         if (self.delegate && [self.delegate respondsToSelector:@selector(popupMenuDidAppear:)]) {
             [self.delegate popupMenuDidAppear:self];
         }
-    }
-    NSLog(@"%s%i>~%@~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.overlayView.frame), NSStringFromCGRect(self.frame));
-    for (QBPopupMenuItemView *view in self.itemViews) {
-        NSLog(@"%s%i>~%@~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(view.frame), NSStringFromCGRect(view.button.frame));
     }
 }
 

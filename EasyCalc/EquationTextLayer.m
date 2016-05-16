@@ -25,30 +25,10 @@
 @synthesize roll;
 @synthesize expo;
 @synthesize mainFrame;
-@synthesize is_base_expo;
 @synthesize type;
 @synthesize strLenTbl;
 @synthesize fontLvl;
 @synthesize isCopy;
-
-//-(id) init : (Equation *)e {
-//    self = [super init];
-//    if (self) {
-//        self.ancestor = e;
-//        self.contentsScale = [UIScreen mainScreen].scale;
-//        self.guid = ++e.guid_cnt;
-//        self.roll = calcB.curRoll;
-//        self.strLenTbl = [NSMutableArray array];
-//        [self.strLenTbl addObject:@0.0];
-//        
-//        if (calcB.curFont == calcB.baseFont) {
-//            is_base_expo = IS_BASE;
-//        } else {
-//            is_base_expo = IS_EXPO;
-//        }
-//    }
-//    return self;
-//}
 
 -(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t {
     self = [super init];
@@ -63,7 +43,6 @@
         self.strLenTbl = [NSMutableArray array];
         [self.strLenTbl addObject:@0.0];
         self.fontLvl = calcB.curFontLvl;
-        self.is_base_expo = calcB.base_or_expo;
         self.isCopy = NO;
         
         NSMutableAttributedString *attStr;
@@ -109,7 +88,6 @@
         self.guid = [coder decodeIntForKey:@"guid"];
         self.expo = [coder decodeObjectForKey:@"expo"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
-        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.type = [coder decodeIntForKey:@"type"];
         self.strLenTbl = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"strLenTbl"]];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
@@ -127,7 +105,6 @@
         [coder encodeObject:self.expo forKey:@"expo"];
     }
     [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
-    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeInt:self.type forKey:@"type"];
     [coder encodeObject:[NSArray arrayWithArray:self.strLenTbl] forKey:@"strLenTbl"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
@@ -141,7 +118,6 @@
         copy.expo = [self.expo copy];
     }
     copy.mainFrame = self.mainFrame;
-    copy.is_base_expo = self.is_base_expo;
     copy.type = self.type;
     copy.strLenTbl = [self.strLenTbl mutableCopy];
     copy.fontLvl = self.fontLvl;
@@ -154,26 +130,6 @@
     copy.isCopy = YES;
     return copy;
 }
-
-//- (id) mutableCopyWithZone:(NSZone *)zone {
-//    EquationTextLayer *copy = [[[self class] allocWithZone :zone] init];
-//    copy.c_idx = self.c_idx;
-//    copy.roll = self.roll;
-//    if (self.expo != nil) {
-//        copy.expo = [self.expo copy];
-//    }
-//    copy.mainFrame = self.mainFrame;
-//    copy.is_base_expo = self.is_base_expo;
-//    copy.type = self.type;
-//    copy.strLenTbl = [self.strLenTbl mutableCopy];
-//    
-//    copy.contentsScale = [UIScreen mainScreen].scale;
-//    copy.frame = self.frame;
-//    copy.backgroundColor = [UIColor clearColor].CGColor;
-//    copy.name = [self.name copy];
-//    copy.string = [self.string copy];
-//    return copy;
-//}
 
 -(CGFloat) addNumStr:(NSString *)str {
     Equation *E = self.ancestor;
@@ -286,6 +242,10 @@
 }
 
 -(void) updateStrLenTbl {
+    if (self.type == TEXTLAYER_EMPTY) {
+        return;
+    }
+    
     NSString *str = [self.string string];
     
     [self.strLenTbl removeAllObjects];
@@ -390,6 +350,10 @@
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
     CFRelease(ctFont);
+    
+    if (self.type == TEXTLAYER_EMPTY) {
+        [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, attStr.length)];
+    }
     
     self.string = attStr;
     
@@ -499,6 +463,67 @@
     
 }
 
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
+    CGFloat orgWidth1 = self.mainFrame.size.width;
+    [self updateFrameBaseOnBase];
+    if ((int)orgWidth1 != (int)self.mainFrame.size.width) {
+        [self.parent updateFrameWidth:self.mainFrame.size.width - orgWidth1 :self.roll];
+    }
+}
+
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par {
+    CalcBoard *calcB = anc.par;
+    self.isCopy = NO;
+    self.c_idx = chld_idx;
+    self.parent = par;
+    self.ancestor = anc;
+    [calcB.view.layer addSublayer:self];
+    if (self.expo != nil) {
+        [self.expo reorganize:anc :vc :0 :self];
+    }
+}
+
+-(void) updateCalcBoardInfo {
+    Equation *eq = self.ancestor;
+    CalcBoard *cb = eq.par;
+    cb.insertCIdx = self.c_idx + 1;
+    if (self.expo == nil) {
+        cb.curTxtLyr = self;
+        cb.txtInsIdx = (int)self.strLenTbl.count - 1;
+    } else {
+        cb.curTxtLyr = nil;
+        cb.txtInsIdx = 1;
+    }
+    cb.curBlk = self;
+    cb.curRoll = self.roll;
+    cb.curParent = self.parent;
+    [cb updateFontInfo:self.fontLvl];
+    if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+        cb.curMode = MODE_INPUT;
+    } else {
+        cb.curMode = MODE_INSERT;
+    }
+    if (self.type == TEXTLAYER_EMPTY) {
+        cb.view.inpOrg = CGPointMake(self.frame.origin.x, self.frame.origin.y);
+        cb.view.cursor.frame = CGRectMake(cb.view.inpOrg.x, cb.view.inpOrg.y, CURSOR_W, cb.curFontH);
+    } else {
+        cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
+        cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
+    }
+}
+
+-(EquationTextLayer *) lookForEmptyTxtLyr {
+    if (self.type == TEXTLAYER_EMPTY) {
+        return self;
+    }
+    
+    if (self.expo != nil) {
+        return [self.expo lookForEmptyTxtLyr];
+    }
+    
+    return nil;
+}
+
 -(void) destroy {
     if (self.expo != nil) {
         [self.expo destroy];
@@ -507,5 +532,4 @@
     self.strLenTbl = nil;
     [self removeFromSuperlayer];
 }
-
 @end

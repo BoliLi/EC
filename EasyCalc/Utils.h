@@ -17,4 +17,6 @@ bool rectContainsRect(CGRect rect1, CGRect rect2);
 NSMutableString *equationToString(EquationBlock *parent, int *i);
 NSNumber *calculate(NSMutableString *input);
 void updateRoll(id b, int r);
+BOOL isNumber(NSString *str);
+EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock);
 #endif /* Utils_h */

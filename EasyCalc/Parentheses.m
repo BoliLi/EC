@@ -22,7 +22,6 @@
 @synthesize guid;
 @synthesize c_idx;
 @synthesize roll;
-@synthesize is_base_expo;
 @synthesize ancestor;
 @synthesize l_or_r;
 @synthesize expo;
@@ -42,7 +41,6 @@
         self.hidden = NO;
         self.roll = calcB.curRoll;
         self.l_or_r = l_r;
-        self.is_base_expo = calcB.base_or_expo;
         self.expo = nil;
         
         self.frame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
@@ -59,7 +57,6 @@
     if (self) {
         self.guid = [coder decodeIntForKey:@"guid"];
         self.roll = [coder decodeIntForKey:@"roll"];
-        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.l_or_r = [coder decodeIntForKey:@"l_or_r"];
         self.expo = [coder decodeObjectForKey:@"expo"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
@@ -74,7 +71,6 @@
     [super encodeWithCoder:coder];
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.roll forKey:@"roll"];
-    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeInt:self.l_or_r forKey:@"l_or_r"];
     if (self.expo != nil) {
         [coder encodeObject:self.expo forKey:@"expo"];
@@ -87,7 +83,6 @@
     Parentheses *copy = [[[self class] allocWithZone :zone] init];
     copy.c_idx = self.c_idx;
     copy.roll = self.roll;
-    copy.is_base_expo = self.is_base_expo;
     copy.l_or_r = self.l_or_r;
     
     copy.frame = self.frame;
@@ -174,6 +169,55 @@
         [CATransaction commit];
         
         [self.expo moveCopy:expoPos];
+    }
+}
+
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
+    CGFloat orgWidth1 = self.mainFrame.size.width;
+    [self updateFrameBaseOnBase];
+    if ((int)orgWidth1 != (int)self.mainFrame.size.width) {
+        [self.parent updateFrameWidth:self.mainFrame.size.width - orgWidth1 :self.roll];
+    }
+}
+
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par {
+    CalcBoard *calcB = anc.par;
+    self.isCopy = NO;
+    self.c_idx = chld_idx;
+    self.parent = par;
+    self.ancestor = anc;
+    self.delegate = vc;
+    [calcB.view.layer addSublayer: self];
+    [self setNeedsDisplay];
+    if (self.expo != nil) {
+        [self.expo reorganize:anc :vc :0 :self];
+    }
+}
+
+-(void) updateCalcBoardInfo {
+    Equation *eq = self.ancestor;
+    CalcBoard *cb = eq.par;
+    cb.insertCIdx = self.c_idx + 1;
+    cb.curTxtLyr = nil;
+    cb.curBlk = self;
+    cb.txtInsIdx = 1;
+    cb.curRoll = self.roll;
+    cb.curParent = self.parent;
+    [cb updateFontInfo:self.fontLvl];
+    if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+        cb.curMode = MODE_INPUT;
+    } else {
+        cb.curMode = MODE_INSERT;
+    }
+    cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
+    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.frame.origin.y + self.frame.size.height / 2.0 - cb.curFontH / 2.0);
+}
+
+-(EquationTextLayer *) lookForEmptyTxtLyr {
+    if (self.expo == nil) {
+        return nil;
+    } else {
+        return [self.expo lookForEmptyTxtLyr];
     }
 }
 

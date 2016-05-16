@@ -19,7 +19,6 @@
 @property int roll;
 @property EquationBlock *expo;
 @property CGRect mainFrame;
-@property int is_base_expo;
 @property int type;
 @property NSMutableArray *strLenTbl;
 @property int fontLvl;
@@ -40,5 +39,10 @@
 - (void)updateCopyBlock:(Equation *)e;
 -(void) moveFrom:(CGPoint)orgF :(CGPoint)desF;
 -(void) moveCopy:(CGPoint)dest;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
+-(void) updateCalcBoardInfo;
+-(EquationTextLayer *) lookForEmptyTxtLyr;
 -(void) destroy;
+
 @end

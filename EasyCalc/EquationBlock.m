@@ -31,7 +31,6 @@
 @synthesize numerBtmHalf;
 @synthesize denomTopHalf;
 @synthesize denomBtmHalf;
-@synthesize is_base_expo;
 @synthesize fontLvl;
 @synthesize isCopy;
 
@@ -44,7 +43,6 @@
         self.children = [NSMutableArray array];
         self.guid = e.guid_cnt++;
         self.roll = calcB.curRoll;
-        self.is_base_expo = calcB.base_or_expo;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
     }
@@ -65,7 +63,6 @@
         self.mainFrame = self.numerFrame;
         self.numerTopHalf = calcB.curFontH / 2.0;
         self.numerBtmHalf = calcB.curFontH / 2.0;
-        self.is_base_expo = calcB.base_or_expo;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
     }
@@ -87,7 +84,6 @@
         self.numerBtmHalf = [coder decodeDoubleForKey:@"numerBtmHalf"];
         self.denomTopHalf = [coder decodeDoubleForKey:@"denomTopHalf"];
         self.denomBtmHalf = [coder decodeDoubleForKey:@"denomBtmHalf"];
-        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
     }
@@ -109,7 +105,6 @@
     [coder encodeDouble:self.numerBtmHalf forKey:@"numerBtmHalf"];
     [coder encodeDouble:self.denomTopHalf forKey:@"denomTopHalf"];
     [coder encodeDouble:self.denomBtmHalf forKey:@"denomBtmHalf"];
-    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
 }
 
@@ -124,7 +119,6 @@
         }
     }
     newEB.children = copyArr;
-    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, copyArr);
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -139,88 +133,20 @@
     copy.numerBtmHalf = self.numerBtmHalf;
     copy.denomTopHalf = self.denomTopHalf;
     copy.denomBtmHalf = self.denomBtmHalf;
-    copy.is_base_expo = self.is_base_expo;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
     return copy;
 }
 
--(void) reorganize : (Equation *)anc : (ViewController *)vc {
-    if (self.roll == ROLL_ROOT) {
-        self.parent = nil;
-    }
-    
-    CalcBoard *calcB = anc.par;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par {
+    self.isCopy = NO;
+    self.c_idx = chld_idx;
+    self.parent = par;
+    self.ancestor = anc;
     
     NSUInteger cidx = 0;
     for (id b in self.children) {
-        if ([b isMemberOfClass:[EquationBlock class]]) {
-            EquationBlock *eb = b;
-            NSLog(@"%s%i>~%p~~~~~~~~~~", __FUNCTION__, __LINE__, eb.bar);
-            eb.c_idx = cidx++;
-            eb.parent = self;
-            eb.ancestor = anc;
-            [eb reorganize:anc :vc];
-        } else if ([b isMemberOfClass:[EquationTextLayer class]]) {
-            EquationTextLayer *l = b;
-            l.c_idx = cidx++;
-            l.parent = self;
-            l.ancestor = anc;
-            [calcB.view.layer addSublayer:l];
-            if (l.expo != nil) {
-                [l.expo reorganize:anc :vc];
-            }
-        } else if ([b isMemberOfClass:[RadicalBlock class]]) {
-            RadicalBlock *rb = b;
-            rb.c_idx = cidx++;
-            rb.parent = self;
-            rb.ancestor = anc;
-            rb.delegate = vc;
-            [calcB.view.layer addSublayer: rb];
-            [rb setNeedsDisplay];
-            
-            if (rb.rootNum != nil) {
-                [calcB.view.layer addSublayer: rb.rootNum];
-            }
-            
-            [rb.content reorganize:anc :vc];
-        } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
-            FractionBarLayer *fb = b;
-            NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, fb);
-            fb.c_idx = cidx++;
-            fb.parent = self;
-            fb.ancestor = anc;
-            fb.delegate = vc;
-            [calcB.view.layer addSublayer: fb];
-            [fb setNeedsDisplay];
-        } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
-            WrapedEqTxtLyr *wetl = b;
-            wetl.c_idx = cidx++;
-            wetl.parent = self;
-            wetl.ancestor = anc;
-            [calcB.view.layer addSublayer: wetl.title];
-            [calcB.view.layer addSublayer: wetl.left_parenth];
-            wetl.left_parenth.delegate = vc;
-            [wetl.left_parenth setNeedsDisplay];
-            [calcB.view.layer addSublayer: wetl.right_parenth];
-            wetl.left_parenth.delegate = vc;
-            [wetl.right_parenth setNeedsDisplay];
-            
-            [wetl.content reorganize:anc :vc];
-        } else if ([b isMemberOfClass:[Parentheses class]]) {
-            Parentheses *p = b;
-            p.c_idx = cidx++;
-            p.parent = self;
-            p.ancestor = anc;
-            p.delegate = vc;
-            [calcB.view.layer addSublayer: p];
-            [p setNeedsDisplay];
-            if (p.expo != nil) {
-                [p.expo reorganize:anc :vc];
-            }
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-        }
+        [b reorganize:anc :vc :(int)cidx++ :self];
     }
 }
 
@@ -357,43 +283,7 @@
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     
     if ((int)orgWidth != (int)self.mainFrame.size.width) {
-        id block = self.parent;
-        if (block != nil) {
-            if([block isMemberOfClass:[EquationBlock class]]) {
-                [block updateFrameWidth:self.mainFrame.size.width - orgWidth :self.roll];
-            } else if([block isMemberOfClass:[RadicalBlock class]]) {
-                RadicalBlock *rBlock = block;
-                CGFloat orgWidth1 = rBlock.frame.size.width;
-                [rBlock updateFrame];
-                [rBlock setNeedsDisplay];
-                if ((int)orgWidth1 != (int)rBlock.frame.size.width) {
-                    [rBlock.parent updateFrameWidth:rBlock.frame.size.width - orgWidth1 :rBlock.roll];
-                }
-            } else if([block isMemberOfClass:[EquationTextLayer class]]) {
-                EquationTextLayer *layer = block;
-                CGFloat orgWidth1 = layer.mainFrame.size.width;
-                layer.mainFrame = CGRectUnion(layer.frame, self.mainFrame);
-                if ((int)orgWidth1 != (int)layer.mainFrame.size.width) {
-                    [layer.parent updateFrameWidth:layer.mainFrame.size.width - orgWidth1 :layer.roll];
-                }
-            } else if([block isMemberOfClass:[WrapedEqTxtLyr class]]) {
-                WrapedEqTxtLyr *wetl = block;
-                CGFloat orgWidth1 = wetl.mainFrame.size.width;
-                CGFloat newMW = wetl.title.frame.size.width + wetl.left_parenth.frame.size.width + wetl.content.mainFrame.size.width + wetl.right_parenth.frame.size.width;
-                wetl.mainFrame = CGRectMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y, newMW, wetl.mainFrame.size.height);
-                if ((int)orgWidth1 != (int)wetl.mainFrame.size.width) {
-                    [wetl.parent updateFrameWidth:wetl.mainFrame.size.width - orgWidth1 :wetl.roll];
-                }
-            } else if([block isMemberOfClass:[Parentheses class]]) {
-                Parentheses *p = block;
-                CGFloat orgWidth1 = p.mainFrame.size.width;
-                p.mainFrame = CGRectUnion(p.frame, self.mainFrame);
-                if ((int)orgWidth1 != (int)p.mainFrame.size.width) {
-                    [p.parent updateFrameWidth:p.mainFrame.size.width - orgWidth1 :p.roll];
-                }
-            } else
-                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-        }
+        [self.parent updateFrameWidth:self.mainFrame.size.width - orgWidth :self.roll];
     }
 }
 
@@ -1621,6 +1511,45 @@
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
+}
+
+-(void) updateCalcBoardInfo {
+    Equation *eq = self.ancestor;
+    CalcBoard *cb = eq.par;
+    cb.insertCIdx = self.c_idx + 1;
+    cb.curTxtLyr = nil;
+    cb.curBlk = self;
+    cb.txtInsIdx = 1;
+    cb.curRoll = self.roll;
+    cb.curParent = self.parent;
+    [cb updateFontInfo:self.fontLvl];
+    if (self.roll == ROLL_ROOT) {
+        cb.curMode = MODE_DUMP_ROOT;
+    } else if (self.roll == ROLL_ROOT_ROOT) {
+        cb.curMode = MODE_DUMP_RADICAL;
+    } else if (self.roll == ROLL_WRAP_ROOT) {
+        cb.curMode = MODE_DUMP_WETL;
+    } else if (self.roll == ROLL_EXPO_ROOT) {
+        cb.curMode = MODE_DUMP_EXPO;
+    } else {
+        if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+            cb.curMode = MODE_INPUT;
+        } else {
+            cb.curMode = MODE_INSERT;
+        }
+    }
+    cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
+    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
+}
+
+-(EquationTextLayer *) lookForEmptyTxtLyr {
+    for (id b in self.children) {
+        EquationTextLayer *ret = [b lookForEmptyTxtLyr];
+        if (ret != nil) {
+            return ret;
+        }
+    }
+    return nil;
 }
 
 -(void) destroy {

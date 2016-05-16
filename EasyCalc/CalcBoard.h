@@ -13,6 +13,7 @@
 @class DisplayView;
 @class EquationTextLayer;
 @class ViewController;
+@class EquationBlock;
 
 @interface CalcBoard : NSObject <NSCoding>
 @property DisplayView *view;
@@ -29,11 +30,11 @@
 @property CGFloat curFontW;
 @property NSUInteger insertCIdx;
 @property int txtInsIdx;
-@property int base_or_expo;
 @property int curFontLvl;
 
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
 -(void) resetParam;
--(void)updateFontInfo: (int)lvl;
+-(void) updateFontInfo: (int)lvl;
 -(void) reorganize : (ViewController *)vc;
+-(void) insertTemplate :(EquationBlock *)rootBlk :(ViewController *)vc;
 @end

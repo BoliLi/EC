@@ -25,7 +25,6 @@
 @property CGFloat numerBtmHalf;
 @property CGFloat denomTopHalf;
 @property CGFloat denomBtmHalf;
-@property int is_base_expo;
 @property int fontLvl;
 @property BOOL isCopy;
 
@@ -39,9 +38,11 @@
 -(void) destroy;
 -(void) moveUp : (CGFloat)distance;
 -(void) adjustElementPosition;
--(void) reorganize : (Equation *)anc : (ViewController *)vc;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 - (void)copyChildrenTo:(EquationBlock *)newEB;
 -(void) moveCopy:(CGPoint)dest;
+-(void) updateCalcBoardInfo;
+-(EquationTextLayer *) lookForEmptyTxtLyr;
 @end

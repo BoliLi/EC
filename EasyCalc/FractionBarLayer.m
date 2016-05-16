@@ -23,7 +23,6 @@
 @synthesize c_idx;
 @synthesize parent;
 @synthesize ancestor;
-@synthesize is_base_expo;
 @synthesize fontLvl;
 @synthesize isCopy;
 
@@ -36,7 +35,6 @@
         self.contentsScale = [UIScreen mainScreen].scale;
         self.guid = e.guid_cnt++;
         self.delegate = vc;
-        is_base_expo = calcB.base_or_expo;
         fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
     }
@@ -48,7 +46,6 @@
     self = [super initWithCoder:coder];
     if (self) {
         self.guid = [coder decodeIntForKey:@"guid"];
-        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
     }
@@ -59,14 +56,12 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeInt:self.guid forKey:@"guid"];
-    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
     FractionBarLayer *copy = [[[self class] allocWithZone :zone] init];
     copy.c_idx = self.c_idx;
-    copy.is_base_expo = self.is_base_expo;
     copy.frame = self.frame;
     copy.delegate = self.delegate;
     copy.contentsScale = [UIScreen mainScreen].scale;
@@ -105,7 +100,23 @@
     [CATransaction commit];
 }
 
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par {
+    CalcBoard *calcB = anc.par;
+    self.isCopy = NO;
+    self.c_idx = chld_idx;
+    self.parent = par;
+    self.ancestor = anc;
+    self.delegate = vc;
+    [calcB.view.layer addSublayer: self];
+    [self setNeedsDisplay];
+}
+
+-(EquationTextLayer *) lookForEmptyTxtLyr {
+    return nil;
+}
+
 -(void) destroy {
     [self removeFromSuperlayer];
 }
+
 @end

@@ -33,7 +33,6 @@
 @synthesize curFontW;
 @synthesize insertCIdx;
 @synthesize txtInsIdx;
-@synthesize base_or_expo;
 @synthesize curFontLvl;
 
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc {
@@ -46,7 +45,6 @@
         curTxtLyr = curBlk = nil;
         downLeftBasePoint = downLeft;
         eqList = [NSMutableArray array];
-        base_or_expo = IS_BASE;
         curFontLvl = 0;
         
         curFont = getFont(0);
@@ -67,7 +65,6 @@
     insertCIdx = 0;
     txtInsIdx = 0;
     curTxtLyr = curBlk = nil;
-    base_or_expo = IS_BASE;
     curFontLvl = 0;
     
     curFont = getFont(0);
@@ -93,7 +90,6 @@
         self.curFontW = [coder decodeDoubleForKey:@"curFontW"];
         self.insertCIdx = [coder decodeIntegerForKey:@"insertCIdx"];
         self.txtInsIdx = [coder decodeIntForKey:@"txtInsIdx"];
-        self.base_or_expo = [coder decodeIntForKey:@"base_or_expo"];
         self.curFontLvl = [coder decodeIntForKey:@"curFontLvl"];
         
 //        [self addObserver:self forKeyPath:@"curFontLvl" options:NSKeyValueObservingOptionNew context:nil];
@@ -119,7 +115,6 @@
     [coder encodeDouble:self.curFontW forKey:@"curFontW"];
     [coder encodeInteger:self.insertCIdx forKey:@"insertCIdx"];
     [coder encodeInt:self.txtInsIdx forKey:@"txtInsIdx"];
-    [coder encodeInt:self.base_or_expo forKey:@"base_or_expo"];
     [coder encodeInt:self.curFontLvl forKey:@"curFontLvl"];
 }
 
@@ -138,7 +133,7 @@
 -(void) reorganize : (ViewController *)vc {
     for (Equation *eq in self.eqList) {
         eq.par = self;
-        [eq.root reorganize:eq :vc];
+        [eq.root reorganize:eq :vc :0 :nil];
         
         eq.equalsign.opacity = 1.0;
         eq.result.opacity = 1.0;
@@ -147,11 +142,15 @@
     }
     
     self.curEq.par = self;
-    [self.curEq.root reorganize:self.curEq :vc];
+    [self.curEq.root reorganize:self.curEq :vc :0 :nil];
 }
 
--(void) insertTemplate :(EquationBlock *)rootBlk :(ViewController *)vc{
+-(void) insertTemplate :(EquationBlock *)tempRoot :(ViewController *)vc {
+    id sltedBlock = nil;
     CGFloat incrWidth = 0.0;
+    
+    EquationBlock *rootBlk = [tempRoot copy];
+    EquationTextLayer *emptyTxtLyr = [rootBlk lookForEmptyTxtLyr];
     
     if (self.curTxtLyr != nil && self.curTxtLyr.type == TEXTLAYER_EMPTY) {
         if (self.curTxtLyr.expo == nil) {
@@ -206,38 +205,46 @@
     
     [rootBlk updateSize:self.curFontLvl];
     
-    
-    
     incrWidth += rootBlk.mainFrame.size.width;
     
     if(self.curMode == MODE_INPUT) {
-        EquationBlock *block = self.curParent;
+        EquationBlock *eb = self.curParent;
         
         if (rootBlk.bar == nil) {
             for (id b in rootBlk.children) {
-                [block.children addObject:b];
+                [eb.children addObject:b];
                 updateRoll(b, self.curRoll);
+                [b reorganize:self.curEq :vc :0 :eb];
+                sltedBlock = b;
             }
+            [rootBlk.children removeAllObjects];
         } else {
-            [block.children addObject:rootBlk];
+            [eb.children addObject:rootBlk];
             rootBlk.roll = self.curRoll;
-            [rootBlk reorganize:self.curEq :vc];
+            [rootBlk reorganize:self.curEq :vc :0 :eb];
+            sltedBlock = rootBlk;
         }
         
-        [self.curParent updateCIdx];
+        [eb updateCIdx];
     } else if(self.curMode == MODE_INSERT) {
-        EquationBlock *block = self.curParent;
+        EquationBlock *eb = self.curParent;
         
         if (rootBlk.bar == nil) {
             for (id b in rootBlk.children) {
-                [block.children insertObject:b atIndex:self.insertCIdx++];
+                [eb.children insertObject:b atIndex:self.insertCIdx++];
                 updateRoll(b, self.curRoll);
+                [b reorganize:self.curEq :vc :0 :eb];
+                sltedBlock = b;
             }
+            [rootBlk.children removeAllObjects];
         } else {
-            [block.children insertObject:rootBlk atIndex:self.insertCIdx];
+            [eb.children insertObject:rootBlk atIndex:self.insertCIdx];
+            rootBlk.roll = self.curRoll;
+            [rootBlk reorganize:self.curEq :vc :0 :eb];
+            sltedBlock = rootBlk;
         }
         
-        [self.curParent updateCIdx];
+        [eb updateCIdx];
     } else if(self.curMode == MODE_DUMP_ROOT) {
         Equation *eq = self.curEq;
         EquationBlock *newRoot = [[EquationBlock alloc] init:eq];
@@ -254,9 +261,15 @@
                 for (id b in rootBlk.children) {
                     [newRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newRoot];
+                sltedBlock = rootBlk;
             }
             [newRoot.children addObject:eq.root];
             self.curMode = MODE_INSERT;
@@ -266,9 +279,15 @@
                 for (id b in rootBlk.children) {
                     [newRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newRoot];
+                sltedBlock = rootBlk;
             }
             self.curMode = MODE_INPUT;
         }
@@ -293,9 +312,15 @@
                 for (id b in rootBlk.children) {
                     [newRootRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newRootRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newRootRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newRootRoot];
+                sltedBlock = rootBlk;
             }
             
             [newRootRoot.children addObject:orgRootRoot];
@@ -306,9 +331,15 @@
                 for (id b in rootBlk.children) {
                     [newRootRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newRootRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newRootRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newRootRoot];
+                sltedBlock = rootBlk;
             }
             self.curMode = MODE_INPUT;
         }
@@ -333,9 +364,15 @@
                 for (id b in rootBlk.children) {
                     [newExpoRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newExpoRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newExpoRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newExpoRoot];
+                sltedBlock = rootBlk;
             }
             [newExpoRoot.children addObject:orgExpoRoot];
             self.curMode = MODE_INSERT;
@@ -345,9 +382,15 @@
                 for (id b in rootBlk.children) {
                     [newExpoRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [b reorganize:self.curEq :vc :0 :newExpoRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newExpoRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newExpoRoot];
+                sltedBlock = rootBlk;
             }
             self.curMode = MODE_INPUT;
         }
@@ -372,9 +415,15 @@
                 for (id b in rootBlk.children) {
                     [newWrapRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [rootBlk reorganize:self.curEq :vc :0 :newWrapRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newWrapRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newWrapRoot];
+                sltedBlock = rootBlk;
             }
             [newWrapRoot.children addObject:orgWrapRoot];
             self.curMode = MODE_INSERT;
@@ -384,9 +433,15 @@
                 for (id b in rootBlk.children) {
                     [newWrapRoot.children addObject:b];
                     updateRoll(b, ROLL_NUMERATOR);
+                    [rootBlk reorganize:self.curEq :vc :0 :newWrapRoot];
+                    sltedBlock = b;
                 }
+                [rootBlk.children removeAllObjects];
             } else {
                 [newWrapRoot.children addObject:rootBlk];
+                rootBlk.roll = ROLL_NUMERATOR;
+                [rootBlk reorganize:self.curEq :vc :0 :newWrapRoot];
+                sltedBlock = rootBlk;
             }
             self.curMode = MODE_INPUT;
         }
@@ -394,39 +449,169 @@
         self.curParent = newWrapRoot;
         [self.curParent updateCIdx];
         self.curRoll = ROLL_NUMERATOR;
-    } else if(gCurCB.curMode == MODE_REPLACE_ROOT) {
-        [gCurCB.curEq.root destroy];
-        gCurCB.curEq.root = rootBlk;
-        gCurCB.curEq.root.c_idx = 0;
-        gCurCB.curParent = nil;
-        gCurCB.curRoll = ROLL_ROOT;
-        gCurCB.curMode = MODE_DUMP_ROOT;
-    } else if(gCurCB.curMode == MODE_REPLACE_RADICAL) {
-        RadicalBlock *rb = ((EquationBlock *)gCurCB.curParent).parent;
+    } else if(self.curMode == MODE_REPLACE_ROOT) {
+        [self.curEq.root destroy];
+        self.curEq.root = rootBlk;
+        self.curEq.root.c_idx = 0;
+        
+        if (rootBlk.bar == nil) {
+            self.curMode = MODE_INPUT;
+            self.curRoll = ROLL_NUMERATOR;
+            self.curParent = rootBlk;
+        } else {
+            self.curMode = MODE_DUMP_ROOT;
+            self.curRoll = ROLL_ROOT;
+            self.curParent = nil;
+        }
+        sltedBlock = rootBlk;
+        rootBlk.roll = ROLL_ROOT;
+        [rootBlk reorganize:self.curEq :vc :0 :nil];
+    } else if(self.curMode == MODE_REPLACE_RADICAL) {
+        RadicalBlock *rb = ((EquationBlock *)self.curParent).parent;
         [rb.content destroy];
         rb.content = rootBlk;
         rb.content.c_idx = 0;
-        gCurCB.curParent = rb;
-        gCurCB.curRoll = ROLL_ROOT_ROOT;
-        gCurCB.curMode = MODE_DUMP_RADICAL;
-    } else if(gCurCB.curMode == MODE_REPLACE_WETL) {
-        WrapedEqTxtLyr *wetl = ((EquationBlock *)gCurCB.curParent).parent;
+        
+        
+        if (rootBlk.bar == nil) {
+            self.curMode = MODE_INPUT;
+            self.curRoll = ROLL_NUMERATOR;
+            self.curParent = rootBlk;
+        } else {
+            self.curMode = MODE_DUMP_RADICAL;
+            self.curRoll = ROLL_ROOT_ROOT;
+            self.curParent = rb;
+        }
+        sltedBlock = rootBlk;
+        rootBlk.roll = ROLL_ROOT_ROOT;
+        [rootBlk reorganize:self.curEq :vc :0 :rb];
+    } else if(self.curMode == MODE_REPLACE_WETL) {
+        WrapedEqTxtLyr *wetl = ((EquationBlock *)self.curParent).parent;
         [wetl.content destroy];
         wetl.content = rootBlk;
         wetl.content.c_idx = 0;
-        gCurCB.curParent = wetl;
-        gCurCB.curRoll = ROLL_WRAP_ROOT;
-        gCurCB.curMode = MODE_DUMP_WETL;
-    } else if(gCurCB.curMode == MODE_REPLACE_EXPO) {
-        EquationTextLayer *etl = ((EquationBlock *)gCurCB.curParent).parent;
+        
+        
+        if (rootBlk.bar == nil) {
+            self.curMode = MODE_INPUT;
+            self.curRoll = ROLL_NUMERATOR;
+            self.curParent = rootBlk;
+        } else {
+            self.curMode = MODE_DUMP_WETL;
+            self.curRoll = ROLL_WRAP_ROOT;
+            self.curParent = wetl;
+        }
+        sltedBlock = rootBlk;
+        rootBlk.roll = ROLL_WRAP_ROOT;
+        [rootBlk reorganize:self.curEq :vc :0 :wetl];
+    } else if(self.curMode == MODE_REPLACE_EXPO) {
+        EquationTextLayer *etl = ((EquationBlock *)self.curParent).parent;
         [etl.expo destroy];
         etl.expo = rootBlk;
         etl.expo.c_idx = 0;
-        gCurCB.curParent = etl;
-        gCurCB.curRoll = ROLL_EXPO_ROOT;
-        gCurCB.curMode = MODE_DUMP_EXPO;
+        
+        if (rootBlk.bar == nil) {
+            self.curMode = MODE_INPUT;
+            self.curRoll = ROLL_NUMERATOR;
+            self.curParent = rootBlk;
+        } else {
+            self.curMode = MODE_DUMP_EXPO;
+            self.curRoll = ROLL_EXPO_ROOT;
+            self.curParent = etl;
+        }
+        sltedBlock = rootBlk;
+        rootBlk.roll = ROLL_EXPO_ROOT;
+        [rootBlk reorganize:self.curEq :vc :0 :etl];
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    
+    if ([sltedBlock isMemberOfClass: [RadicalBlock class]]) {
+        RadicalBlock *rb = sltedBlock;
+        
+        [(EquationBlock *)self.curParent updateFrameWidth:incrWidth :rb.roll];
+        [(EquationBlock *)self.curParent updateFrameHeightS1:rb];
+        [self.curEq.root adjustElementPosition];
+    } else if ([sltedBlock isMemberOfClass: [FractionBarLayer class]]) {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    } else if ([sltedBlock isMemberOfClass: [EquationTextLayer class]]) {
+        EquationTextLayer *etl = sltedBlock;
+        
+        [(EquationBlock *)self.curParent updateFrameWidth:incrWidth :etl.roll];
+        [(EquationBlock *)self.curParent updateFrameHeightS1:etl];
+        [self.curEq.root adjustElementPosition];
+    } else if ([sltedBlock isMemberOfClass: [EquationBlock class]]) {
+        EquationBlock *eb = sltedBlock;
+        
+        if (eb.roll == ROLL_ROOT) {
+            CGRect f = eb.mainFrame;
+            f.origin.x = self.downLeftBasePoint.x;
+            f.origin.y = self.downLeftBasePoint.y - f.size.height - 1.0;
+            eb.mainFrame = f;
+            if (eb.bar == nil) {
+                sltedBlock = eb.children.lastObject;
+            }
+        } else if (eb.roll == ROLL_ROOT_ROOT) {
+            RadicalBlock *rb = eb.parent;
+            incrWidth = -rb.frame.size.width;
+            [rb updateFrame];
+            [rb setNeedsDisplay];
+            incrWidth += rb.frame.size.width;
+            [(EquationBlock *)rb.parent updateFrameWidth:incrWidth :rb.roll];
+            [(EquationBlock *)rb.parent updateFrameHeightS1:rb];
+            if (eb.bar == nil) {
+                sltedBlock = eb.children.lastObject;
+            }
+        } else if (eb.roll == ROLL_WRAP_ROOT) {
+            WrapedEqTxtLyr *wetl = eb.parent;
+            [wetl updateFrame:YES];
+            [(EquationBlock *)wetl.parent updateFrameWidth:incrWidth :wetl.roll];
+            [(EquationBlock *)wetl.parent updateFrameHeightS1:wetl];
+            if (eb.bar == nil) {
+                sltedBlock = eb.children.lastObject;
+            }
+        } else if (eb.roll == ROLL_EXPO_ROOT) {
+            EquationTextLayer *etl = eb.parent;
+            [etl updateFrameBaseOnExpo];
+            [(EquationBlock *)etl.parent updateFrameWidth:incrWidth :etl.roll];
+            [(EquationBlock *)etl.parent updateFrameHeightS1:etl];
+            if (eb.bar == nil) {
+                sltedBlock = eb.children.lastObject;
+            }
+        } else {
+            [(EquationBlock *)self.curParent updateFrameWidth:incrWidth :eb.roll];
+            [(EquationBlock *)self.curParent updateFrameHeightS1:eb];
+        }
+        
+        [self.curEq.root adjustElementPosition];
+    } else if ([sltedBlock isMemberOfClass: [WrapedEqTxtLyr class]]) {
+        WrapedEqTxtLyr *wetl = sltedBlock;
+        
+        [(EquationBlock *)self.curParent updateFrameWidth:incrWidth :wetl.roll];
+        [(EquationBlock *)self.curParent updateFrameHeightS1:wetl];
+        [self.curEq.root adjustElementPosition];
+    } else if ([sltedBlock isMemberOfClass: [Parentheses class]]) {
+        Parentheses *p = sltedBlock;
+        
+        [(EquationBlock *)self.curParent updateFrameWidth:incrWidth :p.roll];
+        [(EquationBlock *)self.curParent updateFrameHeightS1:p];
+        [self.curEq.root adjustElementPosition];
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    
+    if (emptyTxtLyr == nil) {
+        [sltedBlock updateCalcBoardInfo];
+    } else {
+        [emptyTxtLyr updateCalcBoardInfo];
+    }
+    
+    if ((int)self.curEq.maxRootHeight < (int)self.curEq.root.mainFrame.size.height) {
+        CGFloat dis = self.curEq.root.mainFrame.size.height - self.curEq.maxRootHeight;
+        self.curEq.maxRootHeight = self.curEq.root.mainFrame.size.height;
+        for (Equation *eq in self.eqList) {
+            [eq moveUp:dis];
+        }
     }
 }
 

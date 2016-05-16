@@ -83,7 +83,6 @@ id locaLastLyr(Equation *e, id blk) {
             calcB.insertCIdx = layer.c_idx + 1;
             calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
             
-            calcB.base_or_expo = layer.is_base_expo;
             [calcB updateFontInfo:layer.fontLvl];
             
             if (layer.type == TEXTLAYER_EMPTY) {
@@ -110,7 +109,6 @@ id locaLastLyr(Equation *e, id blk) {
             calcB.insertCIdx = p.c_idx + 1;
             calcB.txtInsIdx = 1;
             
-            calcB.base_or_expo = p.is_base_expo;
             [calcB updateFontInfo:p.fontLvl];
             
             calcB.view.inpOrg = CGPointMake(p.mainFrame.origin.x + p.mainFrame.size.width, p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - calcB.curFontH / 2.0);
@@ -437,7 +435,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             FractionBarLayer *bar = eBlock.bar;
             EquationBlock *block = bar.parent;
             
-            calcB.base_or_expo = bar.is_base_expo;
             [calcB updateFontInfo:eBlock.fontLvl];
             
             calcB.curTxtLyr = nil;
@@ -533,7 +530,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else {
             id blk;
             
-            calcB.base_or_expo = eBlock.is_base_expo;
             [calcB updateFontInfo:eBlock.fontLvl];
             
             if (curPoint.y >= eBlock.numerFrame.origin.y && curPoint.y <= eBlock.numerFrame.origin.y + eBlock.numerFrame.size.height) {
@@ -819,7 +815,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         EquationTextLayer *layer = b;
         CalcBoard *calcB = e.par;
         
-        calcB.base_or_expo = layer.is_base_expo;
         [calcB updateFontInfo:layer.fontLvl];
         
         if (layer.type == TEXTLAYER_OP) {
@@ -903,7 +898,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         RadicalBlock *block = b;
         CalcBoard *calcB = e.par;
         
-        calcB.base_or_expo = block.is_base_expo;
         [calcB updateFontInfo:block.fontLvl];
         
         id lastBlock = [((EquationBlock *)block.parent).children lastObject];
@@ -948,7 +942,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         WrapedEqTxtLyr *wetl = b;
         CalcBoard *calcB = e.par;
         
-        calcB.base_or_expo = wetl.is_base_expo;
         [calcB updateFontInfo:wetl.fontLvl];
         
         if (curPoint.x >= wetl.title.frame.origin.x && curPoint.x < wetl.left_parenth.frame.origin.x + wetl.left_parenth.frame.size.width / 2.0) {
@@ -1147,7 +1140,6 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         
         EquationBlock *par = p.parent;
         
-        calcB.base_or_expo = p.is_base_expo;
         [calcB updateFontInfo:par.fontLvl];
         
         id lastBlock = [((EquationBlock *)p.parent).children lastObject];
@@ -1508,4 +1500,20 @@ bool rectContainsRect(CGRect rect1, CGRect rect2) {
     }
     
     return NO;
+}
+
+BOOL isNumber(NSString *str) {
+    NSScanner* scan = [NSScanner scannerWithString:str];
+    int val;
+    float val1;
+    return ([scan scanInt:&val] && [scan isAtEnd]) || ([scan scanFloat:&val1] && [scan isAtEnd]);
+}
+
+EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock) {
+    for (id b in rootBlock.children) {
+        if ([b isMemberOfClass:[EquationTextLayer class]] && ((EquationTextLayer *)b).type == TEXTLAYER_EMPTY) {
+            return b;
+        }
+    }
+    return nil;
 }

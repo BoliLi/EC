@@ -43,6 +43,8 @@
     [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
     [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
+    NSData *gTemplateListData = [NSKeyedArchiver archivedDataWithRootObject:gTemplateList];
+    [user setObject:gTemplateListData forKey:@"gTemplateList"];
     [user synchronize];
 }
 

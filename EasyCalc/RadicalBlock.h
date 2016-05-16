@@ -20,7 +20,6 @@
 @property int guid;
 @property NSUInteger c_idx;
 @property int roll;
-@property int is_base_expo;
 @property EquationTextLayer *rootNum;
 @property int fontLvl;
 @property BOOL isCopy;
@@ -31,5 +30,9 @@
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrame;
 -(void) moveCopy:(CGPoint)dest;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
+-(void) updateCalcBoardInfo;
+-(EquationTextLayer *) lookForEmptyTxtLyr;
 -(void) destroy;
 @end

@@ -22,7 +22,6 @@
 @synthesize c_idx;
 @synthesize parent;
 @synthesize ancestor;
-@synthesize is_base_expo;
 @synthesize mainFrame;
 @synthesize roll;
 @synthesize title;
@@ -39,7 +38,6 @@
         self.ancestor = E;
         self.guid = E.guid_cnt++;
         self.roll = calcB.curRoll;
-        self.is_base_expo = calcB.base_or_expo;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
         
@@ -108,7 +106,6 @@
         self.roll = [coder decodeIntForKey:@"roll"];
         self.guid = [coder decodeIntForKey:@"guid"];
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
-        self.is_base_expo = [coder decodeIntForKey:@"is_base_expo"];
         self.title = [coder decodeObjectForKey:@"title"];
         self.content = [coder decodeObjectForKey:@"content"];
         self.left_parenth = [coder decodeObjectForKey:@"left_parenth"];
@@ -123,7 +120,6 @@
     [coder encodeInt:self.roll forKey:@"roll"];
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
-    [coder encodeInt:self.is_base_expo forKey:@"is_base_expo"];
     [coder encodeObject:self.title forKey:@"title"];
     [coder encodeObject:self.content forKey:@"content"];
     [coder encodeObject:self.left_parenth forKey:@"left_parenth"];
@@ -146,7 +142,6 @@
     copy.left_parenth = [self.left_parenth copy];
     copy.right_parenth = [self.right_parenth copy];
     copy.mainFrame = self.mainFrame;
-    copy.is_base_expo = self.is_base_expo;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
     return copy;
@@ -236,6 +231,55 @@
     CGPoint rpDest = CGPointMake(curX + self.left_parenth.frame.size.width / 2.0, dest.y);
     [self.right_parenth moveCopy:rpDest];
     curX += self.right_parenth.frame.size.width;
+}
+
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
+    CGFloat orgWidth1 = self.mainFrame.size.width;
+    CGFloat newMW = self.title.frame.size.width + self.left_parenth.frame.size.width + self.content.mainFrame.size.width + self.right_parenth.frame.size.width;
+    self.mainFrame = CGRectMake(self.mainFrame.origin.x, self.mainFrame.origin.y, newMW, self.mainFrame.size.height);
+    if ((int)orgWidth1 != (int)self.mainFrame.size.width) {
+        [self.parent updateFrameWidth:self.mainFrame.size.width - orgWidth1 :self.roll];
+    }
+}
+
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par {
+    CalcBoard *calcB = anc.par;
+    self.isCopy = NO;
+    self.c_idx = chld_idx;
+    self.parent = par;
+    self.ancestor = anc;
+    [calcB.view.layer addSublayer: self.title];
+    [calcB.view.layer addSublayer: self.left_parenth];
+    self.left_parenth.delegate = vc;
+    [self.left_parenth setNeedsDisplay];
+    [calcB.view.layer addSublayer: self.right_parenth];
+    self.left_parenth.delegate = vc;
+    [self.right_parenth setNeedsDisplay];
+    
+    [self.content reorganize:anc :vc :0 :self];
+}
+
+-(void) updateCalcBoardInfo {
+    Equation *eq = self.ancestor;
+    CalcBoard *cb = eq.par;
+    cb.insertCIdx = self.c_idx + 1;
+    cb.curTxtLyr = nil;
+    cb.curBlk = self;
+    cb.txtInsIdx = 1;
+    cb.curRoll = self.roll;
+    cb.curParent = self.parent;
+    [cb updateFontInfo:self.fontLvl];
+    if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+        cb.curMode = MODE_INPUT;
+    } else {
+        cb.curMode = MODE_INSERT;
+    }
+    cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
+    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
+}
+
+-(EquationTextLayer *) lookForEmptyTxtLyr {
+    return [self.content lookForEmptyTxtLyr];
 }
 
 -(void) destroy {

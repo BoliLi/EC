@@ -25,7 +25,6 @@
 @property Parentheses *left_parenth;
 @property Parentheses *right_parenth;
 @property CGRect mainFrame;
-@property int is_base_expo;
 @property int fontLvl;
 @property BOOL isCopy;
 
@@ -34,5 +33,10 @@
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) moveCopy:(CGPoint)dest;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
+-(void) updateCalcBoardInfo;
+-(EquationTextLayer *) lookForEmptyTxtLyr;
 -(void) destroy;
+
 @end

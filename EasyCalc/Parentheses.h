@@ -16,7 +16,6 @@
 @property int guid;
 @property NSUInteger c_idx;
 @property int roll;
-@property int is_base_expo;
 @property int l_or_r;
 @property EquationBlock *expo;
 @property CGRect mainFrame;
@@ -28,5 +27,9 @@
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;
 -(void) moveCopy:(CGPoint)dest;
+-(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
+-(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
+-(void) updateCalcBoardInfo;
+-(EquationTextLayer *) lookForEmptyTxtLyr;
 -(void) destroy;
 @end

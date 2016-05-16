@@ -21,7 +21,7 @@
 NSMutableArray *gCalcBoardList;
 NSInteger gCurCBIdx = 0;
 CalcBoard *gCurCB;
-CGFloat gCharWidthTbl[4][16];
+CGFloat gCharWidthTbl[4][17];
 CGFloat gCharHeightTbl[4];
 NSMutableArray *gTemplateList;
 
@@ -120,6 +120,10 @@ void initCharSizeTbl(void) {
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
         gCharWidthTbl[j][i++] = [attStr size].width;
         
+        attStr = [[NSMutableAttributedString alloc] initWithString:@"_"];
+        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+        gCharWidthTbl[j][i++] = [attStr size].width;
+        
         CFRelease(ctFont);
     }
     
@@ -163,8 +167,10 @@ CGFloat getCharWidth(int level, NSString *s) {
         return gCharWidthTbl[level][14];
     } else if ([s isEqual:@")"]) {
         return gCharWidthTbl[level][15];
+    } else if ([s isEqual:@"_"]) {
+        return gCharWidthTbl[level][16];
     } else {
-        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        NSLog(@"%s%i>~%@~ERR~~~~~~~~~", __FUNCTION__, __LINE__, s);
         return 0.0;
     }
 }

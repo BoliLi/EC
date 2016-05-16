@@ -61,7 +61,7 @@
 extern NSMutableArray *gCalcBoardList;
 extern NSInteger gCurCBIdx;
 extern CalcBoard *gCurCB;
-extern CGFloat gCharWidthTbl[4][16];
+extern CGFloat gCharWidthTbl[4][17];
 extern CGFloat gCharHeightTbl[4];
 extern NSMutableArray *gTemplateList;
 

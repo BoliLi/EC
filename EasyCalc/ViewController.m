@@ -74,7 +74,6 @@ static UIView *testview;
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)aNotification {
-    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
     saveTempDlg.center = CGPointMake(CGRectGetMidX(self.view.bounds), CGRectGetMidY(self.view.bounds));
 }
 
@@ -234,6 +233,8 @@ static UIView *testview;
     
     EquationTemplate *temp = [gTemplateList objectAtIndex:indexPath.row];
     
+    [gCurCB insertTemplate:temp.root :self];
+        
     NSLog(@"%s%i>~%li~~~~~~~~~~", __FUNCTION__, __LINE__, (long)indexPath.row);
     [UIView animateWithDuration:.5 animations:^{
         
@@ -333,9 +334,7 @@ static UIView *testview;
 
 -(void)handleLongPress: (UILongPressGestureRecognizer *)gesture {
     if (gesture.state == UIGestureRecognizerStateBegan) {
-        
         [self.popMenu showInView:gCurCB.view targetRect:gCurCB.curEq.root.mainFrame animated:YES];
-        NSLog(@"%s%i>~%@~%@~%@~%@~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.popMenu.frame), NSStringFromCGRect(gCurCB.curEq.root.mainFrame), gCurCB.view.subviews, self.popMenu.subviews);
     }
 }
 
@@ -681,12 +680,8 @@ static UIView *testview;
                     [rb updateFrame];
                     [rb setNeedsDisplay];
                     incrWidth += rb.frame.size.width;
-                    NSLog(@"%s%i>~%.2f~~~~~~~~~~", __FUNCTION__, __LINE__, incrWidth);
-                    [gCurCB.curEq dumpEverything:gCurCB.curEq.root];
                     [(EquationBlock *)rb.parent updateFrameWidth:incrWidth :rb.roll];
-                    [gCurCB.curEq dumpEverything:gCurCB.curEq.root];
                     [(EquationBlock *)rb.parent updateFrameHeightS1:rb];
-                    [gCurCB.curEq dumpEverything:gCurCB.curEq.root];
                 } else if (eb.roll == ROLL_WRAP_ROOT) {
                     WrapedEqTxtLyr *wetl = eb.parent;
                     [wetl updateFrame:YES];
@@ -697,11 +692,8 @@ static UIView *testview;
                     EquationTextLayer *etl = eb.parent;
                     [etl updateFrameBaseOnExpo];
                     incrWidth += etl.expo.mainFrame.size.width;
-                    
                     [(EquationBlock *)etl.parent updateFrameWidth:incrWidth :etl.roll];
-                    
                     [(EquationBlock *)etl.parent updateFrameHeightS1:etl];
-                    
                 } else {
                     incrWidth += eb.mainFrame.size.width;
                     [(EquationBlock *)gCurCB.curParent updateFrameWidth:incrWidth :gCurCB.curRoll];
@@ -976,7 +968,7 @@ static UIView *testview;
                     continue;
                 }
                 CalcBoard *cb = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:[NSString stringWithFormat: @"calcboard%li", (long)i]]];
-                [cb.curEq.root reorganize:cb.curEq :self];
+                [cb.curEq.root reorganize:cb.curEq :self :0 :nil];
                 
                 UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTap:)];
                 tapGesture.numberOfTapsRequired = 1;
@@ -1081,6 +1073,12 @@ static UIView *testview;
             [cb.view.cursor setNeedsDisplay];
             [gCalcBoardList addObject:cb];
         }
+        gTemplateList = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTemplateList"]];
+        if (gTemplateList == nil) {
+            gTemplateList = [NSMutableArray array];
+        }
+        //gTemplateList = [NSMutableArray arrayWithArray:[NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTemplateList"]]];
+        NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, gTemplateList);
     } else {
         [user setObject:@"1.0" forKey:@"version"];
         [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
@@ -1098,6 +1096,8 @@ static UIView *testview;
             [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)i]];
         }
         NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
+        
+        gTemplateList = [NSMutableArray array];
     }
     
     secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
@@ -1270,8 +1270,6 @@ static UIView *testview;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillBeHidden:) name:UIKeyboardWillHideNotification object:nil];
-    
-    gTemplateList = [NSMutableArray array];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -3020,7 +3018,6 @@ static UIView *testview;
             
             CGFloat y = (gCurCB.view.inpOrg.y + gCurCB.curTxtLyr.mainFrame.size.height * 0.45) - gCurCB.curFontH;
             gCurCB.view.inpOrg = CGPointMake(x, y);
-            gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
             
             EquationBlock *eBlock = [[EquationBlock alloc] init:gCurCB.view.inpOrg :gCurCB.curEq];
             eBlock.roll = ROLL_EXPO_ROOT;
@@ -3050,10 +3047,8 @@ static UIView *testview;
             gCurCB.curRoll = ROLL_NUMERATOR;
             gCurCB.curMode = MODE_INPUT;
             
-//            if ((gCurCB.root.mainFrame.origin.y < 0.0 || gCurCB.root.mainFrame.origin.x + gCurCB.root.mainFrame.size.width > scnWidth) && gCurCB.zoomInLvl < 2) {
-//                gCurCB.zoomInLvl++;
-//                [self zoom];
-//            }
+            gCurCB.view.inpOrg = layer.frame.origin;
+            gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
         } else {
             EquationBlock *exp = gCurCB.curTxtLyr.expo;
             id lastObj = exp.children.lastObject;
@@ -3412,14 +3407,14 @@ static UIView *testview;
             if (eb.c_idx == 0 || [[par.children objectAtIndex:eb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                     EquationTextLayer *layer = pre;
-                    if (layer.is_base_expo == eb.is_base_expo) {
+                    if (layer.fontLvl == eb.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                     }
                 } else if ([pre isMemberOfClass:[Parentheses class]]) {
                     Parentheses *p = pre;
-                    if (p.is_base_expo == eb.is_base_expo) {
+                    if (p.fontLvl == eb.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
@@ -3474,14 +3469,14 @@ static UIView *testview;
             if (rb.c_idx == 0 || [[par.children objectAtIndex:rb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                     EquationTextLayer *layer = pre;
-                    if (layer.is_base_expo == rb.is_base_expo) {
+                    if (layer.fontLvl == rb.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                     }
                 } else if ([pre isMemberOfClass:[Parentheses class]]) {
                     Parentheses *p = pre;
-                    if (p.is_base_expo == rb.is_base_expo) {
+                    if (p.fontLvl == rb.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
@@ -3536,14 +3531,14 @@ static UIView *testview;
             if (wetl.c_idx == 0 || [[par.children objectAtIndex:wetl.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                     EquationTextLayer *layer = pre;
-                    if (layer.is_base_expo == wetl.is_base_expo) {
+                    if (layer.fontLvl == wetl.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                     }
                 } else if ([pre isMemberOfClass:[Parentheses class]]) {
                     Parentheses *p = pre;
-                    if (p.is_base_expo == wetl.is_base_expo) {
+                    if (p.fontLvl == wetl.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
@@ -3601,14 +3596,14 @@ static UIView *testview;
             if (curLayer.c_idx == 0 || [[par.children objectAtIndex:curLayer.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                     EquationTextLayer *layer = pre;
-                    if (layer.is_base_expo == curLayer.is_base_expo) {
+                    if (layer.fontLvl == curLayer.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                     }
                 } else if ([pre isMemberOfClass:[Parentheses class]]) {
                     Parentheses *p = pre;
-                    if (p.is_base_expo == curLayer.is_base_expo) {
+                    if (p.fontLvl == curLayer.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
@@ -3679,14 +3674,14 @@ static UIView *testview;
                         if (pre != nil) {
                             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                                 EquationTextLayer *layer = pre;
-                                if (layer.is_base_expo == curLayer.is_base_expo) {
+                                if (layer.fontLvl == curLayer.fontLvl) {
                                     (void)locaLastLyr(gCurCB.curEq, pre);
                                 } else { //Switch from expo to base in a same text layer
                                     cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                                 }
                             } else if ([pre isMemberOfClass:[Parentheses class]]) {
                                 Parentheses *p = pre;
-                                if (p.is_base_expo == curLayer.is_base_expo) {
+                                if (p.fontLvl == curLayer.fontLvl) {
                                     (void)locaLastLyr(gCurCB.curEq, pre);
                                 } else { //Switch from expo to base in a same text layer
                                     cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
@@ -3776,14 +3771,14 @@ static UIView *testview;
             if (p.c_idx == 0 || [[par.children objectAtIndex:p.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
                 if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                     EquationTextLayer *layer = pre;
-                    if (layer.is_base_expo == p.is_base_expo) {
+                    if (layer.fontLvl == p.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
                     }
                 } else if ([pre isMemberOfClass:[Parentheses class]]) {
                     Parentheses *pp = pre;
-                    if (pp.is_base_expo == p.is_base_expo) {
+                    if (pp.fontLvl == p.fontLvl) {
                         (void)locaLastLyr(gCurCB.curEq, pre);
                     } else { //Switch from expo to base in a same text layer
                         cfgEqnBySlctBlk(gCurCB.curEq, pp, CGPointMake(pp.frame.origin.x + pp.frame.size.width - 1.0, pp.frame.origin.y + 1.0));
@@ -3867,13 +3862,13 @@ static UIView *testview;
         [gCurCB updateFontInfo:0];
         
         for (Equation *eq in gCurCB.eqList) {
-            [eq moveUp:gCurCB.curFontH];
+            [eq moveUp:gCurCB.curFontH * 2.0];
         }
         
-        [gCurCB.curEq.root moveUp:gCurCB.curFontH];
+        [gCurCB.curEq.root moveUp:gCurCB.curFontH * 2.0];
         
         CGRect f = gCurCB.curEq.root.mainFrame;
-        CGPoint pos = CGPointMake(f.size.width, f.origin.y + (f.size.height / 2.0) - (gCurCB.curFontH / 2.0));
+        CGPoint pos = CGPointMake(f.origin.x, f.origin.y + f.size.height);
         
         gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
         gCurCB.curEq.equalsign.opacity = 0.0;
@@ -3896,7 +3891,6 @@ static UIView *testview;
         
         [gCurCB.curEq.equalsign addAnimation:animation forKey:nil];
         [gCurCB.curEq.result addAnimation:animation forKey:nil];
-        
         
         [gCurCB.eqList addObject:gCurCB.curEq];
         
@@ -4200,10 +4194,12 @@ static UIView *testview;
         [self handleReturnBtnClick];
     } else if([[btn currentTitle]  isEqual: @"save"]) {
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
+        NSData *gTemplateListData = [NSKeyedArchiver archivedDataWithRootObject:gTemplateList];
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
         [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
         [user setObject:@"1.0" forKey:@"version"];
         [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
+        [user setObject:gTemplateListData forKey:@"gTemplateList"];
         NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
     } else if([[btn currentTitle]  isEqual: @"load"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
@@ -4212,7 +4208,7 @@ static UIView *testview;
         if (data != nil) {
             CalcBoard *cb = [NSKeyedUnarchiver unarchiveObjectWithData:data];
             [cb.curEq dumpEverything:cb.curEq.root];
-            [cb.curEq.root reorganize:cb.curEq :self];
+            [cb.curEq.root reorganize:cb.curEq :self :0 :nil];
             
             CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
             anim.fromValue = [NSNumber numberWithBool:YES];

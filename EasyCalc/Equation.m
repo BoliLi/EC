@@ -291,7 +291,7 @@
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point {
     
     if (!CGRectContainsPoint(rootB.mainFrame, point)) {
-        if (self.result != nil && CGRectContainsPoint(self.result.frame, point)) {
+        if (self.result != nil && CGRectContainsPoint(self.result.frame, point) && isNumber([self.result.string string])) {
             return self.result;
         } else {
             return nil;
@@ -860,7 +860,7 @@
                         if (pre != nil) {
                             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                                 EquationTextLayer *layer = pre;
-                                if (layer.is_base_expo == l.is_base_expo) {
+                                if (layer.fontLvl == l.fontLvl) {
                                     (void)locaLastLyr(self, pre);
                                 } else { //Switch from expo to base in a same text layer
                                     calcB.curTxtLyr = layer;
