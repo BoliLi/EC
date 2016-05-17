@@ -1517,3 +1517,15 @@ EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock) {
     }
     return nil;
 }
+
+UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont) {
+    UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
+    bn.titleLabel.font = buttonFont;
+    bn.layer.borderWidth = 1;
+    bn.layer.cornerRadius = 5;
+    bn.layer.borderColor = [[UIColor blueColor] CGColor];
+    bn.showsTouchWhenHighlighted = YES;
+    [bn setTitle:title forState:UIControlStateNormal];
+    bn.frame = btmFrame;
+    return bn;
+}

@@ -1010,7 +1010,7 @@ static UIView *testview;
         }
         
         secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
-        secondKbView.backgroundColor = [UIColor whiteColor];
+        secondKbView.backgroundColor = [UIColor clearColor];
         
         UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeRight:)];
         right.numberOfTouchesRequired = 1;
@@ -1087,8 +1087,8 @@ static UIView *testview;
         NSData *data = [NSKeyedArchiver archivedDataWithRootObject:firstCB];
         [user setObject:data forKey:@"calcboard0"];
         
-        CGRect dspFrame = CGRectMake(0, 0, scnWidth, (scnHeight / 2) - statusBarHeight);
-        CGPoint downLeft = CGPointMake(1, ((scnHeight / 2) - statusBarHeight) * 3.0);
+        CGRect dspFrame = CGRectMake(0, 0, scnWidth, dspConView.frame.size.height);
+        CGPoint downLeft = CGPointMake(1, ((scnHeight - statusBarHeight) / 2.0) * 3.0);
         for (int i = 1; i < 16; i++) {
             CalcBoard *cb = [[CalcBoard alloc] init:downLeft :dspFrame :self];
             [gCalcBoardList addObject:cb];
@@ -1100,7 +1100,7 @@ static UIView *testview;
         gTemplateList = [NSMutableArray array];
     }
     
-    secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
+    secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, kbConView.frame.size.height)];
     secondKbView.backgroundColor = [UIColor whiteColor];
     
     UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeRight:)];
@@ -1108,22 +1108,134 @@ static UIView *testview;
     right.direction = UISwipeGestureRecognizerDirectionRight;
     [secondKbView addGestureRecognizer:right];
     
+    CGFloat btnGridHeight = (scnHeight - statusBarHeight) / 10.0;
+    CGFloat btnGridWidth = scnWidth / 5.0;
     UIFont *buttonFont = getFont(0);
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"save", @"load", @"reset", @"C", @"COS", @"<", @">", @"STRL", @"blur", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", @"TBD", nil];
-    CGFloat btnHeight = scnHeight / 10;
-    CGFloat btnWidth = scnWidth / 5;
-    for (int i = 0; i < 25; i++) {
-        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
-        bn.tag = i + 10;
-        bn.titleLabel.font = buttonFont;
-        bn.showsTouchWhenHighlighted = YES;
-        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
-        int j = i % 5;
-        int k = i / 5;
-        bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
-        [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-        [secondKbView addSubview:bn];
-    }
+    CGFloat curX = 0.0, curY = 0.0;
+    CGRect btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    UIButton *btn = makeButton(btnFrame, @"save", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"load", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"reset", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"COS", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"STRL", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"blur", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"DUMP", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [secondKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
 }
 
 - (void)viewDidLoad {
@@ -1135,13 +1247,13 @@ static UIView *testview;
     scnHeight = [UIScreen mainScreen].bounds.size.height;
     statusBarHeight = [UIApplication sharedApplication].statusBarFrame.size.height;
     
-    dspConView = [[UIView alloc] initWithFrame:CGRectMake(0, statusBarHeight, scnWidth, (scnHeight / 2) - statusBarHeight)];
+    dspConView = [[UIView alloc] initWithFrame:CGRectMake(0, statusBarHeight, scnWidth, (scnHeight - statusBarHeight) / 2.0)];
     dspConView.tag = 1;
-    dspConView.backgroundColor = [UIColor clearColor];
+    dspConView.backgroundColor = [UIColor redColor];
     [self.view addSubview:dspConView];
     
-    CGRect dspFrame = CGRectMake(0, 0, scnWidth, (scnHeight / 2) - statusBarHeight);
-    CGPoint downLeft = CGPointMake(1, ((scnHeight / 2) - statusBarHeight) * 3.0);
+    CGRect dspFrame = CGRectMake(0, 0, scnWidth, dspConView.frame.size.height);
+    CGPoint downLeft = CGPointMake(1, ((scnHeight - statusBarHeight) / 2.0) * 3.0);
     //CGRect cursorFrame = CGRectMake(1, rootPos.y, 0.0, 0.0); //Size will update in Equation init
     
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
@@ -1150,6 +1262,7 @@ static UIView *testview;
     if (ver != nil) {
 #else
     if (0) {
+    .
 #endif
         NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
         gCurCBIdx = [user integerForKey:@"gCurCBIdx"];
@@ -1183,13 +1296,62 @@ static UIView *testview;
     [self foreGroundInit:gCurCB];
     
     [dspConView addSubview:gCurCB.view];
+    
+    CGFloat btnGridHeight = (scnHeight - statusBarHeight) / 10.0;
+    CGFloat btnGridWidth = scnWidth / 6.0;
+        
+    UIView *midKBView = [[UIView alloc] initWithFrame:CGRectMake(0, dspConView.frame.origin.y + dspConView.frame.size.height, scnWidth, btnGridHeight)];
+    midKBView.tag = 2;
+    midKBView.backgroundColor = [UIColor clearColor];
+    [self.view addSubview:midKBView];
+    
+    UIFont *buttonFont = getFont(0);
+    CGFloat curX = 0.0, curY = 0.0;
+    CGRect btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    UIButton *btn = makeButton(btnFrame, @"<", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"(", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @")", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"C", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"<-", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(btnDelLongPress:)];
+    longPress.minimumPressDuration = 1; //定义按的时间
+    [btn addGestureRecognizer:longPress];
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @">", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [midKBView addSubview:btn];
+    curX += btnGridWidth;
 
-    kbConView = [[UIView alloc] initWithFrame:CGRectMake(0, scnHeight / 2, scnWidth, scnHeight / 2)];
-    kbConView.tag = 2;
+    kbConView = [[UIView alloc] initWithFrame:CGRectMake(0, midKBView.frame.origin.y + midKBView.frame.size.height, scnWidth, btnGridHeight * 4.0)];
+    kbConView.tag = 3;
     kbConView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:kbConView];
     
-    mainKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, scnHeight / 2)];
+    mainKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kbConView.frame.size.width, kbConView.frame.size.height)];
     mainKbView.backgroundColor = [UIColor whiteColor];
     [kbConView addSubview:mainKbView];
     
@@ -1198,66 +1360,125 @@ static UIView *testview;
     left.direction = UISwipeGestureRecognizerDirectionLeft;
     [mainKbView addGestureRecognizer:left];
     
-//    borderLayer = [CALayer layer];
-//    borderLayer.contentsScale = [UIScreen mainScreen].scale;
-//    borderLayer.name = @"btnBorderLayer";
-//    borderLayer.backgroundColor = [UIColor clearColor].CGColor;
-//    borderLayer.frame = CGRectMake(0, 0, scnWidth, scnHeight / 2);
-//    borderLayer.delegate = self;
-//    [mainKbView.layer addSublayer: borderLayer];
-//    [borderLayer setNeedsDisplay];
+    curX = curY = 0.0;
+    btnGridWidth = scnWidth / 5.0;
+        
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"7", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
     
-    UIFont *buttonFont = getFont(0);
-    NSArray *btnTitleArr = [NSArray arrayWithObjects:@"DUMP", @"DEBUG", @"Root", @"<-", @"7", @"8", @"9", @"÷", @"4", @"5", @"6", @"×", @"1", @"2", @"3", @"-", @"%", @"0", @"·", @"+", @"x^", @"(", @")", @"=", nil];
-    CGFloat btnHeight = scnHeight / 10;
-    CGFloat btnWidth = scnWidth / 5;
-    for (int i = 0; i < 20; i++) {
-        int j = i % 4;
-        int k = i / 4;
-        
-        HTPressableButton *bn = [[HTPressableButton alloc] initWithFrame:CGRectMake(j * btnWidth, k * btnHeight, btnWidth - 3.0, btnHeight) buttonStyle:HTPressableButtonStyleRounded];
-        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
-        bn.cornerRadius = 5;
-        bn.titleFont = buttonFont;
-        
-//        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
-//        bn.tag = i + 10;
-//        bn.titleLabel.font = buttonFont;
-//        bn.showsTouchWhenHighlighted = YES;
-//        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
-//        bn.frame = CGRectMake(j * btnWidth, k * btnHeight, btnWidth, btnHeight);
-        
-        [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-        
-        if (i == 3) {
-            UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(btnDelLongPress:)];
-            longPress.minimumPressDuration = 1; //定义按的时间
-            [bn addGestureRecognizer:longPress];
-        }
-        
-        [mainKbView addSubview:bn];
-    }
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"8", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
     
-    for (int i = 20; i < 23; i++) {
-        UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
-        bn.tag = i + 10;
-        bn.titleLabel.font = buttonFont;
-        bn.showsTouchWhenHighlighted = YES;
-        [bn setTitle:[btnTitleArr objectAtIndex:i] forState:UIControlStateNormal];
-        int k = i % 4;
-        bn.frame = CGRectMake(4 * btnWidth, k * btnHeight, btnWidth, btnHeight);
-        [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-        [mainKbView addSubview:bn];
-    }
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"9", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
     
-    UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
-    bn.tag = 33;
-    bn.titleLabel.font = buttonFont;
-    bn.showsTouchWhenHighlighted = YES;
-    [bn setTitle:[btnTitleArr objectAtIndex: 23] forState:UIControlStateNormal];
-    bn.frame = CGRectMake(4 * btnWidth, 3 * btnHeight, btnWidth, 2 * btnHeight);
-    [bn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
-    [mainKbView addSubview:bn];
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"÷", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"Root", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"4", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"5", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"6", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"×", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"DEBUG", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"1", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"2", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"3", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"-", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight * 2.0 - 2.0);
+    btn = makeButton(btnFrame, @"=", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX = 0.0;
+    curY += btnGridHeight;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"%", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"0", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"·", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
+    
+    btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
+    btn = makeButton(btnFrame, @"+", buttonFont);
+    [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
+    [mainKbView addSubview:btn];
+    curX += btnGridWidth;
     
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.bounds));
     
@@ -1270,6 +1491,8 @@ static UIView *testview;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillBeHidden:) name:UIKeyboardWillHideNotification object:nil];
+    
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, self.view.subviews);
 }
 
 - (void)didReceiveMemoryWarning {
@@ -4236,7 +4459,7 @@ static UIView *testview;
         for(NSString* key in [dictionary allKeys]){
             [user removeObjectForKey:key];
         }
-        [user synchronize];
+        NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
     } else if([[btn currentTitle]  isEqual: @"C"]) {
         [self handleCleanBtnClick];
     } else if([[btn currentTitle]  isEqual: @"COS"]) {

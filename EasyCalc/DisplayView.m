@@ -31,7 +31,7 @@
         par = calcB;
         
         self.backgroundColor = [UIColor lightGrayColor];
-        self.contentSize = CGSizeMake(dspFrame.size.width * 5.0, dspFrame.size.height * 3.0);
+        self.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 3.0);
         self.directionalLockEnabled = YES;
         self.bounces = YES;
         [self setContentOffset:CGPointMake(0, dspFrame.size.height * 2.0) animated:NO];

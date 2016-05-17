@@ -115,8 +115,22 @@
     return nil;
 }
 
+-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    if ([self animationForKey:@"remove"] == anim) {
+        [self removeFromSuperlayer];
+    }
+}
+
 -(void) destroy {
-    [self removeFromSuperlayer];
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    animation.fromValue = [NSNumber numberWithFloat:1.0];
+    animation.toValue = [NSNumber numberWithFloat:0.0];
+    animation.duration = 0.4;
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
+    animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+    animation.delegate = self;
+    [self addAnimation:animation forKey:@"remove"];
 }
 
 @end

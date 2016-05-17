@@ -253,7 +253,7 @@
     self.left_parenth.delegate = vc;
     [self.left_parenth setNeedsDisplay];
     [calcB.view.layer addSublayer: self.right_parenth];
-    self.left_parenth.delegate = vc;
+    self.right_parenth.delegate = vc;
     [self.right_parenth setNeedsDisplay];
     
     [self.content reorganize:anc :vc :0 :self];
@@ -282,9 +282,25 @@
     return [self.content lookForEmptyTxtLyr];
 }
 
+-(void)animationDidStop:(CAAnimation *)anim finished:(BOOL)flag{
+    if ([self.title animationForKey:@"remove"] == anim) {
+        [self.title removeFromSuperlayer];
+    }
+}
+
 -(void) destroy {
     [self.content destroy];
-    [self.title removeFromSuperlayer];
+    
+    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+    animation.fromValue = [NSNumber numberWithFloat:1.0];
+    animation.toValue = [NSNumber numberWithFloat:0.0];
+    animation.duration = 0.4;
+    animation.removedOnCompletion = NO;
+    animation.fillMode = kCAFillModeForwards;
+    animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+    animation.delegate = self;
+    [self.title addAnimation:animation forKey:@"remove"];
+    
     [self.left_parenth destroy];
     [self.right_parenth destroy];
 }

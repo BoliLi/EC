@@ -19,4 +19,5 @@ NSNumber *calculate(NSMutableString *input);
 void updateRoll(id b, int r);
 BOOL isNumber(NSString *str);
 EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock);
+UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont);
 #endif /* Utils_h */

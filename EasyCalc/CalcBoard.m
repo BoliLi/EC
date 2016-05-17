@@ -52,6 +52,7 @@
         curFontH = curFont.lineHeight;
         
         view = [[DisplayView alloc] init:self :dspFrame :vc];
+        NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(view.frame), NSStringFromCGRect(dspFrame));
         curEq = [[Equation alloc] init:self :vc];
         
 //        [self addObserver:self forKeyPath:@"curFontLvl" options:NSKeyValueObservingOptionNew context:nil];
