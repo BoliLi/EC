@@ -31,6 +31,7 @@
 @property NSUInteger insertCIdx;
 @property int txtInsIdx;
 @property int curFontLvl;
+@property int allowInputBitMap;
 
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
 -(void) resetParam;

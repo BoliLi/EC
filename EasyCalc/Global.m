@@ -24,6 +24,11 @@ CalcBoard *gCurCB;
 CGFloat gCharWidthTbl[4][17];
 CGFloat gCharHeightTbl[4];
 NSMutableArray *gTemplateList;
+UIColor *gDspBGColor;
+UIColor *gDspFontColor;
+UIColor *gKbBGColor;
+UIColor *gBtnBGColor;
+UIColor *gBtnFontColor;
 
 @implementation NSMutableArray (EasyCalc)
 - (void)reverse {

@@ -30,7 +30,7 @@
     if (self) {
         par = calcB;
         
-        self.backgroundColor = [UIColor lightGrayColor];
+        self.backgroundColor = gDspBGColor;
         self.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 3.0);
         self.directionalLockEnabled = YES;
         self.bounces = YES;

@@ -34,6 +34,7 @@
 @synthesize insertCIdx;
 @synthesize txtInsIdx;
 @synthesize curFontLvl;
+@synthesize allowInputBitMap;
 
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc {
     self = [super init];
@@ -46,6 +47,7 @@
         downLeftBasePoint = downLeft;
         eqList = [NSMutableArray array];
         curFontLvl = 0;
+        allowInputBitMap = INPUT_ALL_BIT;
         
         curFont = getFont(0);
         curFontW = gCharWidthTbl[0][8];
@@ -67,6 +69,7 @@
     txtInsIdx = 0;
     curTxtLyr = curBlk = nil;
     curFontLvl = 0;
+    allowInputBitMap = INPUT_ALL_BIT;
     
     curFont = getFont(0);
     curFontW = gCharWidthTbl[0][8];
@@ -92,6 +95,7 @@
         self.insertCIdx = [coder decodeIntegerForKey:@"insertCIdx"];
         self.txtInsIdx = [coder decodeIntForKey:@"txtInsIdx"];
         self.curFontLvl = [coder decodeIntForKey:@"curFontLvl"];
+        self.allowInputBitMap = [coder decodeIntForKey:@"allowInputBitMap"];
         
 //        [self addObserver:self forKeyPath:@"curFontLvl" options:NSKeyValueObservingOptionNew context:nil];
     }
@@ -117,6 +121,7 @@
     [coder encodeInteger:self.insertCIdx forKey:@"insertCIdx"];
     [coder encodeInt:self.txtInsIdx forKey:@"txtInsIdx"];
     [coder encodeInt:self.curFontLvl forKey:@"curFontLvl"];
+    [coder encodeInt:self.allowInputBitMap forKey:@"allowInputBitMap"];
 }
 
 -(void)updateFontInfo: (int)lvl {

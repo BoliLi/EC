@@ -1101,7 +1101,7 @@ static UIView *testview;
     }
     
     secondKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, scnWidth, kbConView.frame.size.height)];
-    secondKbView.backgroundColor = [UIColor whiteColor];
+    secondKbView.backgroundColor = gKbBGColor;
     
     UISwipeGestureRecognizer *right = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeRight:)];
     right.numberOfTouchesRequired = 1;
@@ -1249,7 +1249,7 @@ static UIView *testview;
     
     dspConView = [[UIView alloc] initWithFrame:CGRectMake(0, statusBarHeight, scnWidth, (scnHeight - statusBarHeight) / 2.0)];
     dspConView.tag = 1;
-    dspConView.backgroundColor = [UIColor redColor];
+    dspConView.backgroundColor = [UIColor clearColor];
     [self.view addSubview:dspConView];
     
     CGRect dspFrame = CGRectMake(0, 0, scnWidth, dspConView.frame.size.height);
@@ -1302,7 +1302,7 @@ static UIView *testview;
         
     UIView *midKBView = [[UIView alloc] initWithFrame:CGRectMake(0, dspConView.frame.origin.y + dspConView.frame.size.height, scnWidth, btnGridHeight)];
     midKBView.tag = 2;
-    midKBView.backgroundColor = [UIColor clearColor];
+    midKBView.backgroundColor = gKbBGColor;
     [self.view addSubview:midKBView];
     
     UIFont *buttonFont = getFont(0);
@@ -1352,7 +1352,7 @@ static UIView *testview;
     [self.view addSubview:kbConView];
     
     mainKbView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, kbConView.frame.size.width, kbConView.frame.size.height)];
-    mainKbView.backgroundColor = [UIColor whiteColor];
+    mainKbView.backgroundColor = gKbBGColor;
     [kbConView addSubview:mainKbView];
     
     UISwipeGestureRecognizer *left = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleKbViewSwipeLeft:)];

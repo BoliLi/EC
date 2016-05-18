@@ -1524,7 +1524,8 @@ UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont) {
     bn.layer.borderWidth = 1;
     bn.layer.cornerRadius = 5;
     bn.layer.borderColor = [[UIColor blueColor] CGColor];
-    bn.showsTouchWhenHighlighted = YES;
+    //bn.showsTouchWhenHighlighted = YES;
+    bn.backgroundColor = gBtnBGColor;
     [bn setTitle:title forState:UIControlStateNormal];
     bn.frame = btmFrame;
     return bn;

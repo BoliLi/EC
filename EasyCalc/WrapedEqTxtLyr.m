@@ -47,6 +47,7 @@
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: pfx];
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, pfx.length)];
+        [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0, pfx.length)];
         CGSize strSize = [attStr size];
         
         self.title = [[CATextLayer alloc] init];
@@ -184,6 +185,7 @@
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.title.string string]];
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0, attStr.length)];
     CFRelease(ctFont);
     
     CGRect f = self.title.frame;

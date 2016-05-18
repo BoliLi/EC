@@ -11,6 +11,7 @@
 #import "Equation.h"
 #import "ViewController.h"
 #import "CalcBoard.h"
+#import <ChameleonFramework/Chameleon.h>
 
 @interface AppDelegate ()
 
@@ -22,6 +23,11 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     gCalcBoardList = [NSMutableArray array];
     
+    gDspBGColor = [UIColor flatMintColorDark];
+    gDspFontColor = [UIColor colorWithContrastingBlackOrWhiteColorOn:(UIColor *)gDspBGColor isFlat:YES];
+    gKbBGColor = [UIColor flatMintColorDark];
+    gBtnBGColor = [UIColor flatWhiteColor];
+    gBtnFontColor = [UIColor flatOrangeColorDark];
     NSLog(@"%s%i>~%.2f~%.2f~~~~~~~~~", __FUNCTION__, __LINE__, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height);
     
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];

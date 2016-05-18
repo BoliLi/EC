@@ -16,6 +16,7 @@
 #import "Parentheses.h"
 #import "CalcBoard.h"
 #import "UIView+Easing.h"
+#import <ChameleonFramework/Chameleon.h>
 
 @implementation EquationTextLayer
 @synthesize parent;
@@ -51,6 +52,7 @@
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
+            [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
             CFRelease(ctFont);
             newStrSize = [attStr size];
             [self.strLenTbl addObject:@(newStrSize.width)];
@@ -58,6 +60,7 @@
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
+            [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
             CFRelease(ctFont);
             newStrSize = [attStr size];
             [self.strLenTbl addObject:@(newStrSize.width)];
@@ -66,7 +69,7 @@
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
             CFRelease(ctFont);
-            [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0,str.length)];
+            [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor flatBlueColor] range:NSMakeRange(0,str.length)];
             newStrSize = [attStr size];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -138,6 +141,7 @@
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: str];
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
     CFRelease(ctFont);
     NSMutableAttributedString *orgStr;
     if (self.type == TEXTLAYER_NUM) {
@@ -180,6 +184,7 @@
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: str];
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,1)];
     CFRelease(ctFont);
     NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.string];
     
@@ -349,10 +354,13 @@
     UIFont *font = getFont(lvl);
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
+    
     CFRelease(ctFont);
     
     if (self.type == TEXTLAYER_EMPTY) {
-        [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor blueColor] range:NSMakeRange(0, attStr.length)];
+        [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor flatBlueColor] range:NSMakeRange(0, attStr.length)];
+    } else {
+        [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0, attStr.length)];
     }
     
     self.string = attStr;

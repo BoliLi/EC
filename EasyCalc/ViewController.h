@@ -31,6 +31,7 @@
 @property (nonatomic, strong) QBPopupMenu *popMenu;
 @property SaveTemplateDialog *saveTempDlg;
 
+
 -(void)handleTap: (UITapGestureRecognizer *)gesture;
 -(void)handleDspViewSwipeRight: (UISwipeGestureRecognizer *)gesture;
 -(void)handleDspViewSwipeLeft: (UISwipeGestureRecognizer *)gesture;

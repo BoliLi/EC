@@ -58,12 +58,29 @@
 #define BASECHARHIGHT 23.9
 #define CURSOR_W 3.0
 
+#define INPUT_NUM_BIT (1)
+#define INPUT_OP_BIT (1 << 1)
+#define INPUT_EMPTY_BIT (1 << 2)
+#define INPUT_RADICAL_BIT (1 << 3)
+#define INPUT_WETL_BIT (1 << 4)
+#define INPUT_PARENTH_BIT (1 << 5)
+#define INPUT_ALL_BIT (INPUT_NUM_BIT | INPUT_OP_BIT | INPUT_EMPTY_BIT | INPUT_RADICAL_BIT | INPUT_WETL_BIT | INPUT_PARENTH_BIT)
+
+#define CLR_BIT(x, y) ((x) &= ~(y))
+#define SET_BIT(x, y) ((x) |= (y))
+#define TEST_BIT(x, y) ((x) & (y))
+
 extern NSMutableArray *gCalcBoardList;
 extern NSInteger gCurCBIdx;
 extern CalcBoard *gCurCB;
 extern CGFloat gCharWidthTbl[4][17];
 extern CGFloat gCharHeightTbl[4];
 extern NSMutableArray *gTemplateList;
+extern UIColor *gDspBGColor;
+extern UIColor *gDspFontColor;
+extern UIColor *gKbBGColor;
+extern UIColor *gBtnBGColor;
+extern UIColor *gBtnFontColor;
 
 @interface NSMutableArray (EasyCalc)
 - (void)reverse;
