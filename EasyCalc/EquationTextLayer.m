@@ -31,7 +31,7 @@
 @synthesize fontLvl;
 @synthesize isCopy;
 
--(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t {
+-(id) init : (NSString *)str : (Equation *)e : (int)t {
     self = [super init];
     if (self) {
         CalcBoard *calcB = e.par;
@@ -75,7 +75,7 @@
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
         
-        self.frame = CGRectMake(org.x, org.y, newStrSize.width, newStrSize.height);
+        self.frame = CGRectMake(0.0, 0.0, newStrSize.width, newStrSize.height);
         self.mainFrame = self.frame;
         self.backgroundColor = [UIColor clearColor].CGColor;
         self.string = attStr;
@@ -512,11 +512,9 @@
         cb.curMode = MODE_INSERT;
     }
     if (self.type == TEXTLAYER_EMPTY) {
-        cb.view.inpOrg = CGPointMake(self.frame.origin.x, self.frame.origin.y);
-        cb.view.cursor.frame = CGRectMake(cb.view.inpOrg.x, cb.view.inpOrg.y, CURSOR_W, cb.curFontH);
+        cb.view.cursor.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CURSOR_W, cb.curFontH);
     } else {
         cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
-        cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
     }
 }
 

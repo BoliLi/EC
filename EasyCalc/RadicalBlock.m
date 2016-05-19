@@ -27,25 +27,26 @@
 @synthesize rootNum;
 @synthesize fontLvl;
 @synthesize isCopy;
+@synthesize mainFrame;
 
--(id) init :(Equation *)e :(ViewController *)vc {
-    self = [super init];
-    if (self) {
-        CalcBoard *calcB = e.par;
-        
-        self.ancestor = e;
-        self.delegate = vc;
-        self.contentsScale = [UIScreen mainScreen].scale;
-        self.content = [[EquationBlock alloc] init:e];
-        self.guid = e.guid_cnt++;
-        self.roll = calcB.curRoll;
-        self.fontLvl = calcB.curFontLvl;
-        self.isCopy = NO;
-    }
-    return self;
-}
+//-(id) init :(Equation *)e :(ViewController *)vc {
+//    self = [super init];
+//    if (self) {
+//        CalcBoard *calcB = e.par;
+//        
+//        self.ancestor = e;
+//        self.delegate = vc;
+//        self.contentsScale = [UIScreen mainScreen].scale;
+//        self.content = [[EquationBlock alloc] init:e];
+//        self.guid = e.guid_cnt++;
+//        self.roll = calcB.curRoll;
+//        self.fontLvl = calcB.curFontLvl;
+//        self.isCopy = NO;
+//    }
+//    return self;
+//}
 
--(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt :(ViewController *)vc {
+-(id) init : (Equation *)e :(ViewController *)vc :(BOOL)hasRootNum {
     self = [super init];
     if (self) {
         CalcBoard *calcB = e.par;
@@ -58,13 +59,9 @@
         self.hidden = NO;
         self.roll = calcB.curRoll;
         self.isCopy = NO;
+        self.rootNum = nil;
         
-        CGRect frame;
-        frame.size.height = RADICAL_MARGINE_T + calcB.curFontH + RADICAL_MARGINE_B;
-        CGFloat margineL = RADICAL_MARGINE_L_PERC * frame.size.height;
-        frame.origin.x = inputPos.x + margineL;
-        frame.origin.y = inputPos.y - RADICAL_MARGINE_B;
-        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :frame.origin :e :TEXTLAYER_EMPTY];
+        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :e :TEXTLAYER_EMPTY];
         
         self.content = [[EquationBlock alloc] init:e];
         layer.parent = self.content;
@@ -75,15 +72,19 @@
         self.content.numerTopHalf = calcB.curFontH / 2.0;
         self.content.numerBtmHalf = calcB.curFontH / 2.0;
         
-        frame.origin.x = inputPos.x;
-        frame.origin.y = inputPos.y - RADICAL_MARGINE_T - RADICAL_MARGINE_B;
+        CGRect frame = CGRectZero;
+        frame.size.height = RADICAL_MARGINE_T + calcB.curFontH + RADICAL_MARGINE_B;
+        CGFloat margineL = RADICAL_MARGINE_L_PERC * frame.size.height;
         frame.size.width = margineL + calcB.curFontW + RADICAL_MARGINE_R;
         self.frame = frame;
+        self.mainFrame = frame;
         
-        if (rootCnt == 3) {
+        if (hasRootNum) {
             int orgFontLvl = calcB.curFontLvl;
             [calcB updateFontInfo:orgFontLvl + 1];
-            self.rootNum = [[EquationTextLayer alloc] init:@"3" :CGPointMake(inputPos.x + margineL / 2.0 - 4.0, frame.origin.y) :e :TEXTLAYER_NUM];
+            self.rootNum = [[EquationTextLayer alloc] init:@"_" :e :TEXTLAYER_EMPTY];
+            self.rootNum.ancestor = e;
+            self.rootNum.parent = self;
             [calcB.view.layer addSublayer: self.rootNum];
             [calcB updateFontInfo:orgFontLvl];
         }
@@ -104,6 +105,7 @@
     guid = e.guid_cnt++;
     content.parent = self;
     [content updateCopyBlock:e];
+    
     if (rootNum != nil) {
         rootNum.parent = self;
         [rootNum updateCopyBlock:e];
@@ -121,7 +123,7 @@
     
     [self.content updateSize:lvl];
     
-    if (self.rootNum != nil) {
+    if (rootNum != nil) {
         [self.rootNum updateSize:lvl + 1];
     }
     
@@ -140,6 +142,7 @@
         self.rootNum = [coder decodeObjectForKey:@"rootNum"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
     }
     return self;
 }
@@ -150,10 +153,11 @@
     [coder encodeObject:self.content forKey:@"content"];
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.roll forKey:@"roll"];
-    if (self.rootNum != nil) {
+    if (rootNum != nil) {
         [coder encodeObject:self.rootNum forKey:@"rootNum"];
     }
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -171,6 +175,7 @@
     copy.name = [self.name copy];
     copy.hidden = NO;
     copy.isCopy = YES;
+    copy.mainFrame = self.mainFrame;
     return copy;
 }
 
@@ -186,28 +191,34 @@
     self.frame = frame;
     
     if (self.rootNum != nil) {
-        CGFloat ML = RADICAL_MARGINE_L_PERC * self.frame.size.height;
         CGRect f = self.rootNum.frame;
-        self.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - 4.0, frame.origin.y, f.size.width, f.size.height);
+        self.rootNum.frame = CGRectMake(frame.origin.x + margineL / 2.0 - f.size.width, frame.origin.y, f.size.width, f.size.height);
+        self.mainFrame = CGRectUnion(self.frame, self.rootNum.frame);
+    } else {
+        self.mainFrame = self.frame;
     }
+    
 }
 
 -(void) moveCopy:(CGPoint)dest {
     self.isCopy = NO;
     
+    CGPoint radiDest = dest;
+    radiDest.x = dest.x + self.mainFrame.size.width / 2.0 - self.frame.size.width / 2.0;
+    
     CGPoint contDest;
     
-    contDest.x = dest.x + self.frame.size.width / 2.0 - RADICAL_MARGINE_R - self.content.mainFrame.size.width / 2.0;
-    contDest.y = dest.y - self.frame.size.height / 2.0 + RADICAL_MARGINE_T + self.content.mainFrame.size.height / 2.0;
+    contDest.x = radiDest.x + self.frame.size.width / 2.0 - RADICAL_MARGINE_R - self.content.mainFrame.size.width / 2.0;
+    contDest.y = radiDest.y - self.frame.size.height / 2.0 + RADICAL_MARGINE_T + self.content.mainFrame.size.height / 2.0;
     
     if (self.rootNum != nil) {
         CGPoint rootNumDest;
         CGFloat ML = RADICAL_MARGINE_L_PERC * self.frame.size.height;
-        rootNumDest.x = dest.x - self.frame.size.width / 2.0 + ML / 2.0 - 4.0 + self.rootNum.frame.size.width / 2.0;
-        rootNumDest.y = dest.y - self.frame.size.height / 2.0 + self.rootNum.frame.size.height / 2.0;
+        rootNumDest.x = radiDest.x - self.frame.size.width / 2.0 + ML / 2.0 - self.rootNum.frame.size.width / 2.0;
+        rootNumDest.y = radiDest.y - self.frame.size.height / 2.0 + self.rootNum.frame.size.height / 2.0;
         
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-        animation.duration = 0.75;
+        animation.duration = 0.5;
         animation.delegate = self;
         animation.fromValue = [NSValue valueWithCGPoint:self.rootNum.position];
         animation.toValue = [NSValue valueWithCGPoint:rootNumDest];
@@ -219,18 +230,18 @@
         [CATransaction commit];
     }
     
-    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position), NSStringFromCGPoint(dest));
+    NSLog(@"%s%i>~%@~%@~~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGPoint(self.position), NSStringFromCGPoint(radiDest));
     
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
     animation.duration = 0.5;
     animation.delegate = self;
     animation.fromValue = [NSValue valueWithCGPoint:self.position];
-    animation.toValue = [NSValue valueWithCGPoint:dest];
+    animation.toValue = [NSValue valueWithCGPoint:radiDest];
     [animation setTimingFunction:easeOutBack];
     [self addAnimation:animation forKey:nil];
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
-    self.position = dest;
+    self.position = radiDest;
     [CATransaction commit];
     
     [self.content moveCopy:contDest];
@@ -247,6 +258,8 @@
     [self setNeedsDisplay];
     
     if (self.rootNum != nil) {
+        self.rootNum.parent = self;
+        self.rootNum.ancestor = anc;
         [calcB.view.layer addSublayer: self.rootNum];
     }
     
@@ -254,11 +267,11 @@
 }
 
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
-    CGFloat orgW = self.frame.size.width;
+    CGFloat orgW = self.mainFrame.size.width;
     [self updateFrame];
     [self setNeedsDisplay];
-    if ((int)orgW != (int)self.frame.size.width) {
-        [self.parent updateFrameWidth:self.frame.size.width - orgW :self.roll];
+    if ((int)orgW != (int)self.mainFrame.size.width) {
+        [self.parent updateFrameWidth:self.mainFrame.size.width - orgW :self.roll];
     }
 }
 
@@ -278,10 +291,12 @@
         cb.curMode = MODE_INSERT;
     }
     cb.view.cursor.frame = CGRectMake(self.frame.origin.x + self.frame.size.width, self.frame.origin.y, CURSOR_W, self.frame.size.height);
-    cb.view.inpOrg = CGPointMake(self.frame.origin.x + self.frame.size.width, self.frame.origin.y + self.frame.size.height / 2.0 - cb.curFontH / 2.0);
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {
+    if (self.rootNum != nil && self.rootNum.type == TEXTLAYER_EMPTY) {
+        return self.rootNum;
+    }
     return [self.content lookForEmptyTxtLyr];
 }
 
@@ -293,6 +308,7 @@
 
 -(void) destroy {
     [self.content destroy];
+    
     if (self.rootNum != nil) {
         [self.rootNum destroy];
         self.rootNum = nil;

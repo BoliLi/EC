@@ -28,7 +28,7 @@
 @property int fontLvl;
 @property BOOL isCopy;
 
--(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc;
+-(id) init :(NSString *)pfx :(Equation *)E :(ViewController *)vc;
 -(void) updateFrame:(BOOL)updateParenth;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;

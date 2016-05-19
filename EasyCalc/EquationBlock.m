@@ -34,22 +34,22 @@
 @synthesize fontLvl;
 @synthesize isCopy;
 
--(id) init : (Equation *)e {
-    self = [super init];
-    if (self) {
-        CalcBoard *calcB = e.par;
-        
-        self.ancestor = e;
-        self.children = [NSMutableArray array];
-        self.guid = e.guid_cnt++;
-        self.roll = calcB.curRoll;
-        self.fontLvl = calcB.curFontLvl;
-        self.isCopy = NO;
-    }
-    return self;
-}
+//-(id) init : (Equation *)e {
+//    self = [super init];
+//    if (self) {
+//        CalcBoard *calcB = e.par;
+//        
+//        self.ancestor = e;
+//        self.children = [NSMutableArray array];
+//        self.guid = e.guid_cnt++;
+//        self.roll = calcB.curRoll;
+//        self.fontLvl = calcB.curFontLvl;
+//        self.isCopy = NO;
+//    }
+//    return self;
+//}
 
--(id) init : (CGPoint)inputPos : (Equation *)e {
+-(id) init : (Equation *)e {
     self = [super init];
     if (self) {
         CalcBoard *calcB = e.par;
@@ -59,7 +59,7 @@
         self.guid = e.guid_cnt++;
         self.roll = calcB.curRoll;
         
-        self.numerFrame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontW, calcB.curFontH);
+        self.numerFrame = CGRectMake(0.0, 0.0, calcB.curFontW, calcB.curFontH);
         self.mainFrame = self.numerFrame;
         self.numerTopHalf = calcB.curFontH / 2.0;
         self.numerBtmHalf = calcB.curFontH / 2.0;
@@ -1250,11 +1250,9 @@
                 } else
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 
-                if (rb.rootNum != nil) {
-                    CGFloat ML = RADICAL_MARGINE_L_PERC * rb.frame.size.height;
-                    CGRect f = rb.rootNum.frame;
-                    rb.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - 4.0, frame.origin.y, f.size.width, f.size.height);
-                }
+                CGFloat ML = RADICAL_MARGINE_L_PERC * rb.frame.size.height;
+                CGRect f = rb.rootNum.frame;
+                rb.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - rb.rootNum.frame.size.width, frame.origin.y, f.size.width, f.size.height);
                 
                 frame.origin.x += RADICAL_MARGINE_L_PERC * rb.frame.size.height;
                 frame.origin.y += RADICAL_MARGINE_T;
@@ -1539,7 +1537,6 @@
         }
     }
     cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
-    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {

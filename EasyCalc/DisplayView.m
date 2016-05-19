@@ -20,7 +20,6 @@
 
 @implementation DisplayView
 @synthesize cursor;
-@synthesize inpOrg;
 @synthesize swipLBtn;
 @synthesize swipRBtn;
 @synthesize par;
@@ -81,7 +80,6 @@
         [clayer setNeedsDisplay];
         
         self.cursor = clayer;
-        self.inpOrg = clayer.frame.origin;
     }
     return self;
 }
@@ -91,7 +89,6 @@
     self = [super initWithCoder:coder];
     if (self) {
         self.cursor = [coder decodeObjectForKey:@"cursor"];
-        self.inpOrg = [coder decodeCGPointForKey:@"inpOrg"];
         self.swipLBtn = [coder decodeObjectForKey:@"swipLBtn"];
         self.swipRBtn = [coder decodeObjectForKey:@"swipRBtn"];
     }
@@ -102,7 +99,6 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:self.cursor forKey:@"cursor"];
-    [coder encodeCGPoint:self.inpOrg forKey:@"inpOrg"];
     [coder encodeObject:self.swipLBtn forKey:@"swipLBtn"];
     [coder encodeObject:self.swipRBtn forKey:@"swipRBtn"];
 }
@@ -120,8 +116,8 @@
 }
 
 - (void)updateContentView {
-    if (!CGRectContainsPoint(self.bounds, self.inpOrg)) {
-        CGFloat offX = self.inpOrg.x - self.bounds.size.width;
+    if (!CGRectContainsPoint(self.bounds, self.cursor.frame.origin)) {
+        CGFloat offX = self.cursor.frame.origin.x - self.bounds.size.width;
         
         if (offX < 0.0)
             [self setContentOffset:CGPointMake(0.0, self.bounds.size.height * 2.0) animated:YES];

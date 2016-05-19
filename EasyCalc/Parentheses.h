@@ -22,7 +22,7 @@
 @property int fontLvl;
 @property BOOL isCopy;
 
--(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc;
+-(id) init :(Equation *)E :(int)l_r :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrameBaseOnBase;
 -(void) updateFrameBaseOnExpo;

@@ -50,7 +50,7 @@
         allowInputBitMap = INPUT_ALL_BIT;
         
         curFont = getFont(0);
-        curFontW = gCharWidthTbl[0][8];
+        curFontW = getCharWidth(0, @"_");
         curFontH = curFont.lineHeight;
         
         view = [[DisplayView alloc] init:self :dspFrame :vc];
@@ -72,7 +72,7 @@
     allowInputBitMap = INPUT_ALL_BIT;
     
     curFont = getFont(0);
-    curFontW = gCharWidthTbl[0][8];
+    curFontW = getCharWidth(0, @"_");
     curFontH = curFont.lineHeight;
 }
 
@@ -132,7 +132,7 @@
     
     curFontLvl = lvl;
     curFont = getFont(lvl);
-    curFontW = gCharWidthTbl[lvl][8];
+    curFontW = getCharWidth(lvl, @"_");
     curFontH = curFont.lineHeight;
 }
 

@@ -28,8 +28,8 @@
 @property int fontLvl;
 @property BOOL isCopy;
 
+//-(id) init : (Equation *)e;
 -(id) init : (Equation *)e;
--(id) init : (CGPoint)inputPos : (Equation *)e;
 -(void) updateFrame : (CGRect)frame : (int)r;
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
 -(void) updateFrameHeightS2 : (CGFloat)newH : (int)r;

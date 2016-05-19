@@ -13,7 +13,6 @@
 
 @interface DisplayView : UIScrollView <NSCoding>
 @property CALayer *cursor;
-@property CGPoint inpOrg;
 @property UIButton *swipLBtn;
 @property UIButton *swipRBtn;
 @property (weak) CalcBoard *par;

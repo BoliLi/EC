@@ -23,9 +23,10 @@
 @property EquationTextLayer *rootNum;
 @property int fontLvl;
 @property BOOL isCopy;
+@property CGRect mainFrame;
 
--(id) init :(Equation *)e :(ViewController *)vc;
--(id) init : (CGPoint)inputPos : (Equation *)e : (int)rootCnt :(ViewController *)vc;
+//-(id) init :(Equation *)e :(ViewController *)vc;
+-(id) init : (Equation *)e :(ViewController *)vc;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrame;

@@ -431,7 +431,6 @@ static UIView *testview;
                                 [gCurCB.curEq.root adjustElementPosition];
                                 
                                 gCurCB.view.cursor.frame = CGRectMake(gCurCB.curTxtLyr.frame.origin.x + gCurCB.curTxtLyr.frame.size.width, gCurCB.curTxtLyr.frame.origin.y, CURSOR_W, gCurCB.curTxtLyr.frame.size.height);
-                                gCurCB.view.inpOrg = CGPointMake(gCurCB.curTxtLyr.frame.origin.x + gCurCB.curTxtLyr.frame.size.width, gCurCB.curTxtLyr.frame.origin.y);
                                 
                                 return;
                             } else {
@@ -457,7 +456,6 @@ static UIView *testview;
                             [gCurCB.curEq.root adjustElementPosition];
                             
                             gCurCB.view.cursor.frame = CGRectMake(gCurCB.curTxtLyr.frame.origin.x + gCurCB.curTxtLyr.frame.size.width, gCurCB.curTxtLyr.frame.origin.y, CURSOR_W, gCurCB.curTxtLyr.frame.size.height);
-                            gCurCB.view.inpOrg = CGPointMake(gCurCB.curTxtLyr.frame.origin.x + gCurCB.curTxtLyr.frame.size.width, gCurCB.curTxtLyr.frame.origin.y);
                             
                             return;
                         } else {
@@ -631,7 +629,6 @@ static UIView *testview;
                 [gCurCB.curEq.root adjustElementPosition];
                 
                 gCurCB.view.cursor.frame = CGRectMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y, CURSOR_W, rb.frame.size.height);
-                gCurCB.view.inpOrg = CGPointMake(rb.frame.origin.x + rb.frame.size.width, rb.frame.origin.y + rb.frame.size.height / 2.0 - gCurCB.curFontH / 2.0);
             } else if ([copyBlock isMemberOfClass: [FractionBarLayer class]]) {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             } else if ([copyBlock isMemberOfClass: [EquationTextLayer class]]) {
@@ -656,7 +653,6 @@ static UIView *testview;
                 [gCurCB.curEq.root adjustElementPosition];
                 
                 gCurCB.view.cursor.frame = CGRectMake(etl.mainFrame.origin.x + etl.mainFrame.size.width, etl.mainFrame.origin.y, CURSOR_W, etl.mainFrame.size.height);
-                gCurCB.view.inpOrg = CGPointMake(etl.mainFrame.origin.x + etl.mainFrame.size.width, etl.mainFrame.origin.y);
             } else if ([copyBlock isMemberOfClass: [EquationBlock class]]) {
                 EquationBlock *eb = copyBlock;
                 
@@ -703,7 +699,6 @@ static UIView *testview;
                 [gCurCB.curEq.root adjustElementPosition];
                 
                 gCurCB.view.cursor.frame = CGRectMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y, CURSOR_W, eb.mainFrame.size.height);
-                gCurCB.view.inpOrg = CGPointMake(eb.mainFrame.origin.x + eb.mainFrame.size.width, eb.mainFrame.origin.y + eb.mainFrame.size.height / 2.0 - gCurCB.curFontH / 2.0);
             } else if ([copyBlock isMemberOfClass: [WrapedEqTxtLyr class]]) {
                 WrapedEqTxtLyr *wetl = copyBlock;
                 
@@ -722,7 +717,6 @@ static UIView *testview;
                 [gCurCB.curEq.root adjustElementPosition];
                 
                 gCurCB.view.cursor.frame = CGRectMake(wetl.mainFrame.origin.x + wetl.mainFrame.size.width, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
-                gCurCB.view.inpOrg = CGPointMake(wetl.mainFrame.origin.x + wetl.mainFrame.size.width, wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - gCurCB.curFontH / 2.0);
             } else if ([copyBlock isMemberOfClass: [Parentheses class]]) {
                 // do nothing
             } else {
@@ -744,9 +738,6 @@ static UIView *testview;
                 if (curEq.root.bar != nil) {//Root block has denominator
                     CGFloat tmp = curEq.root.mainFrame.size.height;
                     gCurCB.view.cursor.frame = CGRectMake(curEq.root.mainFrame.origin.x + curEq.root.mainFrame.size.width, curEq.root.mainFrame.origin.y, CURSOR_W, tmp);
-                    CGFloat x = curEq.root.bar.frame.origin.x + curEq.root.bar.frame.size.width;
-                    CGFloat y = curEq.root.numerFrame.origin.y + curEq.root.numerFrame.size.height - gCurCB.curFontH / 2.0;
-                    gCurCB.view.inpOrg = CGPointMake(x, y);
                     gCurCB.curMode = MODE_DUMP_ROOT;
                     gCurCB.curTxtLyr = nil;
                     gCurCB.curBlk = curEq.root;
@@ -762,43 +753,37 @@ static UIView *testview;
                         if (layer.type == TEXTLAYER_OP) {
                             CGFloat x = layer.frame.origin.x + layer.frame.size.width;
                             CGFloat y = layer.frame.origin.y;
-                            gCurCB.view.inpOrg = CGPointMake(x, y);
                             CGFloat tmp = layer.frame.size.height;
-                            gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, tmp);
+                            gCurCB.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
                             gCurCB.curTxtLyr = nil;
                             gCurCB.txtInsIdx = 1;
                         } else if (layer.type == TEXTLAYER_NUM) {
                             if (layer.expo == nil) {
                                 CGFloat x = layer.frame.origin.x + layer.frame.size.width;
                                 CGFloat y = layer.frame.origin.y;
-                                gCurCB.view.inpOrg = CGPointMake(x, y);
                                 CGFloat tmp = layer.frame.size.height;
-                                gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, tmp);
+                                gCurCB.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
                                 gCurCB.curTxtLyr = layer;
                                 gCurCB.txtInsIdx = (int)gCurCB.curTxtLyr.strLenTbl.count - 1;
                             } else {
                                 CGFloat x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
                                 CGFloat y = layer.frame.origin.y;
-                                gCurCB.view.inpOrg = CGPointMake(x, y);
                                 CGFloat tmp = layer.mainFrame.size.height;
-                                gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
+                                gCurCB.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
                                 gCurCB.curTxtLyr = nil;
                             }
                         } else if (layer.type == TEXTLAYER_EMPTY) {
                             if (layer.expo == nil) {
                                 CGFloat x = layer.frame.origin.x;
                                 CGFloat y = layer.frame.origin.y;
-                                gCurCB.view.inpOrg = CGPointMake(x, y);
                                 CGFloat tmp = layer.frame.size.height;
-                                gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, tmp);
+                                gCurCB.view.cursor.frame = CGRectMake(x, y, CURSOR_W, tmp);
                                 gCurCB.curTxtLyr = layer;
                                 gCurCB.txtInsIdx = 0;
                             } else {
                                 CGFloat x = layer.mainFrame.origin.x + layer.mainFrame.size.width;
-                                CGFloat y = layer.frame.origin.y;
-                                gCurCB.view.inpOrg = CGPointMake(x, y);
                                 CGFloat tmp = layer.mainFrame.size.height;
-                                gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, layer.mainFrame.origin.y, CURSOR_W, tmp);
+                                gCurCB.view.cursor.frame = CGRectMake(x, layer.mainFrame.origin.y, CURSOR_W, tmp);
                                 gCurCB.curTxtLyr = nil;
                             }
                         } else
@@ -816,10 +801,8 @@ static UIView *testview;
                         gCurCB.curBlk = b;
                         gCurCB.insertCIdx = b.c_idx + 1;
                         CGFloat x = b.bar.frame.origin.x + b.bar.frame.size.width;
-                        CGFloat y = b.numerFrame.origin.y + b.numerFrame.size.height - gCurCB.curFontH / 2.0;
-                        gCurCB.view.inpOrg = CGPointMake(x, y);
                         CGFloat tmp = b.mainFrame.size.height;
-                        gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, b.mainFrame.origin.y, CURSOR_W, tmp);
+                        gCurCB.view.cursor.frame = CGRectMake(x, b.mainFrame.origin.y, CURSOR_W, tmp);
                     } else if ([block isMemberOfClass: [RadicalBlock class]]) {
                         RadicalBlock *b = block;
                         gCurCB.curMode = MODE_INPUT;
@@ -829,10 +812,8 @@ static UIView *testview;
                         gCurCB.curBlk = b;
                         gCurCB.insertCIdx = b.c_idx + 1;
                         CGFloat x = b.frame.origin.x + b.frame.size.width;
-                        CGFloat y = b.frame.origin.y + b.frame.size.height / 2.0 - gCurCB.curFontH / 2.0;
-                        gCurCB.view.inpOrg = CGPointMake(x, y);
                         CGFloat tmp = b.frame.size.height;
-                        gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, b.frame.origin.y, CURSOR_W, tmp);
+                        gCurCB.view.cursor.frame = CGRectMake(x, b.frame.origin.y, CURSOR_W, tmp);
                     } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
                         WrapedEqTxtLyr *wetl = block;
                         gCurCB.curMode = MODE_INPUT;
@@ -842,8 +823,6 @@ static UIView *testview;
                         gCurCB.curBlk = wetl;
                         gCurCB.insertCIdx = wetl.c_idx + 1;
                         CGFloat x = wetl.mainFrame.origin.x + wetl.mainFrame.size.width;
-                        CGFloat y = wetl.mainFrame.origin.y + wetl.mainFrame.size.height / 2.0 - gCurCB.curFontH / 2.0;
-                        gCurCB.view.inpOrg = CGPointMake(x, y);
                         gCurCB.view.cursor.frame = CGRectMake(x, wetl.mainFrame.origin.y, CURSOR_W, wetl.mainFrame.size.height);
                     } else if ([block isMemberOfClass: [Parentheses class]]) {
                         Parentheses *p = block;
@@ -854,10 +833,8 @@ static UIView *testview;
                         gCurCB.curBlk = p;
                         gCurCB.insertCIdx = p.c_idx + 1;
                         CGFloat x = p.mainFrame.origin.x + p.mainFrame.size.width;
-                        CGFloat y = p.mainFrame.origin.y + p.mainFrame.size.height / 2.0 - gCurCB.curFontH / 2.0;
-                        gCurCB.view.inpOrg = CGPointMake(x, y);
                         CGFloat tmp = p.mainFrame.size.height;
-                        gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, p.mainFrame.origin.y, CURSOR_W, tmp);
+                        gCurCB.view.cursor.frame = CGRectMake(x, p.mainFrame.origin.y, CURSOR_W, tmp);
                     } else {
                         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                     }
@@ -912,7 +889,7 @@ static UIView *testview;
     anim.repeatCount = HUGE_VALF;
     [gCurCB.view.cursor addAnimation:anim forKey:nil];
     
-    NSLog(@"%s%i>~%@~%@~%@~%@~%@~%@~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.cursor.frame), NSStringFromCGPoint(gCurCB.view.inpOrg), orgView, gCurCB.view, gCurCB.view.subviews, gCurCB.view.layer.sublayers);
+    NSLog(@"%s%i>~%@~%@~%@~%@~%@~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.cursor.frame), orgView, gCurCB.view, gCurCB.view.subviews, gCurCB.view.layer.sublayers);
     [UIView transitionFromView:orgView toView:gCurCB.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
         // What to do when its finished.
     }];
@@ -1754,8 +1731,7 @@ static UIView *testview;
     
     if (needNewLayer) {
         
-        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:num :gCurCB.view.inpOrg :gCurCB.curEq :TEXTLAYER_NUM];
-        
+        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:num :gCurCB.curEq :TEXTLAYER_NUM];
         incrWidth = tLayer.frame.size.width;
         
         if(gCurCB.curMode == MODE_INPUT) {
@@ -1935,7 +1911,6 @@ static UIView *testview;
     CGFloat cursorOrgX = gCurCB.curTxtLyr.frame.origin.x + cursorOffset;
     CGFloat cursorOrgY = gCurCB.curTxtLyr.frame.origin.y;
     gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
-    gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
     
     [gCurCB.view updateContentView];
     
@@ -1971,7 +1946,7 @@ static UIView *testview;
             }
         }
         
-        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:op :gCurCB.view.inpOrg :gCurCB.curEq :TEXTLAYER_OP];
+        EquationTextLayer *tLayer = [[EquationTextLayer alloc] init:op :gCurCB.curEq :TEXTLAYER_OP];
         
         incrWidth += tLayer.frame.size.width;
         
@@ -2136,7 +2111,6 @@ static UIView *testview;
         cursorOrgX = tLayer.frame.origin.x + tLayer.frame.size.width;
         cursorOrgY = tLayer.frame.origin.y;
         gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
-        gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
         
         [gCurCB.view updateContentView];
         
@@ -2785,7 +2759,7 @@ static UIView *testview;
         [eBlock.children addObject: barLayer];
         eBlock.bar = barLayer;
         
-        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :eBlock.denomFrame.origin :gCurCB.curEq :TEXTLAYER_EMPTY];
+        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :gCurCB.curEq :TEXTLAYER_EMPTY];
         layer.parent = eBlock;
         eBlock.denomFrame = layer.frame;
         layer.c_idx = eBlock.children.count;
@@ -2804,7 +2778,6 @@ static UIView *testview;
         cursorOrgX = eBlock.denomFrame.origin.x;
         cursorOrgY = eBlock.denomFrame.origin.y;
         gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, gCurCB.curFontH);
-        gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY);
         
         if ((int)gCurCB.curEq.maxRootHeight < (int)gCurCB.curEq.root.mainFrame.size.height) {
             CGFloat dis = gCurCB.curEq.root.mainFrame.size.height - gCurCB.curEq.maxRootHeight;
@@ -2847,8 +2820,8 @@ static UIView *testview;
         }
     }
     
-    RadicalBlock *newRBlock = [[RadicalBlock alloc] init:gCurCB.view.inpOrg :gCurCB.curEq :rootCnt :self];
-    
+    RadicalBlock *newRBlock = [[RadicalBlock alloc] init:gCurCB.curEq :self];
+
     incrWidth += newRBlock.frame.size.width;
     
 //    if (orgLayer != nil && orgLayer.type == TEXTLAYER_EMPTY) {
@@ -3019,8 +2992,8 @@ static UIView *testview;
     gCurCB.curMode = MODE_INPUT;
     gCurCB.curRoll = ROLL_NUMERATOR;
     gCurCB.curParent = newRBlock.content;
-    gCurCB.view.inpOrg = ((EquationBlock *)gCurCB.curParent).mainFrame.origin;
-    gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+    CGPoint tempF = ((EquationBlock *)gCurCB.curParent).mainFrame.origin;
+    gCurCB.view.cursor.frame = CGRectMake(tempF.x, tempF.y, CURSOR_W, gCurCB.curFontH);
     
     if ((int)gCurCB.curEq.maxRootHeight < (int)gCurCB.curEq.root.mainFrame.size.height) {
         CGFloat dis = gCurCB.curEq.root.mainFrame.size.height - gCurCB.curEq.maxRootHeight;
@@ -3041,14 +3014,13 @@ static UIView *testview;
             if (p.expo == nil) {
                 [gCurCB updateFontInfo:gCurCB.curFontLvl + 1];
                 
-                CGPoint pos = CGPointMake(p.frame.origin.x + p.frame.size.width, p.frame.origin.y - gCurCB.curFontH / 2.0);
                 
-                EquationBlock *exp = [[EquationBlock alloc] init:pos :gCurCB.curEq];
+                EquationBlock *exp = [[EquationBlock alloc] init:gCurCB.curEq];
                 exp.roll = ROLL_EXPO_ROOT;
                 exp.parent = p;
                 p.expo = exp;
                 
-                EquationTextLayer *expLayer = [[EquationTextLayer alloc] init:@"_" :pos :gCurCB.curEq :TEXTLAYER_EMPTY];
+                EquationTextLayer *expLayer = [[EquationTextLayer alloc] init:@"_" :gCurCB.curEq :TEXTLAYER_EMPTY];
                 expLayer.parent = exp;
                 exp.numerFrame = expLayer.frame;
                 exp.mainFrame = expLayer.frame;
@@ -3072,8 +3044,7 @@ static UIView *testview;
                 gCurCB.curRoll = ROLL_NUMERATOR;
                 gCurCB.curMode = MODE_INPUT;
                 
-                gCurCB.view.inpOrg = expLayer.frame.origin;
-                gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+                gCurCB.view.cursor.frame = CGRectMake(expLayer.frame.origin.x, expLayer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
             } else {
                 EquationBlock *exp = p.expo;
                 id lastObj = exp.children.lastObject;
@@ -3081,24 +3052,20 @@ static UIView *testview;
                 locaLastLyr(gCurCB.curEq, lastObj);
             }
         } else {
-            CGPoint pos = gCurCB.view.inpOrg;
             CGFloat incrWidth = 0.0;
             
-            EquationTextLayer *baseLayer = [[EquationTextLayer alloc] init:@"_" :pos :gCurCB.curEq :TEXTLAYER_EMPTY];
+            EquationTextLayer *baseLayer = [[EquationTextLayer alloc] init:@"_" :gCurCB.curEq :TEXTLAYER_EMPTY];
             //baseLayer.parent = gCurCB.curParent;
             [gCurCB.view.layer addSublayer: baseLayer];
             
             [gCurCB updateFontInfo:gCurCB.curFontLvl + 1];
             
-            pos.x += baseLayer.frame.size.width;
-            pos.y = (pos.y + baseLayer.frame.size.height * 0.45) - gCurCB.curFontH;
-            
-            EquationBlock *exp = [[EquationBlock alloc] init:pos :gCurCB.curEq];
+            EquationBlock *exp = [[EquationBlock alloc] init:gCurCB.curEq];
             exp.roll = ROLL_EXPO_ROOT;
             exp.parent = baseLayer;
             baseLayer.expo = exp;
             
-            EquationTextLayer *expLayer = [[EquationTextLayer alloc] init:@"_" :pos :gCurCB.curEq :TEXTLAYER_EMPTY];
+            EquationTextLayer *expLayer = [[EquationTextLayer alloc] init:@"_" :gCurCB.curEq :TEXTLAYER_EMPTY];
             expLayer.parent = exp;
             exp.numerFrame = expLayer.frame;
             exp.mainFrame = expLayer.frame;
@@ -3229,25 +3196,20 @@ static UIView *testview;
             gCurCB.txtInsIdx = 0;
             gCurCB.curTxtLyr = baseLayer;
             gCurCB.curBlk = baseLayer;
-            gCurCB.view.inpOrg = baseLayer.frame.origin;
-            gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+            gCurCB.view.cursor.frame = CGRectMake(baseLayer.frame.origin.x, baseLayer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
         }
     } else {
         [gCurCB updateFontInfo:gCurCB.curFontLvl + 1];
         
         if (gCurCB.curTxtLyr.expo == nil) {
             CGFloat orgW = gCurCB.curTxtLyr.mainFrame.size.width;
-            CGFloat x = gCurCB.curTxtLyr.frame.origin.x + orgW;
             
-            CGFloat y = (gCurCB.view.inpOrg.y + gCurCB.curTxtLyr.mainFrame.size.height * 0.45) - gCurCB.curFontH;
-            gCurCB.view.inpOrg = CGPointMake(x, y);
-            
-            EquationBlock *eBlock = [[EquationBlock alloc] init:gCurCB.view.inpOrg :gCurCB.curEq];
+            EquationBlock *eBlock = [[EquationBlock alloc] init:gCurCB.curEq];
             eBlock.roll = ROLL_EXPO_ROOT;
             eBlock.parent = gCurCB.curTxtLyr;
             gCurCB.curTxtLyr.expo = eBlock;
             
-            EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :gCurCB.view.inpOrg :gCurCB.curEq :TEXTLAYER_EMPTY];
+            EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :gCurCB.curEq :TEXTLAYER_EMPTY];
             layer.parent = eBlock;
             eBlock.numerFrame = layer.frame;
             eBlock.mainFrame = layer.frame;
@@ -3270,8 +3232,7 @@ static UIView *testview;
             gCurCB.curRoll = ROLL_NUMERATOR;
             gCurCB.curMode = MODE_INPUT;
             
-            gCurCB.view.inpOrg = layer.frame.origin;
-            gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+            gCurCB.view.cursor.frame = CGRectMake(layer.frame.origin.x, layer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
         } else {
             EquationBlock *exp = gCurCB.curTxtLyr.expo;
             id lastObj = exp.children.lastObject;
@@ -3321,7 +3282,7 @@ static UIView *testview;
         }
     }
 
-    Parentheses *parenth = [[Parentheses alloc] init:gCurCB.view.inpOrg :gCurCB.curEq :l_r :self];
+    Parentheses *parenth = [[Parentheses alloc] init:gCurCB.curEq :l_r :self];
     
     if(gCurCB.curMode == MODE_INPUT) {
         EquationBlock *block = gCurCB.curParent;
@@ -3599,7 +3560,6 @@ static UIView *testview;
     CGFloat cursorOrgY = parenth.frame.origin.y;
     
     gCurCB.view.cursor.frame = CGRectMake(cursorOrgX, cursorOrgY, CURSOR_W, parenth.frame.size.height);
-    gCurCB.view.inpOrg = CGPointMake(cursorOrgX, cursorOrgY + parenth.frame.size.height / 2.0 - gCurCB.curFontH / 2.0);
     
     gCurCB.insertCIdx = parenth.c_idx + 1;
     gCurCB.curBlk = parenth;
@@ -3884,8 +3844,7 @@ static UIView *testview;
                     [(EquationBlock *)gCurCB.curParent updateFrameWidth:incrWidth :curLayer.roll];
                     [gCurCB.curEq.root adjustElementPosition];
                     
-                    gCurCB.view.inpOrg = CGPointMake(curLayer.frame.origin.x, curLayer.frame.origin.y);
-                    gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+                    gCurCB.view.cursor.frame = CGRectMake(curLayer.frame.origin.x, curLayer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
                     
                     curLayer.type = TEXTLAYER_EMPTY;
                     [curLayer.strLenTbl removeLastObject];
@@ -3954,8 +3913,7 @@ static UIView *testview;
                     CGFloat incrWidth = curLayer.mainFrame.size.width - orgW;
                     [(EquationBlock *)gCurCB.curParent updateFrameWidth:incrWidth :gCurCB.curRoll];
                     [gCurCB.curEq.root adjustElementPosition];
-                    gCurCB.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
-                    gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+                    gCurCB.view.cursor.frame = CGRectMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
                     if (gCurCB.txtInsIdx == 0) {
                         gCurCB.insertCIdx = curLayer.c_idx;
                     }
@@ -3971,8 +3929,7 @@ static UIView *testview;
                     CGFloat incrWidth = curLayer.mainFrame.size.width - orgW;
                     [(EquationBlock *)gCurCB.curParent updateFrameWidth:incrWidth :gCurCB.curRoll];
                     [gCurCB.curEq.root adjustElementPosition];
-                    gCurCB.view.inpOrg = CGPointMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y);
-                    gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+                    gCurCB.view.cursor.frame = CGRectMake(curLayer.frame.origin.x + offset, curLayer.frame.origin.y, CURSOR_W, gCurCB.curFontH);
                     if (gCurCB.txtInsIdx == 0) {
                         gCurCB.insertCIdx = curLayer.c_idx;
                     }
@@ -4078,6 +4035,7 @@ static UIView *testview;
     }
     
     NSNumber *result = calculate(str);
+//    NSNumber *result = calculate(@"nthroot(27, 1)");
     
     NSLog(@"%s%i>~%@~~~~~%@~~~~~", __FUNCTION__, __LINE__, str, result);
     
@@ -4093,13 +4051,21 @@ static UIView *testview;
         CGRect f = gCurCB.curEq.root.mainFrame;
         CGPoint pos = CGPointMake(f.origin.x, f.origin.y + f.size.height);
         
-        gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :pos :gCurCB.curEq :TEXTLAYER_OP];
+        gCurCB.curEq.equalsign = [[EquationTextLayer alloc] init:@"=" :gCurCB.curEq :TEXTLAYER_OP];
+        CGRect temp = gCurCB.curEq.equalsign.frame;
+        temp.origin.x = pos.x;
+        temp.origin.y = pos.y;
+        gCurCB.curEq.equalsign.frame = temp;
         gCurCB.curEq.equalsign.opacity = 0.0;
         [gCurCB.view.layer addSublayer:gCurCB.curEq.equalsign];
         
         pos.x += gCurCB.curEq.equalsign.frame.size.width;
         
-        gCurCB.curEq.result = [[EquationTextLayer alloc] init:[result stringValue] :pos :gCurCB.curEq :TEXTLAYER_NUM];
+        gCurCB.curEq.result = [[EquationTextLayer alloc] init:[result stringValue] :gCurCB.curEq :TEXTLAYER_NUM];
+        temp = gCurCB.curEq.result.frame;
+        temp.origin.x = pos.x;
+        temp.origin.y = pos.y;
+        gCurCB.curEq.result.frame = temp;
         [gCurCB.curEq.result updateStrLenTbl];
         gCurCB.curEq.result.opacity = 0.0;
         [gCurCB.view.layer addSublayer:gCurCB.curEq.result];
@@ -4121,7 +4087,6 @@ static UIView *testview;
         
         CGPoint rootPos = CGPointMake(gCurCB.downLeftBasePoint.x, gCurCB.downLeftBasePoint.y - gCurCB.curFontH - 1.0);
         gCurCB.view.cursor.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, gCurCB.curFontH);
-        gCurCB.view.inpOrg = gCurCB.view.cursor.frame.origin;
         
         gCurCB.curEq = [[Equation alloc] init:gCurCB :self];
         
@@ -4145,7 +4110,6 @@ static UIView *testview;
     
     CGPoint rootPos = CGPointMake(gCurCB.downLeftBasePoint.x, gCurCB.downLeftBasePoint.y - gCurCB.curFontH - 1.0);
     gCurCB.view.cursor.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, gCurCB.curFontH);
-    gCurCB.view.inpOrg = gCurCB.view.cursor.frame.origin;
 
     gCurCB.curEq = [[Equation alloc] init:gCurCB :self];
     
@@ -4180,7 +4144,7 @@ static UIView *testview;
         }
     }
     
-    WrapedEqTxtLyr *wetl = [[WrapedEqTxtLyr alloc] init:pfx :gCurCB.view.inpOrg :gCurCB.curEq :self];
+    WrapedEqTxtLyr *wetl = [[WrapedEqTxtLyr alloc] init:pfx :gCurCB.curEq :self];
     
     incrWidth += wetl.mainFrame.size.width;
     
@@ -4348,8 +4312,8 @@ static UIView *testview;
     gCurCB.curMode = MODE_INPUT;
     gCurCB.curRoll = ROLL_NUMERATOR;
     gCurCB.curParent = wetl.content;
-    gCurCB.view.inpOrg = ((EquationBlock *)gCurCB.curParent).mainFrame.origin;
-    gCurCB.view.cursor.frame = CGRectMake(gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y, CURSOR_W, gCurCB.curFontH);
+    CGPoint temp = ((EquationBlock *)gCurCB.curParent).mainFrame.origin;
+    gCurCB.view.cursor.frame = CGRectMake(temp.x, temp.y, CURSOR_W, gCurCB.curFontH);
     
     [gCurCB.view updateContentView];
 }
@@ -4359,7 +4323,6 @@ static UIView *testview;
     if([[btn currentTitle]  isEqual: @"DUMP"]) {
         NSLog(@"-----------curEq--------------");
         [gCurCB.curEq dumpEverything:gCurCB.curEq.root];
-        NSLog(@"InputX: %.1f InputY: %.1f~~~~~~~~~~~", gCurCB.view.inpOrg.x, gCurCB.view.inpOrg.y);
         int i = 0;
         for (Equation *eq in gCurCB.eqList) {
             NSLog(@"-----------Eq%i--------------", i++);

@@ -28,7 +28,7 @@
 @synthesize mainFrame;
 @synthesize fontLvl;
 
--(id) init :(CGPoint)inputPos :(Equation *)E :(int)l_r :(ViewController *)vc {
+-(id) init :(Equation *)E :(int)l_r :(ViewController *)vc {
     self = [super init];
     if (self) {
         CalcBoard *calcB = E.par;
@@ -43,7 +43,7 @@
         self.l_or_r = l_r;
         self.expo = nil;
         
-        self.frame = CGRectMake(inputPos.x, inputPos.y, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
+        self.frame = CGRectMake(0.0, 0.0, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
         self.mainFrame = self.frame;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
@@ -210,7 +210,6 @@
         cb.curMode = MODE_INSERT;
     }
     cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
-    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.frame.origin.y + self.frame.size.height / 2.0 - cb.curFontH / 2.0);
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {

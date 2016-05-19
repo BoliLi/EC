@@ -31,7 +31,7 @@
 @synthesize fontLvl;
 @synthesize isCopy;
 
--(id) init :(NSString *)pfx :(CGPoint)inputPos :(Equation *)E :(ViewController *)vc {
+-(id) init :(NSString *)pfx :(Equation *)E :(ViewController *)vc {
     self = [super init];
     if (self) {
         CalcBoard *calcB = E.par;
@@ -41,7 +41,7 @@
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
         
-        CGPoint org = inputPos;
+        CGPoint org = CGPointZero;
         CGFloat w = 0.0;
         
         NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: pfx];
@@ -60,7 +60,7 @@
         org.x += strSize.width;
         w += strSize.width;
         
-        self.left_parenth = [[Parentheses alloc] init:org :E :LEFT_PARENTH :vc];
+        self.left_parenth = [[Parentheses alloc] init:E :LEFT_PARENTH :vc];
         self.left_parenth.parent = self;
         [calcB.view.layer addSublayer:self.left_parenth];
         [self.left_parenth setNeedsDisplay];
@@ -68,11 +68,11 @@
         org.x += self.left_parenth.frame.size.width;
         w += self.left_parenth.frame.size.width;
         
-        self.content = [[EquationBlock alloc] init:org :E];
+        self.content = [[EquationBlock alloc] init:E];
         self.content.roll = ROLL_WRAP_ROOT;
         self.content.parent = self;
         NSLog(@"%s%i>~%.1f~%.1f~~~~~~~~~", __FUNCTION__, __LINE__, org.x, org.y);
-        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :org :E :TEXTLAYER_EMPTY];
+        EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :E :TEXTLAYER_EMPTY];
         layer.roll = ROLL_NUMERATOR;
         layer.parent = self.content;
         self.content.numerFrame = layer.frame;
@@ -89,14 +89,14 @@
         org.x += layer.mainFrame.size.width;
         w += layer.mainFrame.size.width;
         
-        self.right_parenth = [[Parentheses alloc] init:org :E :RIGHT_PARENTH :vc];
+        self.right_parenth = [[Parentheses alloc] init:E :RIGHT_PARENTH :vc];
         self.right_parenth.parent = self;
         [calcB.view.layer addSublayer:self.right_parenth];
         [self.right_parenth setNeedsDisplay];
         
         w += self.right_parenth.frame.size.width;
         
-        self.mainFrame = CGRectMake(inputPos.x, inputPos.y, w, self.content.mainFrame.size.height);
+        self.mainFrame = CGRectMake(0.0, 0.0, w, self.content.mainFrame.size.height);
     }
     return self;
 }
@@ -277,7 +277,6 @@
         cb.curMode = MODE_INSERT;
     }
     cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
-    cb.view.inpOrg = CGPointMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y + self.mainFrame.size.height / 2.0 - cb.curFontH / 2.0);
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {

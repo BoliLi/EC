@@ -25,7 +25,7 @@
 @property BOOL isCopy;
 
 //-(id) init : (Equation *)e;
--(id) init : (NSString *)str : (CGPoint)org : (Equation *)e : (int)t;
+-(id) init : (NSString *)str : (Equation *)e : (int)t;
 //-(CGFloat) fillEmptyLayer:(NSString *)str oftype:(int)t;
 -(CGFloat) addNumStr:(NSString *)str;
 -(CGFloat) insertNumChar:(NSString *)str at:(int)idx;
