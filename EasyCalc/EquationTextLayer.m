@@ -30,6 +30,8 @@
 @synthesize strLenTbl;
 @synthesize fontLvl;
 @synthesize isCopy;
+@synthesize timeStamp;
+@synthesize pureStr;
 
 -(id) init : (NSString *)str : (Equation *)e : (int)t {
     self = [super init];
@@ -45,6 +47,9 @@
         [self.strLenTbl addObject:@0.0];
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
+        self.timeStamp = [NSDate date];
+        self.pureStr = [NSMutableString stringWithString:str];
+        self.hasFraction = NO;
         
         NSMutableAttributedString *attStr;
         CGSize newStrSize = CGSizeMake(0.0, 0.0);
@@ -56,6 +61,10 @@
             CFRelease(ctFont);
             newStrSize = [attStr size];
             [self.strLenTbl addObject:@(newStrSize.width)];
+            if ([str isEqual:@"."]) {
+                self.hasFraction = YES;
+            }
+            
         } else if (t == TEXTLAYER_OP) {
             attStr = [[NSMutableAttributedString alloc] initWithString: str];
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
@@ -69,7 +78,7 @@
             CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
             CFRelease(ctFont);
-            [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor flatBlueColor] range:NSMakeRange(0,str.length)];
+            [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
             newStrSize = [attStr size];
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -95,6 +104,9 @@
         self.strLenTbl = [NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"strLenTbl"]];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
+        self.pureStr = [coder decodeObjectForKey:@"pureStr"];
+        self.hasFraction = [coder decodeBoolForKey:@"hasFraction"];
     }
     return self;
 }
@@ -111,6 +123,11 @@
     [coder encodeInt:self.type forKey:@"type"];
     [coder encodeObject:[NSArray arrayWithArray:self.strLenTbl] forKey:@"strLenTbl"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
+    if (self.pureStr != nil) {
+        [coder encodeObject:self.pureStr forKey:@"pureStr"];
+    }
+    [coder encodeBool:self.hasFraction forKey:@"hasFraction"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -131,86 +148,129 @@
     copy.name = [self.name copy];
     copy.string = [self.string copy];
     copy.isCopy = YES;
+    copy.timeStamp = [NSDate date];
+    if (self.pureStr != nil) {
+        copy.pureStr = [self.pureStr copy];
+    }
+    copy.hasFraction = self.hasFraction;
     return copy;
 }
 
--(CGFloat) addNumStr:(NSString *)str {
-    Equation *E = self.ancestor;
-    CalcBoard *calcB = E.par;
+-(NSMutableString *) addNumFormat {
+    NSMutableString *ret = [NSMutableString stringWithString:self.pureStr];
     
-    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: str];
-    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
-    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
-    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
-    CFRelease(ctFont);
-    NSMutableAttributedString *orgStr;
+    if (!gSettingThousandSeperator) {
+        return ret;
+    }
+    
+    int i = ret.length - 1;
+    if (self.hasFraction) {
+        while (i >= 0) {
+            if ([ret characterAtIndex:i] == '.') {
+                break;
+            }
+            i--;
+        }
+        
+        i--;
+    }
+    
+    int j = 1;
+    while (i > 0) {
+        if (j == 3) {
+            j = 0;
+            [ret insertString:@"," atIndex:i];
+        }
+        
+        j++;
+        i--;
+    }
+    
+    return ret;
+}
+
+-(CGFloat) addNumStr:(NSString *)str {
+    CalcBoard *calcB = self.ancestor.par;
+    
+    if ([str isEqual:@"."]) {
+        if (self.hasFraction) {
+            [self shake];
+            return [self.strLenTbl.lastObject doubleValue];
+        } else {
+            self.hasFraction = YES;
+        }
+    }
+    
     if (self.type == TEXTLAYER_NUM) {
-        orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.string];
-        [orgStr appendAttributedString:attStr];
+        [self.pureStr appendString:str];
     } else if (self.type == TEXTLAYER_EMPTY) {
         self.type = TEXTLAYER_NUM;
-        orgStr = attStr;
+        self.pureStr = [NSMutableString stringWithString:str];
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         return 0.0;
     }
     
-    CGSize strSize = [orgStr size];
+    NSString *formatedStr = [self addNumFormat];
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: formatedStr];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, formatedStr.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,formatedStr.length)];
+    CFRelease(ctFont);
+    
+    CGSize strSize = [attStr size];
     CGRect f = self.frame;
     f.size.width = strSize.width;
     f.size.height = strSize.height;
     self.frame = f;
     
-    self.string = orgStr;
+    self.string = attStr;
     [self updateFrameBaseOnBase];
     
-    for (int i = 0; i < str.length; i++) {
-        CGFloat preStrLen = [self.strLenTbl.lastObject doubleValue];
-        CGFloat charW = getCharWidth(fontLvl, [str substringWithRange:NSMakeRange(i, 1)]);
-        [self.strLenTbl addObject:@(preStrLen + charW)];
-    }
+    [self updateStrLenTbl];
     
     return [self.strLenTbl.lastObject doubleValue];
 }
 
 -(CGFloat) insertNumChar:(NSString *)str at:(int)idx {
-    if (self.strLenTbl.count == 1) {
+    if (self.strLenTbl.count == 1) { // For empty
         return 0.0;
     }
     
-    Equation *E = self.ancestor;
-    CalcBoard *calcB = E.par;
+    if ([str isEqual:@"."]) {
+        if (self.hasFraction) {
+            [self shake];
+            return [[self.strLenTbl objectAtIndex:idx] doubleValue];
+        } else {
+            self.hasFraction = YES;
+        }
+    }
     
-    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: str];
+    CalcBoard *calcB = self.ancestor.par;
+    
+    [self.pureStr insertString:str atIndex:idx];
+    
+    NSString *formatedStr = [self addNumFormat];
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: formatedStr];
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
-    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,1)];
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, formatedStr.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,formatedStr.length)];
     CFRelease(ctFont);
-    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.string];
     
-    [orgStr insertAttributedString:attStr atIndex:idx];
-    
-    CGSize strSize = [orgStr size];
+    CGSize strSize = [attStr size];
     CGRect f = self.frame;
     f.size.width = strSize.width;
     f.size.height = strSize.height;
     self.frame = f;
     
-    self.string = orgStr;
+    self.string = attStr;
     [self updateFrameBaseOnBase];
     
-    CGFloat preStrLen = [[self.strLenTbl objectAtIndex:idx] doubleValue];
-    CGFloat charW = getCharWidth(fontLvl, str);
-    [self.strLenTbl insertObject:@(preStrLen + charW) atIndex:idx + 1];
+    [self updateStrLenTbl];
     
-    for (int i = idx + 2; i < self.strLenTbl.count; i++) {
-        NSNumber *len = [self.strLenTbl objectAtIndex:i];
-        CGFloat orgLen = [len doubleValue];
-        len = @(orgLen + charW);
-        [self.strLenTbl replaceObjectAtIndex:i withObject:len];
-    }
-    
-    return [[self.strLenTbl objectAtIndex:idx + 1] doubleValue];
+    return [[self.strLenTbl objectAtIndex:idx + str.length] doubleValue];
 }
 
 -(CGFloat) delNumCharAt:(int)idx {
@@ -218,30 +278,28 @@
         return 0.0;
     }
     
-    NSMutableAttributedString *orgStr = [[NSMutableAttributedString alloc] initWithAttributedString:self.string];
-    CGSize strSize = [orgStr size];
-    CGFloat orgW = strSize.width;
+    [self.pureStr deleteCharactersInRange:NSMakeRange(idx - 1, 1)];
     
-    [orgStr deleteCharactersInRange:NSMakeRange(idx - 1, 1)];
+    NSString *formatedStr = [self addNumFormat];
     
-    strSize = [orgStr size];
-    CGFloat charW = orgW - strSize.width;
+    CalcBoard *calcB = self.ancestor.par;
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: formatedStr];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, formatedStr.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,formatedStr.length)];
+    CFRelease(ctFont);
+    
+    CGSize strSize = [attStr size];
     CGRect f = self.frame;
     f.size.width = strSize.width;
     f.size.height = strSize.height;
     self.frame = f;
     
-    self.string = orgStr;
+    self.string = attStr;
     [self updateFrameBaseOnBase];
 
-    [self.strLenTbl removeObjectAtIndex:idx];
-    
-    for (int i = idx; i < self.strLenTbl.count; i++) {
-        NSNumber *len = [self.strLenTbl objectAtIndex:i];
-        CGFloat orgLen = [len doubleValue];
-        len = @(orgLen - charW);
-        [self.strLenTbl replaceObjectAtIndex:i withObject:len];
-    }
+    [self updateStrLenTbl];
     
     return [[self.strLenTbl objectAtIndex:idx - 1] doubleValue];
 }
@@ -256,11 +314,22 @@
     [self.strLenTbl removeAllObjects];
     self.strLenTbl = [NSMutableArray array];
     [self.strLenTbl addObject:@0.0];
-    
+    int j = 0;
     for (int i = 0; i < str.length; i++) {
         NSString *subStr = [str substringWithRange:NSMakeRange(i, 1)];
-        CGFloat charW = getCharWidth(fontLvl, subStr);
-        NSNumber *len = [self.strLenTbl objectAtIndex:i];
+        if ([subStr isEqual:@","]) {
+            continue;
+        }
+        
+        CGFloat charW = getCharWidth(gSettingMainFontLevel, fontLvl, subStr);
+        if (i + 1 < str.length) {
+            subStr = [str substringWithRange:NSMakeRange(i + 1, 1)];
+            if ([subStr isEqual:@","]) {
+                charW += getCharWidth(gSettingMainFontLevel, fontLvl, subStr);
+            }
+        }
+        
+        NSNumber *len = [self.strLenTbl objectAtIndex:j++];
         CGFloat orgLen = [len doubleValue];
         len = @(orgLen + charW);
         [self.strLenTbl addObject:len];
@@ -346,12 +415,9 @@
 }
 
 - (void)updateSize:(int)lvl {
-    if (self.fontLvl == lvl) {
-        return;
-    }
     
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.string string]];
-    UIFont *font = getFont(lvl);
+    UIFont *font = getFont(gSettingMainFontLevel, lvl);
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
     
@@ -450,7 +516,7 @@
         expoPos.y = self.mainFrame.origin.y + self.expo.mainFrame.size.height / 2.0;
         
         CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"position"];
-        animation.duration = 0.75;
+        animation.duration = 0.5;
         animation.delegate = self;
         animation.fromValue = [NSValue valueWithCGPoint:self.position];
         animation.toValue = [NSValue valueWithCGPoint:dest];
@@ -492,30 +558,66 @@
 }
 
 -(void) updateCalcBoardInfo {
-    Equation *eq = self.ancestor;
-    CalcBoard *cb = eq.par;
-    cb.insertCIdx = self.c_idx + 1;
-    if (self.expo == nil) {
-        cb.curTxtLyr = self;
-        cb.txtInsIdx = (int)self.strLenTbl.count - 1;
-    } else {
-        cb.curTxtLyr = nil;
-        cb.txtInsIdx = 1;
-    }
-    cb.curBlk = self;
-    cb.curRoll = self.roll;
-    cb.curParent = self.parent;
-    [cb updateFontInfo:self.fontLvl];
-    if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
-        cb.curMode = MODE_INPUT;
-    } else {
-        cb.curMode = MODE_INSERT;
-    }
+    CalcBoard *cb = self.ancestor.par;
     if (self.type == TEXTLAYER_EMPTY) {
+        cb.insertCIdx = self.c_idx + 1;
+        cb.curTxtLyr = self;
+        cb.txtInsIdx = 0;
+        cb.curBlk = self;
+        cb.curRoll = self.roll;
+        cb.curParent = self.parent;
+        [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
+        
+        if ([self.parent isMemberOfClass:[EquationBlock class]]) {
+            if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+                cb.curMode = MODE_INPUT;
+            } else {
+                cb.curMode = MODE_INSERT;
+            }
+            if (self.expo != nil) {
+                cb.allowInputBitMap = INPUT_NUM_BIT | INPUT_DOT_BIT;
+            } else {
+                cb.allowInputBitMap = INPUT_ALL_BIT;
+            }
+            
+        } else if ([self.parent isMemberOfClass:[RadicalBlock class]]) {
+            cb.curMode = MODE_INPUT;
+            cb.allowInputBitMap = INPUT_NUM_BIT;
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
         cb.view.cursor.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CURSOR_W, cb.curFontH);
     } else {
+        cb.insertCIdx = self.c_idx + 1;
+        if (self.expo == nil) {
+            cb.curTxtLyr = self;
+            cb.txtInsIdx = (int)self.strLenTbl.count - 1; // num & empty
+        } else {
+            cb.curTxtLyr = nil;
+            cb.txtInsIdx = 1;
+        }
+        cb.curBlk = self;
+        cb.curRoll = self.roll;
+        cb.curParent = self.parent;
+        [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
+        
+        if ([self.parent isMemberOfClass:[EquationBlock class]]) {
+            if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+                cb.curMode = MODE_INPUT;
+            } else {
+                cb.curMode = MODE_INSERT;
+            }
+            cb.allowInputBitMap = INPUT_ALL_BIT;
+        } else if ([self.parent isMemberOfClass:[RadicalBlock class]]) {
+            cb.curMode = MODE_INPUT;
+            cb.allowInputBitMap = INPUT_NUM_BIT;
+        } else {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        }
+        
         cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
     }
+    
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {
@@ -530,9 +632,70 @@
     return nil;
 }
 
--(void) destroy {
+-(void) shake {
     if (self.expo != nil) {
-        [self.expo destroy];
+        [self.expo shake];
+    }
+    CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    shakeAnimation.values = @[[NSValue valueWithCGPoint:self.position], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x - 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:self.position]];
+    [shakeAnimation setTimingFunction:easeOutSine];
+    shakeAnimation.duration = 0.5;
+    shakeAnimation.removedOnCompletion = YES;
+    [self addAnimation:shakeAnimation forKey:nil];
+}
+
+-(CGFloat) replaceWithEmpty {
+    CalcBoard *calcB = self.ancestor.par;
+    CGFloat orgWidth = self.mainFrame.size.width;
+    
+    NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: @"_"];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+    CFRelease(ctFont);
+    [attStr addAttribute:NSForegroundColorAttributeName value:[UIColor flatBlueColor] range:NSMakeRange(0, 1)];
+    
+    self.string = attStr;
+    
+    CGRect frame = self.frame;
+    frame.size.width = [attStr size].width;
+    self.frame = frame;
+    
+    [self updateFrameBaseOnBase];
+    
+    self.type = TEXTLAYER_EMPTY;
+    [self.strLenTbl removeAllObjects];
+    [self.strLenTbl addObject:@0.0];
+    
+    return self.mainFrame.size.width - orgWidth;
+}
+
+-(BOOL) isAllowed {
+    if (self.expo != nil && !TEST_BIT(gCurCB.allowInputBitMap, INPUT_EXPO_BIT)) {
+        return NO;
+    }
+    
+    if (self.type == TEXTLAYER_NUM) {
+        if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_NUM_BIT)) {
+            return NO;
+        }
+    } else if (self.type == TEXTLAYER_OP) {
+        if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_OP_BIT)) {
+            return NO;
+        }
+    } else if (self.type == TEXTLAYER_EMPTY) {
+        if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_EMPTY_BIT)) {
+            return NO;
+        }
+    } else {
+        return NO;
+    }
+    
+    return YES;
+}
+
+-(void) destroyWithAnim {
+    if (self.expo != nil) {
+        [self.expo destroyWithAnim];
     }
     [self.strLenTbl removeAllObjects];
     self.strLenTbl = nil;
@@ -547,6 +710,16 @@
     animation.delegate = self;
     
     [self addAnimation:animation forKey:@"remove"];
+    
+}
 
+-(void) destroy {
+    if (self.expo != nil) {
+        [self.expo destroy];
+    }
+    [self.strLenTbl removeAllObjects];
+    self.strLenTbl = nil;
+    
+    [self removeFromSuperlayer];
 }
 @end

@@ -30,6 +30,7 @@
 @synthesize right_parenth;
 @synthesize fontLvl;
 @synthesize isCopy;
+@synthesize timeStamp;
 
 -(id) init :(NSString *)pfx :(Equation *)E :(ViewController *)vc {
     self = [super init];
@@ -40,6 +41,7 @@
         self.roll = calcB.curRoll;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
+        self.timeStamp = [NSDate date];
         
         CGPoint org = CGPointZero;
         CGFloat w = 0.0;
@@ -48,6 +50,14 @@
         CTFontRef ctFont = CTFontCreateWithName((CFStringRef)calcB.curFont.fontName, calcB.curFont.pointSize, NULL);
         [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, pfx.length)];
         [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0, pfx.length)];
+        CFRelease(ctFont);
+        if ([[pfx substringToIndex:pfx.length > 3 ? 3 : pfx.length] isEqual:@"log"]) {
+            UIFont *subFont = getFont(gSettingMainFontLevel, calcB.curFontLvl + 1);
+            CTFontRef ctFont1 = CTFontCreateWithName((CFStringRef)subFont.fontName, subFont.pointSize, NULL);
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont1 range:NSMakeRange(3, pfx.length - 3)];
+            CFRelease(ctFont1);
+        }
+        
         CGSize strSize = [attStr size];
         
         self.title = [[CATextLayer alloc] init];
@@ -113,6 +123,7 @@
         self.right_parenth = [coder decodeObjectForKey:@"right_parenth"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
     }
     return self;
 }
@@ -126,6 +137,7 @@
     [coder encodeObject:self.left_parenth forKey:@"left_parenth"];
     [coder encodeObject:self.right_parenth forKey:@"right_parenth"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -145,6 +157,7 @@
     copy.mainFrame = self.mainFrame;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
+    copy.timeStamp = [NSDate date];
     return copy;
 }
 
@@ -177,11 +190,8 @@
 }
 
 - (void)updateSize:(int)lvl {
-    if (self.fontLvl == lvl) {
-        return;
-    }
     
-    UIFont *font = getFont(lvl);
+    UIFont *font = getFont(gSettingMainFontLevel, lvl);
     CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
     NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:[self.title.string string]];
     [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, attStr.length)];
@@ -270,7 +280,8 @@
     cb.txtInsIdx = 1;
     cb.curRoll = self.roll;
     cb.curParent = self.parent;
-    [cb updateFontInfo:self.fontLvl];
+    cb.allowInputBitMap = INPUT_ALL_BIT;
+    [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
     if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
         cb.curMode = MODE_INPUT;
     } else {
@@ -289,8 +300,41 @@
     }
 }
 
--(void) destroy {
-    [self.content destroy];
+-(void) shake {
+    CAKeyframeAnimation *titleAni = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    titleAni.values = @[[NSValue valueWithCGPoint:self.title.position], [NSValue valueWithCGPoint:CGPointMake(self.title.position.x + 7.0, self.title.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.title.position.x - 7.0, self.title.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.title.position.x + 7.0, self.title.position.y)], [NSValue valueWithCGPoint:self.title.position]];
+    [titleAni setTimingFunction:easeOutSine];
+    titleAni.duration = 0.5;
+    titleAni.removedOnCompletion = YES;
+    [self.title addAnimation:titleAni forKey:nil];
+    
+    CAKeyframeAnimation *leftPAni = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    leftPAni.values = @[[NSValue valueWithCGPoint:self.left_parenth.position], [NSValue valueWithCGPoint:CGPointMake(self.left_parenth.position.x + 7.0, self.left_parenth.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.left_parenth.position.x - 7.0, self.left_parenth.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.left_parenth.position.x + 7.0, self.left_parenth.position.y)], [NSValue valueWithCGPoint:self.left_parenth.position]];
+    [leftPAni setTimingFunction:easeOutSine];
+    leftPAni.duration = 0.5;
+    leftPAni.removedOnCompletion = YES;
+    [self.left_parenth addAnimation:leftPAni forKey:nil];
+    
+    CAKeyframeAnimation *rightPAni = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    rightPAni.values = @[[NSValue valueWithCGPoint:self.right_parenth.position], [NSValue valueWithCGPoint:CGPointMake(self.right_parenth.position.x + 7.0, self.right_parenth.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.right_parenth.position.x - 7.0, self.right_parenth.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.right_parenth.position.x + 7.0, self.right_parenth.position.y)], [NSValue valueWithCGPoint:self.right_parenth.position]];
+    [rightPAni setTimingFunction:easeOutSine];
+    rightPAni.duration = 0.5;
+    rightPAni.removedOnCompletion = YES;
+    [self.right_parenth addAnimation:rightPAni forKey:nil];
+    
+    [self.content shake];
+}
+
+-(BOOL) isAllowed {
+    if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_WETL_BIT)) {
+        return NO;
+    }
+    
+    return YES;
+}
+
+-(void) destroyWithAnim {
+    [self.content destroyWithAnim];
     
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
     animation.fromValue = [NSNumber numberWithFloat:1.0];
@@ -301,6 +345,15 @@
     animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     animation.delegate = self;
     [self.title addAnimation:animation forKey:@"remove"];
+    
+    [self.left_parenth destroyWithAnim];
+    [self.right_parenth destroyWithAnim];
+}
+
+-(void) destroy {
+    [self.content destroy];
+    
+    [self.title removeFromSuperlayer];
     
     [self.left_parenth destroy];
     [self.right_parenth destroy];

@@ -27,7 +27,9 @@
 @synthesize par;
 @synthesize equalsign;
 @synthesize result;
-@synthesize maxRootHeight;
+@synthesize timeRec;
+@synthesize separator;
+@synthesize mainFontLevel;
 
 //-(id) init {
 //    self = [super init];
@@ -188,7 +190,7 @@
         par = calcB;
         equalsign = nil;
         result = nil;
-        maxRootHeight = calcB.curFontH;
+        mainFontLevel = gSettingMainFontLevel;
         
         CGPoint rootPos = CGPointMake(calcB.downLeftBasePoint.x, calcB.downLeftBasePoint.y - calcB.curFontH - 1.0);
         
@@ -225,7 +227,9 @@
         self.root = [coder decodeObjectForKey:@"root"];
         self.equalsign = [coder decodeObjectForKey:@"equalsign"];
         self.result = [coder decodeObjectForKey:@"result"];
-        self.maxRootHeight = [coder decodeDoubleForKey:@"maxRootHeight"];
+        self.timeRec = [coder decodeObjectForKey:@"timeRec"];
+        self.separator = [coder decodeObjectForKey:@"separator"];
+        self.mainFontLevel = [coder decodeIntForKey:@"mainFontLevel"];
     }
     return self;
 }
@@ -237,12 +241,16 @@
     if (self.result != nil) {
         [coder encodeObject:self.equalsign forKey:@"equalsign"];
         [coder encodeObject:self.result forKey:@"result"];
+        [coder encodeObject:self.timeRec forKey:@"timeRec"];
+        [coder encodeObject:self.separator forKey:@"separator"];
     }
-    [coder encodeDouble:self.maxRootHeight forKey:@"maxRootHeight"];
+    [coder encodeInt:self.mainFontLevel forKey:@"mainFontLevel"];
 }
 
 -(void) dumpObj : (EquationBlock *)parentBlock {
-    NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, parentBlock, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
+    NSDateFormatter *format = [[NSDateFormatter alloc] init];
+    [format setDateFormat:@"MM-dd HH:mm:ss:SSS"];
+    NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, [format stringFromDate:parentBlock.timeStamp], parentBlock, parentBlock.guid, (unsigned long)parentBlock.c_idx, parentBlock.roll, parentBlock.mainFrame.origin.x, parentBlock.mainFrame.origin.y, parentBlock.mainFrame.size.width, parentBlock.mainFrame.size.height, parentBlock.numerFrame.origin.x, parentBlock.numerFrame.origin.y, parentBlock.numerFrame.size.width, parentBlock.numerFrame.size.height, parentBlock.denomFrame.origin.x, parentBlock.denomFrame.origin.y, parentBlock.denomFrame.size.width, parentBlock.denomFrame.size.height);
     NSMutableArray *blockChildren = parentBlock.children;
     NSEnumerator *enumerator = [blockChildren objectEnumerator];
     id cb;
@@ -250,42 +258,45 @@
         if ([cb isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *layer = cb;
             if (layer.expo != nil) {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
+                NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, [format stringFromDate:layer.timeStamp], layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
                 [self dumpObj:layer.expo];
-                NSLog(@"%s~%@~id:%i~<<<<<<<<<", __FUNCTION__, layer, layer.guid);
+                NSLog(@"%s~%@~%@~id:%i~<<<<<<<<<", __FUNCTION__, [format stringFromDate:layer.timeStamp], layer, layer.guid);
             } else {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
+                NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, [format stringFromDate:layer.timeStamp], layer, layer.guid, (unsigned long)layer.c_idx, layer.roll, layer.mainFrame.origin.x, layer.mainFrame.origin.y, layer.mainFrame.size.width, layer.mainFrame.size.height);
             }
         } else if ([cb isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *bar = cb;
-            NSLog(@"%s~%@~id:%i~Cidx:%lu~%@~~~~~~~~", __FUNCTION__, bar, bar.guid, (unsigned long)bar.c_idx, NSStringFromCGRect(bar.frame));
+            NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~%@~~~~~~~", __FUNCTION__, [format stringFromDate:bar.timeStamp], bar, bar.guid, (unsigned long)bar.c_idx, NSStringFromCGRect(bar.frame));
         } else if ([cb isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *block = cb;
             [self dumpObj:block];
         } else if ([cb isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *block = cb;
-            NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>>>>>", __FUNCTION__, block, block.guid, (unsigned long)block.c_idx, block.roll, block.frame.origin.x, block.frame.origin.y, block.frame.size.width, block.frame.size.height);
+            NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~>[%.1f %.1f %.1f %.1f]>[%.1f %.1f %.1f %.1f]>>>>", __FUNCTION__, [format stringFromDate:block.timeStamp], block, block.guid, (unsigned long)block.c_idx, block.roll, block.mainFrame.origin.x, block.mainFrame.origin.y, block.mainFrame.size.width, block.mainFrame.size.height, block.frame.origin.x, block.frame.origin.y, block.frame.size.width, block.frame.size.height);
+            if (block.rootNum != nil) {
+                NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, [format stringFromDate:block.rootNum.timeStamp], block.rootNum, block.rootNum.guid, (unsigned long)block.rootNum.c_idx, block.rootNum.roll, block.rootNum.mainFrame.origin.x, block.rootNum.mainFrame.origin.y, block.rootNum.mainFrame.size.width, block.rootNum.mainFrame.size.height);
+            }
             [self dumpObj:block.content];
-            NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, block, block.guid);
+            NSLog(@"%s~%@~%@~%i<<<<<<", __FUNCTION__, [format stringFromDate:block.timeStamp], block, block.guid);
         } else if ([cb isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wtl = cb;
-            NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i>[%.1f %.1f %.1f %.1f]>>>>>", __FUNCTION__, wtl, wtl.guid, (unsigned long)wtl.c_idx, wtl.roll, wtl.mainFrame.origin.x, wtl.mainFrame.origin.y, wtl.mainFrame.size.width, wtl.mainFrame.size.height);
+            NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~>[%.1f %.1f %.1f %.1f]>>>>>", __FUNCTION__, [format stringFromDate:wtl.timeStamp], wtl, wtl.guid, (unsigned long)wtl.c_idx, wtl.roll, wtl.mainFrame.origin.x, wtl.mainFrame.origin.y, wtl.mainFrame.size.width, wtl.mainFrame.size.height);
             [self dumpObj:wtl.content];
-            NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, wtl, wtl.guid);
+            NSLog(@"%s~%@~%@~%i<<<<<<", __FUNCTION__, [format stringFromDate:wtl.timeStamp], wtl, wtl.guid);
         } else if ([cb isMemberOfClass: [Parentheses class]]) {
             Parentheses *p = cb;
             if (p.expo != nil) {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
+                NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~~[%.1f %.1f %.1f %.1f]~with expo>>>>", __FUNCTION__, [format stringFromDate:p.timeStamp], p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
                 [self dumpObj:p.expo];
-                NSLog(@"%s~%@~id:%i~<<<<<<<<<", __FUNCTION__, p, p.guid);
+                NSLog(@"%s~%@~%@~id:%i~<<<<<<<<<", __FUNCTION__, [format stringFromDate:p.timeStamp], p, p.guid);
             } else {
-                NSLog(@"%s~%@~id:%i~Cidx:%lu~roll:%i~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
+                NSLog(@"%s~%@~%@~id:%i~Cidx:%lu~roll:%i~~[%.1f %.1f %.1f %.1f]~~~~~~~~", __FUNCTION__, [format stringFromDate:p.timeStamp], p, p.guid, (unsigned long)p.c_idx, p.roll, p.mainFrame.origin.x, p.mainFrame.origin.y, p.mainFrame.size.width, p.mainFrame.size.height);
             }
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
     }
-    NSLog(@"%s~%@~%i<<<<<<", __FUNCTION__, parentBlock, parentBlock.guid);
+    NSLog(@"%s~%@~%@~%i<<<<<<", __FUNCTION__, [format stringFromDate:parentBlock.timeStamp], parentBlock, parentBlock.guid);
 }
 
 -(void) dumpEverything : (EquationBlock *)eb {
@@ -331,7 +342,7 @@
             }
         } else if ([child isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *rB = child;
-            if (CGRectContainsPoint(rB.frame, point)) {
+            if (CGRectContainsPoint(rB.mainFrame, point)) {
                 EquationBlock *eb = rB.content;
                 if (CGRectContainsPoint(eb.mainFrame, point)) {
                     return [self lookForElementByPoint :eb :point];
@@ -375,11 +386,12 @@
 }
 
 -(void)removeElement:(id)blk {
+    CalcBoard *calcB = self.par;
+    
     if ([blk isMemberOfClass: [EquationBlock class]]) {
         EquationBlock *eb = blk;
-        CalcBoard *calcB = self.par;
         
-        CGFloat fontH = gCharHeightTbl[eb.fontLvl];
+        CGFloat fontH = gCharHeightTbl[gSettingMainFontLevel][eb.fontLvl];
         
         if (eb.roll == ROLL_ROOT) {
             CGPoint p = CGPointMake(eb.mainFrame.origin.x, eb.mainFrame.origin.y + eb.mainFrame.size.height - fontH);
@@ -670,14 +682,37 @@
         }
     } else if ([blk isMemberOfClass: [EquationTextLayer class]]) {
         EquationTextLayer *l = blk;
-        if (![l.parent isMemberOfClass: [EquationBlock class]]) {
-            return;
-        }
-        EquationBlock *parent = l.parent;
-        CalcBoard *calcB = self.par;
         CGFloat orgWidth = l.mainFrame.size.width;
         
-        CGFloat fontH = gCharHeightTbl[l.fontLvl];
+        if ([l.parent isMemberOfClass: [RadicalBlock class]]) {
+            RadicalBlock *rb = l.parent;
+            if (l.type == TEXTLAYER_EMPTY) {
+                [l destroy];
+                rb.rootNum = nil;
+                cfgEqnBySlctBlk(self, rb, CGPointMake(rb.mainFrame.origin.x + 1.0, rb.mainFrame.origin.y + 1.0));
+            } else {
+                CGPoint p = CGPointMake(l.frame.origin.x, l.frame.origin.y);
+                EquationTextLayer *el = [[EquationTextLayer alloc] init:@"_" :self :TEXTLAYER_EMPTY];
+                CGRect temp = el.frame;
+                temp.origin = p;
+                el.mainFrame = el.frame = temp;
+                el.roll = ROLL_ROOT_NUM;
+                el.parent = rb;
+                el.c_idx = 0;
+                [l destroy];
+                rb.rootNum = el;
+                [calcB.view.layer addSublayer: el];
+                
+                [rb updateFrameWidth:el.frame.size.width - orgWidth :el.roll];
+                [self.root adjustElementPosition];
+                
+                cfgEqnBySlctBlk(self, el, CGPointMake(el.frame.origin.x + 1.0, el.frame.origin.y + 1.0));
+            }
+            return;
+        }
+        
+        EquationBlock *parent = l.parent;
+        CGFloat fontH = gCharHeightTbl[gSettingMainFontLevel][l.fontLvl];
         
         if (parent.children.count == 1) {
             if (l.type == TEXTLAYER_EMPTY) {
@@ -905,9 +940,7 @@
                                     calcB.curMode = MODE_INSERT;
                                     calcB.insertCIdx = layer.c_idx + 1;
                                     calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
-                                    
-                                    [calcB updateFontInfo:layer.fontLvl];
-                                    
+                                    [calcB updateFontInfo:layer.fontLvl :gSettingMainFontLevel];                                    
                                     calcB.view.cursor.frame = CGRectMake(layer.frame.origin.x + layer.frame.size.width, layer.frame.origin.y, CURSOR_W, fontH);
                                 }
                             } else {
@@ -1077,10 +1110,9 @@
             return;
         }
         EquationBlock *parent = rb.parent;
-        CalcBoard *calcB = self.par;
         CGFloat orgWidth = rb.frame.size.width;
         
-        CGFloat fontH = gCharHeightTbl[rb.fontLvl];
+        CGFloat fontH = gCharHeightTbl[gSettingMainFontLevel][rb.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(rb.frame.origin.x, rb.frame.origin.y + rb.frame.size.height - fontH);
@@ -1285,9 +1317,8 @@
             return;
         }
         EquationBlock *parent = wetl.parent;
-        CalcBoard *calcB = self.par;
         CGFloat orgWidth = wetl.mainFrame.size.width;
-        CGFloat fontH = gCharHeightTbl[wetl.fontLvl];
+        CGFloat fontH = gCharHeightTbl[gSettingMainFontLevel][wetl.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(wetl.mainFrame.origin.x, wetl.mainFrame.origin.y + wetl.mainFrame.size.height - fontH);
@@ -1492,10 +1523,9 @@
             return;
         }
         EquationBlock *parent = parenth.parent;
-        CalcBoard *calcB = self.par;
         CGFloat orgWidth = parenth.mainFrame.size.width;
         
-        CGFloat fontH = gCharHeightTbl[parent.fontLvl];
+        CGFloat fontH = gCharHeightTbl[gSettingMainFontLevel][parent.fontLvl];
         
         if (parent.children.count == 1) {
             CGPoint p = CGPointMake(parenth.frame.origin.x, parenth.frame.origin.y + parenth.frame.size.height - fontH);
@@ -1699,16 +1729,50 @@
     }
 }
 
--(void) moveUp : (CGFloat)distance {
-    [self.root moveUp:distance];
+-(void) moveUpDown : (CGFloat)distance {
+    [self.root moveUpDown:distance];
     if (self.result != nil) {
-        self.result.frame = CGRectOffset(self.result.frame, 0.0, -distance);
+        self.result.frame = CGRectOffset(self.result.frame, 0.0, distance);
         self.result.mainFrame = self.result.frame;
-        self.equalsign.frame = CGRectOffset(self.equalsign.frame, 0.0, -distance);
+        self.equalsign.frame = CGRectOffset(self.equalsign.frame, 0.0, distance);
         self.equalsign.mainFrame = self.equalsign.frame;
+        self.timeRec.frame = CGRectOffset(self.timeRec.frame, 0.0, distance);
+        self.separator.frame = CGRectOffset(self.separator.frame, 0.0, distance);
     } else {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     }
+}
+
+-(void) destroyWithAnim {
+    [self.root destroyWithAnim];
+    self.root = nil;
+    if (self.result != nil) {
+        [self.equalsign destroyWithAnim];
+        self.equalsign = nil;
+        [self.result destroyWithAnim];
+        self.result = nil;
+        [self.timeRec removeFromSuperview];
+        self.timeRec = nil;
+        [self.separator removeFromSuperlayer];
+        self.separator = nil;
+    }
+}
+
+-(void) formatResult:(NSNumber *)res {
+    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
+    formatter.maximumFractionDigits = gSettingMaxFractionDigits;
+    if ([res compare:gSettingMaxDecimal] == NSOrderedDescending) {
+        formatter.numberStyle = NSNumberFormatterScientificStyle;
+    } else {
+        if (gSettingThousandSeperator) {
+            formatter.numberStyle = NSNumberFormatterDecimalStyle;
+        } else {
+            formatter.numberStyle = NSNumberFormatterNoStyle;
+        }
+    }
+    
+    self.result = [[EquationTextLayer alloc] init:[formatter stringFromNumber:res] :gCurCB.curEq :TEXTLAYER_NUM];
+    return;
 }
 
 -(void) destroy {
@@ -1719,6 +1783,10 @@
         self.equalsign = nil;
         [self.result destroy];
         self.result = nil;
+        [self.timeRec removeFromSuperview];
+        self.timeRec = nil;
+        [self.separator removeFromSuperlayer];
+        self.separator = nil;
     }
 }
 @end

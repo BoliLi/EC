@@ -18,6 +18,6 @@ NSMutableString *equationToString(EquationBlock *parent, int *i);
 NSNumber *calculate(NSMutableString *input);
 void updateRoll(id b, int r);
 BOOL isNumber(NSString *str);
-EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock);
 UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont);
+UILabel *makeLabel(NSString *str);
 #endif /* Utils_h */

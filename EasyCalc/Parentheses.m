@@ -27,6 +27,7 @@
 @synthesize expo;
 @synthesize mainFrame;
 @synthesize fontLvl;
+@synthesize timeStamp;
 
 -(id) init :(Equation *)E :(int)l_r :(ViewController *)vc {
     self = [super init];
@@ -42,6 +43,7 @@
         self.roll = calcB.curRoll;
         self.l_or_r = l_r;
         self.expo = nil;
+        self.timeStamp = [NSDate date];
         
         self.frame = CGRectMake(0.0, 0.0, calcB.curFontH / PARENTH_HW_R, calcB.curFontH);
         self.mainFrame = self.frame;
@@ -62,6 +64,7 @@
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
     }
     return self;
 }
@@ -77,6 +80,7 @@
     }
     [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -96,6 +100,7 @@
     copy.mainFrame = self.mainFrame;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
+    copy.timeStamp = [NSDate date];
     return copy;
 }
 
@@ -117,7 +122,7 @@
     if (self.expo != nil) {
         CGRect frame = self.expo.mainFrame;
         
-        frame.origin.y = self.frame.origin.y + gCharHeightTbl[self.expo.fontLvl] / 2.0 - frame.size.height;
+        frame.origin.y = self.frame.origin.y + gCharHeightTbl[gSettingMainFontLevel][self.expo.fontLvl] / 2.0 - frame.size.height;
         frame.origin.x = self.frame.origin.x + self.frame.size.width;
         self.expo.mainFrame = frame;
         self.mainFrame = CGRectUnion(frame, self.frame);
@@ -129,7 +134,7 @@
 -(void) updateFrameBaseOnExpo {
     CGRect f = self.frame;
     f.origin.x = self.expo.mainFrame.origin.x - f.size.width;
-    f.origin.y = self.expo.mainFrame.origin.y + self.expo.mainFrame.size.height - gCharHeightTbl[self.expo.fontLvl] / 2.0;
+    f.origin.y = self.expo.mainFrame.origin.y + self.expo.mainFrame.size.height - gCharHeightTbl[gSettingMainFontLevel][self.expo.fontLvl] / 2.0;
     self.mainFrame = CGRectUnion(f, self.expo.mainFrame);
 }
 
@@ -203,7 +208,8 @@
     cb.txtInsIdx = 1;
     cb.curRoll = self.roll;
     cb.curParent = self.parent;
-    [cb updateFontInfo:self.fontLvl];
+    cb.allowInputBitMap = INPUT_ALL_BIT;
+    [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
     if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
         cb.curMode = MODE_INPUT;
     } else {
@@ -226,9 +232,25 @@
     }
 }
 
--(void) destroy {
+-(void) shake {
     if (self.expo != nil) {
-        [self.expo destroy];
+        [self.expo shake];
+    }
+    CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    shakeAnimation.values = @[[NSValue valueWithCGPoint:self.position], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x - 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:self.position]];
+    [shakeAnimation setTimingFunction:easeOutSine];
+    shakeAnimation.duration = 0.5;
+    shakeAnimation.removedOnCompletion = YES;
+    [self addAnimation:shakeAnimation forKey:nil];
+}
+
+-(BOOL) isAllowed {
+    return NO;
+}
+
+-(void) destroyWithAnim {
+    if (self.expo != nil) {
+        [self.expo destroyWithAnim];
     }
     
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
@@ -240,5 +262,13 @@
     animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     animation.delegate = self;
     [self addAnimation:animation forKey:@"remove"];
+}
+
+-(void) destroy {
+    if (self.expo != nil) {
+        [self.expo destroy];
+    }
+    
+    [self removeFromSuperlayer];
 }
 @end

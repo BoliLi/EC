@@ -16,12 +16,15 @@
 @property (weak) Equation *ancestor;
 @property int fontLvl;
 @property BOOL isCopy;
+@property NSDate *timeStamp;
 
 -(id) init :(Equation *)e :(ViewController *)vc;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) moveCopy:(CGPoint)dest;
 -(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
 -(EquationTextLayer *) lookForEmptyTxtLyr;
+-(void) shake;
+-(BOOL) isAllowed;
+-(void) destroyWithAnim;
 -(void) destroy;
-
 @end

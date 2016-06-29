@@ -33,6 +33,7 @@
 @synthesize denomBtmHalf;
 @synthesize fontLvl;
 @synthesize isCopy;
+@synthesize timeStamp;
 
 //-(id) init : (Equation *)e {
 //    self = [super init];
@@ -65,6 +66,7 @@
         self.numerBtmHalf = calcB.curFontH / 2.0;
         self.fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
+        self.timeStamp = [NSDate date];
     }
     return self;
 }
@@ -86,6 +88,7 @@
         self.denomBtmHalf = [coder decodeDoubleForKey:@"denomBtmHalf"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
     }
     return self;
 }
@@ -106,6 +109,7 @@
     [coder encodeDouble:self.denomTopHalf forKey:@"denomTopHalf"];
     [coder encodeDouble:self.denomBtmHalf forKey:@"denomBtmHalf"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
 }
 
 - (void)copyChildrenTo:(EquationBlock *)newEB {
@@ -135,6 +139,7 @@
     copy.denomBtmHalf = self.denomBtmHalf;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
+    copy.timeStamp = [NSDate date];
     return copy;
 }
 
@@ -192,47 +197,47 @@
     }
 }
 
--(void) updateFrame : (CGRect)frame : (int)r {
-    
-    if (r == ROLL_NUMERATOR) {
-        self.numerFrame = CGRectUnion(frame, self.numerFrame);
-        if (self.bar == nil) {
-            self.mainFrame = self.numerFrame;\
-            
-            // numer:   ********
-            // bar  :   ----------
-            // denom:       ******
-            if (self.numerFrame.origin.x <= self.denomFrame.origin.x) {
-                frame = self.denomFrame;
-                frame.origin.x = self.numerFrame.origin.x;
-                self.mainFrame = CGRectUnion(self.numerFrame, frame);
-            } else {
-                frame = self.numerFrame;
-                frame.origin.x = self.denomFrame.origin.x;
-                self.mainFrame = CGRectUnion(self.denomFrame, frame);
-            }
-        }
-    } else if (r == ROLL_DENOMINATOR) {
-        CGFloat orgY = self.denomFrame.origin.y;
-        self.denomFrame = CGRectUnion(frame, self.denomFrame);
-        CGFloat offsetY = self.denomFrame.origin.y - orgY;
-        self.numerFrame = CGRectOffset(self.numerFrame, 0, offsetY);
-        //Fix for the following case
-        // numer:   ********
-        // bar  :   ----------
-        // denom:       ******
-        if (self.numerFrame.origin.x <= self.denomFrame.origin.x) {
-            frame = self.denomFrame;
-            frame.origin.x = self.numerFrame.origin.x;
-            self.mainFrame = CGRectUnion(self.numerFrame, frame);
-        } else {
-            frame = self.numerFrame;
-            frame.origin.x = self.denomFrame.origin.x;
-            self.mainFrame = CGRectUnion(self.denomFrame, frame);
-        }
-    } else
-        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-}
+//-(void) updateFrame : (CGRect)frame : (int)r {
+//    
+//    if (r == ROLL_NUMERATOR) {
+//        self.numerFrame = CGRectUnion(frame, self.numerFrame);
+//        if (self.bar == nil) {
+//            self.mainFrame = self.numerFrame;\
+//            
+//            // numer:   ********
+//            // bar  :   ----------
+//            // denom:       ******
+//            if (self.numerFrame.origin.x <= self.denomFrame.origin.x) {
+//                frame = self.denomFrame;
+//                frame.origin.x = self.numerFrame.origin.x;
+//                self.mainFrame = CGRectUnion(self.numerFrame, frame);
+//            } else {
+//                frame = self.numerFrame;
+//                frame.origin.x = self.denomFrame.origin.x;
+//                self.mainFrame = CGRectUnion(self.denomFrame, frame);
+//            }
+//        }
+//    } else if (r == ROLL_DENOMINATOR) {
+//        CGFloat orgY = self.denomFrame.origin.y;
+//        self.denomFrame = CGRectUnion(frame, self.denomFrame);
+//        CGFloat offsetY = self.denomFrame.origin.y - orgY;
+//        self.numerFrame = CGRectOffset(self.numerFrame, 0, offsetY);
+//        //Fix for the following case
+//        // numer:   ********
+//        // bar  :   ----------
+//        // denom:       ******
+//        if (self.numerFrame.origin.x <= self.denomFrame.origin.x) {
+//            frame = self.denomFrame;
+//            frame.origin.x = self.numerFrame.origin.x;
+//            self.mainFrame = CGRectUnion(self.numerFrame, frame);
+//        } else {
+//            frame = self.numerFrame;
+//            frame.origin.x = self.denomFrame.origin.x;
+//            self.mainFrame = CGRectUnion(self.denomFrame, frame);
+//        }
+//    } else
+//        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+//}
 
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
     CGFloat orgWidth = self.mainFrame.size.width;
@@ -412,7 +417,7 @@
                 if (idx > 0) {
                     Parentheses *lp = [pstack objectAtIndex:idx - 1];
                     CGFloat inc = 0.0;
-                    if ((int)lp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[lp.fontLvl]) {
+                    if ((int)lp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][lp.fontLvl]) {
                         CGFloat orgW = lp.frame.size.width;
                         lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
                         [lp setNeedsDisplay];
@@ -420,7 +425,7 @@
                         inc += (lp.frame.size.width - orgW);
                     }
                     
-                    if ((int)p.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[p.fontLvl]) {
+                    if ((int)p.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][p.fontLvl]) {
                         CGFloat orgW = p.frame.size.width;
                         p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
                         [p setNeedsDisplay];
@@ -453,7 +458,7 @@
     
     while (idx > 0) {    // Handle unpaired parenth
         Parentheses *lp = [pstack objectAtIndex:idx - 1];
-        if ((int)lp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[lp.fontLvl]) {
+        if ((int)lp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][lp.fontLvl]) {
             CGFloat orgW = lp.frame.size.width;
             lp.frame = CGRectMake(lp.frame.origin.x, lp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
             [lp setNeedsDisplay];
@@ -555,7 +560,7 @@
                 if (idx > 0) {
                     Parentheses *rp = [pstack objectAtIndex:idx - 1];
                     CGFloat inc = 0.0;
-                    if ((int)rp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[rp.fontLvl]) {
+                    if ((int)rp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][rp.fontLvl]) {
                         CGFloat orgW = rp.frame.size.width;
                         rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
                         [rp setNeedsDisplay];
@@ -563,7 +568,7 @@
                         inc += (rp.frame.size.width - orgW);
                     }
                     
-                    if ((int)p.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[p.fontLvl]) {
+                    if ((int)p.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][p.fontLvl]) {
                         CGFloat orgW = p.frame.size.width;
                         p.frame = CGRectMake(p.frame.origin.x, p.frame.origin.y, maxh / PARENTH_HW_R, maxh);
                         [p setNeedsDisplay];
@@ -604,7 +609,7 @@
     
     while (idx > 0) {    // Handle unpaired parenth
         Parentheses *rp = [pstack objectAtIndex:idx - 1];
-        if ((int)rp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[rp.fontLvl]) {
+        if ((int)rp.frame.size.height != (int)maxh && (int)maxh >= (int)gCharHeightTbl[gSettingMainFontLevel][rp.fontLvl]) {
             CGFloat orgW = rp.frame.size.width;
             rp.frame = CGRectMake(rp.frame.origin.x, rp.frame.origin.y, maxh / PARENTH_HW_R, maxh);
             [rp setNeedsDisplay];
@@ -775,51 +780,53 @@
     }
 }
 
--(void) moveUp : (CGFloat)distance {
+-(void) moveUpDown : (CGFloat)distance {
     
-    self.mainFrame = CGRectOffset(self.mainFrame, 0.0, -distance);
-    self.numerFrame = CGRectOffset(self.numerFrame, 0.0, -distance);
-    self.denomFrame = CGRectOffset(self.denomFrame, 0.0, -distance);
+    self.mainFrame = CGRectOffset(self.mainFrame, 0.0, distance);
+    self.numerFrame = CGRectOffset(self.numerFrame, 0.0, distance);
+    self.denomFrame = CGRectOffset(self.denomFrame, 0.0, distance);
     
     for (id block in self.children) {
         if ([block isMemberOfClass: [EquationTextLayer class]]) {
             EquationTextLayer *l = block;
             
-            l.frame = CGRectOffset(l.frame, 0.0, -distance);
+            l.frame = CGRectOffset(l.frame, 0.0, distance);
             
             if (l.expo != nil) {
-                [l.expo moveUp:distance];
+                [l.expo moveUpDown:distance];
                 l.mainFrame = CGRectUnion(l.frame, l.expo.mainFrame);
             } else {
                 l.mainFrame = l.frame;
             }
         } else if ([block isMemberOfClass: [FractionBarLayer class]]) {
             FractionBarLayer *fb = block;
-            fb.frame = CGRectOffset(fb.frame, 0.0, -distance);
+            fb.frame = CGRectOffset(fb.frame, 0.0, distance);
         } else if ([block isMemberOfClass: [EquationBlock class]]) {
             EquationBlock *eb = block;
-            [eb moveUp:distance];
+            [eb moveUpDown:distance];
         } else if ([block isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *rb = block;
-            rb.frame = CGRectOffset(rb.frame, 0.0, -distance);
-            [rb.content moveUp:distance];
+            rb.frame = CGRectOffset(rb.frame, 0.0, distance);
+            rb.mainFrame = CGRectOffset(rb.mainFrame, 0.0, distance);
+            [rb.content moveUpDown:distance];
             
             if (rb.rootNum != nil) {
-                rb.rootNum.frame = CGRectOffset(rb.rootNum.frame, 0.0, -distance);
+                rb.rootNum.frame = CGRectOffset(rb.rootNum.frame, 0.0, distance);
+                [rb.rootNum updateFrameBaseOnBase];
             }
         } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
             WrapedEqTxtLyr *wetl = block;
-            wetl.title.frame = CGRectOffset(wetl.title.frame, 0.0, -distance);
-            wetl.left_parenth.frame = CGRectOffset(wetl.left_parenth.frame, 0.0, -distance);
-            [wetl.content moveUp:distance];
-            wetl.right_parenth.frame = CGRectOffset(wetl.right_parenth.frame, 0.0, -distance);
-            wetl.mainFrame = CGRectOffset(wetl.mainFrame, 0.0, -distance);
+            wetl.title.frame = CGRectOffset(wetl.title.frame, 0.0, distance);
+            wetl.left_parenth.frame = CGRectOffset(wetl.left_parenth.frame, 0.0, distance);
+            [wetl.content moveUpDown:distance];
+            wetl.right_parenth.frame = CGRectOffset(wetl.right_parenth.frame, 0.0, distance);
+            wetl.mainFrame = CGRectOffset(wetl.mainFrame, 0.0, distance);
         } else if ([block isMemberOfClass: [Parentheses class]]) {
             Parentheses *p = block;
-            p.frame = CGRectOffset(p.frame, 0.0, -distance);
+            p.frame = CGRectOffset(p.frame, 0.0, distance);
             
             if (p.expo != nil) {
-                [p.expo moveUp:distance];
+                [p.expo moveUpDown:distance];
                 p.mainFrame = CGRectUnion(p.frame, p.expo.mainFrame);
             } else {
                 p.mainFrame = p.frame;
@@ -830,10 +837,6 @@
 }
 
 -(void) updateSize:(int)lvl {
-    
-    if (self.fontLvl == lvl) {
-        return;
-    }
     
     CGFloat nTop = 0.0, nBtm = 0.0, dTop = 0.0, dBtm = 0.0, nWidth = 0.0, dWidth = 0.0;
     CGFloat hstack[32];
@@ -877,7 +880,7 @@
             fb.fontLvl = lvl;
             
             CGRect f = fb.frame;
-            f.size.height = gCharHeightTbl[lvl] / FRACTION_BAR_H_R;
+            f.size.height = gCharHeightTbl[gSettingMainFontLevel][lvl] / FRACTION_BAR_H_R;
             fb.frame = f;
             
             while (idx > 0) {    // Handle unpaired parenth
@@ -938,12 +941,12 @@
             
             [rb updateSize:lvl];
             
-            if (maxh < rb.frame.size.height && idx > 0) {
-                maxh = rb.frame.size.height;
+            if (maxh < rb.mainFrame.size.height && idx > 0) {
+                maxh = rb.mainFrame.size.height;
             }
             
-            CGFloat top = rb.frame.size.height / 2.0;
-            CGFloat btm = rb.frame.size.height / 2.0;
+            CGFloat top = rb.mainFrame.size.height / 2.0;
+            CGFloat btm = rb.mainFrame.size.height / 2.0;
             if (rb.roll == ROLL_NUMERATOR) {
                 if ((int)nTop < (int)top)
                     nTop = top;
@@ -951,7 +954,7 @@
                 if ((int)nBtm < (int)btm)
                     nBtm = btm;
                 
-                nWidth += rb.frame.size.width;
+                nWidth += rb.mainFrame.size.width;
             } else if (rb.roll == ROLL_DENOMINATOR) {
                 if ((int)dTop < (int)top)
                     dTop = top;
@@ -959,7 +962,7 @@
                 if ((int)dBtm < (int)btm)
                     dBtm = btm;
                 
-                dWidth += rb.frame.size.width;
+                dWidth += rb.mainFrame.size.width;
             } else {
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             }
@@ -1217,47 +1220,61 @@
             
         } else if ([cb isMemberOfClass: [RadicalBlock class]]) {
             RadicalBlock *rb = cb;
+            CGRect mFrame = rb.mainFrame;
             
             if (rb.isCopy == YES) {
                 if (rb.roll == ROLL_NUMERATOR) {
                     CGPoint dest;
-                    dest.x = curNumX + rb.frame.size.width / 2.0;
+                    dest.x = curNumX + mFrame.size.width / 2.0;
                     dest.y = self.numerFrame.origin.y + self.numerTopHalf;
                     [rb moveCopy:dest];
-                    curNumX += rb.frame.size.width;
+                    
+                    mFrame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (mFrame.size.height / 2.0);
+                    mFrame.origin.x = curNumX;
+                    rb.mainFrame = mFrame;
+                    
+                    curNumX += mFrame.size.width;
                 } else if (rb.roll == ROLL_DENOMINATOR) {
                     CGPoint dest;
-                    dest.x = curDenX + rb.frame.size.width / 2.0;
+                    dest.x = curDenX + mFrame.size.width / 2.0;
                     dest.y = self.denomFrame.origin.y + self.denomTopHalf;
                     [rb moveCopy:dest];
-                    curDenX += rb.frame.size.width;
+                    
+                    mFrame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (mFrame.size.height / 2.0);
+                    mFrame.origin.x = curDenX;
+                    rb.mainFrame = mFrame;
+                    
+                    curDenX += mFrame.size.width;
                 } else
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
             } else {
-                CGRect mainF = rb.content.mainFrame;
-                CGRect frame = rb.frame;
-                
                 if (rb.roll == ROLL_NUMERATOR) {
-                    frame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (rb.frame.size.height / 2.0);
-                    frame.origin.x = curNumX;
-                    rb.frame = frame;
-                    curNumX += frame.size.width;
+                    mFrame.origin.y = self.numerFrame.origin.y + self.numerTopHalf - (rb.mainFrame.size.height / 2.0);
+                    mFrame.origin.x = curNumX;
+                    rb.mainFrame = mFrame;
+                    curNumX += mFrame.size.width;
                 } else if (rb.roll == ROLL_DENOMINATOR) {
-                    frame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (rb.frame.size.height / 2.0);
-                    frame.origin.x = curDenX;
-                    rb.frame = frame;
-                    curDenX += frame.size.width;
+                    mFrame.origin.y = self.denomFrame.origin.y + self.denomTopHalf - (rb.mainFrame.size.height / 2.0);
+                    mFrame.origin.x = curDenX;
+                    rb.mainFrame = mFrame;
+                    curDenX += mFrame.size.width;
                 } else
                     NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
                 
-                CGFloat ML = RADICAL_MARGINE_L_PERC * rb.frame.size.height;
-                CGRect f = rb.rootNum.frame;
-                rb.rootNum.frame = CGRectMake(frame.origin.x + ML / 2.0 - rb.rootNum.frame.size.width, frame.origin.y, f.size.width, f.size.height);
+                CGRect rFrame = rb.frame;
+                rFrame.origin.x = mFrame.origin.x + mFrame.size.width - rFrame.size.width;
+                rFrame.origin.y = mFrame.origin.y;
+                rb.frame = rFrame;
                 
-                frame.origin.x += RADICAL_MARGINE_L_PERC * rb.frame.size.height;
-                frame.origin.y += RADICAL_MARGINE_T;
-                mainF.origin = frame.origin;
-                rb.content.mainFrame = mainF;
+                CGFloat ML = RADICAL_MARGINE_L_PERC * rFrame.size.height;
+                CGRect rnFrame = rb.rootNum.frame;
+                rb.rootNum.frame = CGRectMake(rFrame.origin.x + ML / 2.0 - rnFrame.size.width, mFrame.origin.y, rnFrame.size.width, rnFrame.size.height);
+                rb.rootNum.mainFrame = rb.rootNum.frame;
+                
+                CGRect contF = rb.content.mainFrame;
+                contF.origin.x = rFrame.origin.x + ML;
+                contF.origin.y = rFrame.origin.y + RADICAL_MARGINE_T;
+                rb.content.mainFrame = contF;
                 
                 [rb.content adjustElementPosition];
             }
@@ -1460,16 +1477,16 @@
             
             if (rb.roll == ROLL_NUMERATOR) {
                 CGPoint dest;
-                dest.x = curNumX + rb.frame.size.width / 2.0;
+                dest.x = curNumX + rb.mainFrame.size.width / 2.0;
                 dest.y = self.numerFrame.origin.y + self.numerTopHalf;
                 [rb moveCopy:dest];
-                curNumX += rb.frame.size.width;
+                curNumX += rb.mainFrame.size.width;
             } else if (rb.roll == ROLL_DENOMINATOR) {
                 CGPoint dest;
-                dest.x = curDenX + rb.frame.size.width / 2.0;
+                dest.x = curDenX + rb.mainFrame.size.width / 2.0;
                 dest.y = self.denomFrame.origin.y + self.denomTopHalf;
                 [rb moveCopy:dest];
-                curDenX += rb.frame.size.width;
+                curDenX += rb.mainFrame.size.width;
             } else
                 NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         } else if ([block isMemberOfClass: [WrapedEqTxtLyr class]]) {
@@ -1512,31 +1529,36 @@
 }
 
 -(void) updateCalcBoardInfo {
-    Equation *eq = self.ancestor;
-    CalcBoard *cb = eq.par;
-    cb.insertCIdx = self.c_idx + 1;
-    cb.curTxtLyr = nil;
-    cb.curBlk = self;
-    cb.txtInsIdx = 1;
-    cb.curRoll = self.roll;
-    cb.curParent = self.parent;
-    [cb updateFontInfo:self.fontLvl];
-    if (self.roll == ROLL_ROOT) {
-        cb.curMode = MODE_DUMP_ROOT;
-    } else if (self.roll == ROLL_ROOT_ROOT) {
-        cb.curMode = MODE_DUMP_RADICAL;
-    } else if (self.roll == ROLL_WRAP_ROOT) {
-        cb.curMode = MODE_DUMP_WETL;
-    } else if (self.roll == ROLL_EXPO_ROOT) {
-        cb.curMode = MODE_DUMP_EXPO;
+    if (self.bar == nil) {
+        [self.children.lastObject updateCalcBoardInfo];
     } else {
-        if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
-            cb.curMode = MODE_INPUT;
+        Equation *eq = self.ancestor;
+        CalcBoard *cb = eq.par;
+        cb.insertCIdx = self.c_idx + 1;
+        cb.curTxtLyr = nil;
+        cb.curBlk = self;
+        cb.txtInsIdx = 1;
+        cb.curRoll = self.roll;
+        cb.curParent = self.parent;
+        cb.allowInputBitMap = INPUT_ALL_BIT;
+        [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
+        if (self.roll == ROLL_ROOT) {
+            cb.curMode = MODE_DUMP_ROOT;
+        } else if (self.roll == ROLL_ROOT_ROOT) {
+            cb.curMode = MODE_DUMP_RADICAL;
+        } else if (self.roll == ROLL_WRAP_ROOT) {
+            cb.curMode = MODE_DUMP_WETL;
+        } else if (self.roll == ROLL_EXPO_ROOT) {
+            cb.curMode = MODE_DUMP_EXPO;
         } else {
-            cb.curMode = MODE_INSERT;
+            if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
+                cb.curMode = MODE_INPUT;
+            } else {
+                cb.curMode = MODE_INSERT;
+            }
         }
+        cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
     }
-    cb.view.cursor.frame = CGRectMake(self.mainFrame.origin.x + self.mainFrame.size.width, self.mainFrame.origin.y, CURSOR_W, self.mainFrame.size.height);
 }
 
 -(EquationTextLayer *) lookForEmptyTxtLyr {
@@ -1547,6 +1569,48 @@
         }
     }
     return nil;
+}
+
+-(void) shake {
+    for (id b in self.children) {
+        [b shake];
+    }
+}
+
+-(BOOL) isAllowed {
+    if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_EB_BIT)) {
+        return NO;
+    }
+    
+    return YES;
+}
+
+-(void) destroyWithAnim {
+    for (id b in self.children) {
+        if ([b isMemberOfClass:[EquationTextLayer class]]) {
+            EquationTextLayer *l = b;
+            [l destroyWithAnim];
+        } else if ([b isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock *eb = b;
+            [eb destroyWithAnim];
+        } else if ([b isMemberOfClass:[RadicalBlock class]]) {
+            RadicalBlock *rb = b;
+            [rb destroyWithAnim];
+        } else if ([b isMemberOfClass:[FractionBarLayer class]]) {
+            FractionBarLayer *fb = b;
+            [fb destroyWithAnim];
+        } else if ([b isMemberOfClass:[WrapedEqTxtLyr class]]) {
+            WrapedEqTxtLyr *wetl = b;
+            [wetl destroyWithAnim];
+        } else if ([b isMemberOfClass:[Parentheses class]]) {
+            Parentheses *p = b;
+            [p destroyWithAnim];
+        } else
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+    }
+    
+    [self.children removeAllObjects];
+    bar = nil;
 }
 
 -(void) destroy {

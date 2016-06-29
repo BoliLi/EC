@@ -23,6 +23,9 @@
 @property NSMutableArray *strLenTbl;
 @property int fontLvl;
 @property BOOL isCopy;
+@property NSDate *timeStamp;
+@property NSMutableString *pureStr;
+@property BOOL hasFraction;
 
 //-(id) init : (Equation *)e;
 -(id) init : (NSString *)str : (Equation *)e : (int)t;
@@ -43,6 +46,10 @@
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
 -(void) updateCalcBoardInfo;
 -(EquationTextLayer *) lookForEmptyTxtLyr;
+-(void) shake;
+-(CGFloat) replaceWithEmpty;
+-(BOOL) isAllowed;
+-(void) destroyWithAnim;
 -(void) destroy;
 
 @end

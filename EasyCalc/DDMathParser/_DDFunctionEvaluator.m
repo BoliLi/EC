@@ -177,10 +177,10 @@ static NSString *const _DDFunctionSelectorSuffix = @":variables:error:";
     NSNumber *result = nil;
     if (round([firstValue doubleValue]) == [firstValue doubleValue] && [firstValue doubleValue] > 0) {
         // it's a positive integer
-        NSUInteger total = 1;
-        NSUInteger integer = [firstValue unsignedIntegerValue];
-        while (integer > 1) {
-            total *= integer--;
+        double total = 1;
+        double doub = [firstValue doubleValue];
+        while (doub > 1) {
+            total *= doub--;
         }
         result = @(total);
     } else {

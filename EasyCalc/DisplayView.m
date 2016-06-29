@@ -20,9 +20,8 @@
 
 @implementation DisplayView
 @synthesize cursor;
-@synthesize swipLBtn;
-@synthesize swipRBtn;
 @synthesize par;
+//@synthesize swipLBtn;
 
 -(id) init : (CalcBoard *)calcB : (CGRect)dspFrame : (ViewController *)vc {
     self = [super initWithFrame:dspFrame];
@@ -30,10 +29,12 @@
         par = calcB;
         
         self.backgroundColor = gDspBGColor;
-        self.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 3.0);
+        self.delegate = self;
+        self.contentSize = CGSizeMake(dspFrame.size.width * 3.0, dspFrame.size.height * 20.0);
         self.directionalLockEnabled = YES;
         self.bounces = YES;
-        [self setContentOffset:CGPointMake(0, dspFrame.size.height * 2.0) animated:NO];
+        self.decelerationRate = 0.2;
+//        [self setContentOffset:CGPointMake(0, dspFrame.size.height * 2.0) animated:NO];
         
         UITapGestureRecognizer *tapGesture = [[UITapGestureRecognizer alloc] initWithTarget:vc action:@selector(handleTap:)];
         tapGesture.numberOfTapsRequired = 1;
@@ -43,6 +44,7 @@
         
         UILongPressGestureRecognizer *lpGesture = [[UILongPressGestureRecognizer alloc] initWithTarget:vc action:@selector(handleLongPress:)];
         [self addGestureRecognizer:lpGesture];
+        
 //        swipLBtn = [UIButton buttonWithType:UIButtonTypeSystem];
 //        swipLBtn.titleLabel.font = [UIFont systemFontOfSize: 30];
 //        swipLBtn.showsTouchWhenHighlighted = YES;
@@ -50,7 +52,7 @@
 //        swipLBtn.frame = CGRectMake(0, dspFrame.size.height / 2.0, 20, 20);
 //        [swipLBtn addTarget:vc action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
 //        [self addSubview:swipLBtn];
-//        
+//
 //        swipRBtn = [UIButton buttonWithType:UIButtonTypeSystem];
 //        swipRBtn.titleLabel.font = [UIFont systemFontOfSize: 30];
 //        swipRBtn.showsTouchWhenHighlighted = YES;
@@ -89,8 +91,6 @@
     self = [super initWithCoder:coder];
     if (self) {
         self.cursor = [coder decodeObjectForKey:@"cursor"];
-        self.swipLBtn = [coder decodeObjectForKey:@"swipLBtn"];
-        self.swipRBtn = [coder decodeObjectForKey:@"swipRBtn"];
     }
     return self;
 }
@@ -99,20 +99,67 @@
 {
     [super encodeWithCoder:coder];
     [coder encodeObject:self.cursor forKey:@"cursor"];
-    [coder encodeObject:self.swipLBtn forKey:@"swipLBtn"];
-    [coder encodeObject:self.swipRBtn forKey:@"swipRBtn"];
 }
 
+- (void)refreshCursorAnim {
+    [self.cursor removeAllAnimations];
+    CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
+    anim.fromValue = [NSNumber numberWithBool:YES];
+    anim.toValue = [NSNumber numberWithBool:NO];
+    anim.duration = 0.5;
+    anim.autoreverses = YES;
+    anim.repeatCount = HUGE_VALF;
+    [self.cursor addAnimation:anim forKey:nil];
+}
+
+//- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+//    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+//    CalcBoard *calcB = self.par;
+//    for (Equation *eq in calcB.eqList) {
+//        eq.timeRec.opacity = 1.0;
+//    }
+//}
+//
+//- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+//    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
+//    CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
+//    animation.fromValue = [NSNumber numberWithFloat:0.0];
+//    animation.toValue = [NSNumber numberWithFloat:1.0];
+//    animation.duration = 0.4;
+//    animation.removedOnCompletion = NO;
+//    animation.fillMode = kCAFillModeForwards;
+//    animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
+//    
+//    CalcBoard *calcB = self.par;
+//    CGRect bouds = [self bounds];
+//    CGFloat maxX = CGRectGetMaxX(bouds);
+//    for (Equation *eq in calcB.eqList) {
+//        eq.timeRec.frame = CGRectMake(maxX - eq.timeRec.frame.size.width, eq.timeRec.frame.origin.y, eq.timeRec.frame.size.width, eq.timeRec.frame.size.height);
+//        [eq.timeRec addAnimation:animation forKey:nil];
+//    }
+//    
+//}
 - (void)layoutSubviews {
     [super layoutSubviews];
     
+    CalcBoard *calcB = self.par;
     CGRect bouds = [self bounds];
     CGFloat maxX = CGRectGetMaxX(bouds);
-    CGFloat minX = CGRectGetMinX(bouds);
-    CGFloat midY = CGRectGetMidY(bouds);
+    for (Equation *eq in calcB.eqList) {\
+        if (eq.root.mainFrame.size.width + eq.timeRec.frame.size.width < maxX) {
+            eq.timeRec.frame = CGRectMake(maxX - eq.timeRec.frame.size.width, eq.timeRec.frame.origin.y, eq.timeRec.frame.size.width, eq.timeRec.frame.size.height);
+        } else {
+            eq.timeRec.frame = CGRectMake(eq.root.mainFrame.origin.x + eq.root.mainFrame.size.width, eq.timeRec.frame.origin.y, eq.timeRec.frame.size.width, eq.timeRec.frame.size.height);
+        }
+    }
     
-    swipLBtn.frame = CGRectMake(minX, midY, 20, 20);
-    swipRBtn.frame = CGRectMake(maxX - 20, midY, 20, 20);
+//    CGRect bouds = [self bounds];
+//    CGFloat maxX = CGRectGetMaxX(bouds);
+//    CGFloat minX = CGRectGetMinX(bouds);
+//    CGFloat midY = CGRectGetMidY(bouds);
+//
+//    swipLBtn.frame = CGRectMake(minX, midY, 20, 20);
+//    swipRBtn.frame = CGRectMake(maxX - 20, midY, 20, 20);
 }
 
 - (void)updateContentView {
@@ -120,9 +167,9 @@
         CGFloat offX = self.cursor.frame.origin.x - self.bounds.size.width;
         
         if (offX < 0.0)
-            [self setContentOffset:CGPointMake(0.0, self.bounds.size.height * 2.0) animated:YES];
+            [self setContentOffset:CGPointMake(0.0, self.bounds.size.height * 19.0) animated:YES];
         else
-            [self setContentOffset:CGPointMake(offX + 20.0, self.bounds.size.height * 2.0) animated:YES];
+            [self setContentOffset:CGPointMake(offX + 20.0, self.bounds.size.height * 19.0) animated:YES];
     }
 }
 /*

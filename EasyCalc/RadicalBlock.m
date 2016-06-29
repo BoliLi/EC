@@ -28,6 +28,7 @@
 @synthesize fontLvl;
 @synthesize isCopy;
 @synthesize mainFrame;
+@synthesize timeStamp;
 
 //-(id) init :(Equation *)e :(ViewController *)vc {
 //    self = [super init];
@@ -60,6 +61,7 @@
         self.roll = calcB.curRoll;
         self.isCopy = NO;
         self.rootNum = nil;
+        self.timeStamp = [NSDate date];
         
         EquationTextLayer *layer = [[EquationTextLayer alloc] init:@"_" :e :TEXTLAYER_EMPTY];
         
@@ -78,15 +80,16 @@
         frame.size.width = margineL + calcB.curFontW + RADICAL_MARGINE_R;
         self.frame = frame;
         self.mainFrame = frame;
-        
+        NSLog(@"%s%i>~%f~%f~~~~~~~~~", __FUNCTION__, __LINE__, self.content.mainFrame.size.width, calcB.curFontW);
         if (hasRootNum) {
             int orgFontLvl = calcB.curFontLvl;
-            [calcB updateFontInfo:orgFontLvl + 1];
+            [calcB updateFontInfo:orgFontLvl + 1 :gSettingMainFontLevel];
             self.rootNum = [[EquationTextLayer alloc] init:@"_" :e :TEXTLAYER_EMPTY];
+            self.rootNum.roll = ROLL_ROOT_NUM;
             self.rootNum.ancestor = e;
             self.rootNum.parent = self;
             [calcB.view.layer addSublayer: self.rootNum];
-            [calcB updateFontInfo:orgFontLvl];
+            [calcB updateFontInfo:orgFontLvl :gSettingMainFontLevel];
         }
         
         layer.roll = ROLL_NUMERATOR;
@@ -117,10 +120,7 @@
 }
 
 - (void)updateSize:(int)lvl {
-    if (self.fontLvl == lvl) {
-        return;
-    }
-    
+
     [self.content updateSize:lvl];
     
     if (rootNum != nil) {
@@ -143,6 +143,7 @@
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
         self.mainFrame = [coder decodeCGRectForKey:@"mainFrame"];
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
     }
     return self;
 }
@@ -158,6 +159,7 @@
     }
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
     [coder encodeCGRect:self.mainFrame forKey:@"mainFrame"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -176,6 +178,7 @@
     copy.hidden = NO;
     copy.isCopy = YES;
     copy.mainFrame = self.mainFrame;
+    copy.timeStamp = [NSDate date];
     return copy;
 }
 
@@ -268,11 +271,14 @@
 
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r {
     CGFloat orgW = self.mainFrame.size.width;
+    NSLog(@"%s%i>~%@~%@~%@~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.mainFrame), NSStringFromCGRect(self.frame), NSStringFromCGRect(self.rootNum.frame));
     [self updateFrame];
+    
     [self setNeedsDisplay];
     if ((int)orgW != (int)self.mainFrame.size.width) {
         [self.parent updateFrameWidth:self.mainFrame.size.width - orgW :self.roll];
     }
+    NSLog(@"%s%i>~%@~%@~%@~~~~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(self.mainFrame), NSStringFromCGRect(self.frame), NSStringFromCGRect(self.rootNum.frame));
 }
 
 -(void) updateCalcBoardInfo {
@@ -284,7 +290,8 @@
     cb.txtInsIdx = 1;
     cb.curRoll = self.roll;
     cb.curParent = self.parent;
-    [cb updateFontInfo:self.fontLvl];
+    cb.allowInputBitMap = INPUT_ALL_BIT;
+    [cb updateFontInfo:self.fontLvl :gSettingMainFontLevel];
     if (self.c_idx == ((EquationBlock *)self.parent).children.count - 1) {
         cb.curMode = MODE_INPUT;
     } else {
@@ -306,11 +313,34 @@
     }
 }
 
--(void) destroy {
-    [self.content destroy];
+-(void) shake {
+    if (self.rootNum != nil) {
+        [self.rootNum shake];
+    }
+    
+    CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    shakeAnimation.values = @[[NSValue valueWithCGPoint:self.position], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x - 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:self.position]];
+    [shakeAnimation setTimingFunction:easeOutSine];
+    shakeAnimation.duration = 0.5;
+    shakeAnimation.removedOnCompletion = YES;
+    [self addAnimation:shakeAnimation forKey:nil];
+    
+    [self.content shake];
+}
+
+-(BOOL) isAllowed {
+    if (!TEST_BIT(gCurCB.allowInputBitMap, INPUT_RADICAL_BIT)) {
+        return NO;
+    }
+    
+    return YES;
+}
+
+-(void) destroyWithAnim {
+    [self.content destroyWithAnim];
     
     if (self.rootNum != nil) {
-        [self.rootNum destroy];
+        [self.rootNum destroyWithAnim];
         self.rootNum = nil;
     }
     
@@ -323,5 +353,16 @@
     animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     animation.delegate = self;
     [self addAnimation:animation forKey:@"remove"];
+}
+
+-(void) destroy {
+    [self.content destroy];
+    
+    if (self.rootNum != nil) {
+        [self.rootNum destroy];
+        self.rootNum = nil;
+    }
+    
+    [self removeFromSuperlayer];
 }
 @end

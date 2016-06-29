@@ -22,7 +22,7 @@
 }
 
 + (instancetype)percentOperator {
-    return OPERATOR(DDMathOperatorPercent, @[@"%"], BINARY, 0, LEFT);
+    return OPERATOR(DDMathOperatorPercent, @[@"%"], UNARY, 0, LEFT);
 }
 
 + (DDMathOperatorAssociativity)associativityForPowerExpressions {

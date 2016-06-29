@@ -27,16 +27,17 @@
 @property CGFloat denomBtmHalf;
 @property int fontLvl;
 @property BOOL isCopy;
+@property NSDate *timeStamp;
 
 //-(id) init : (Equation *)e;
 -(id) init : (Equation *)e;
--(void) updateFrame : (CGRect)frame : (int)r;
+//-(void) updateFrame : (CGRect)frame : (int)r;
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
 -(void) updateFrameHeightS2 : (CGFloat)newH : (int)r;
 -(void) updateFrameHeightS1 : (id)child;
 -(void) updateCIdx;
 -(void) destroy;
--(void) moveUp : (CGFloat)distance;
+-(void) moveUpDown : (CGFloat)distance;
 -(void) adjustElementPosition;
 -(void) reorganize :(Equation *)anc :(ViewController *)vc :(int)chld_idx :(id)par;
 - (void)updateSize:(int)lvl;
@@ -45,4 +46,7 @@
 -(void) moveCopy:(CGPoint)dest;
 -(void) updateCalcBoardInfo;
 -(EquationTextLayer *) lookForEmptyTxtLyr;
+-(void) shake;
+-(BOOL) isAllowed;
+-(void) destroyWithAnim;
 @end

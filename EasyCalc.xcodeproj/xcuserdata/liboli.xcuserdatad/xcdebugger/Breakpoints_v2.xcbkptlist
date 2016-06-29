@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488819550.682367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2198"
-            endingLineNumber = "2198"
+            startingLineNumber = "3620"
+            endingLineNumber = "3620"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -26,27 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3409"
-            endingLineNumber = "3409"
-            landmarkName = "-foreGroundInit:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1224"
-            endingLineNumber = "1224"
+            startingLineNumber = "1440"
+            endingLineNumber = "1440"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1161"
-            endingLineNumber = "1161"
+            startingLineNumber = "1163"
+            endingLineNumber = "1163"
             landmarkName = "-adjustElementPosition"
             landmarkType = "5">
          </BreakpointContent>
@@ -74,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484677047.466355"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "358"
-            endingLineNumber = "358"
+            startingLineNumber = "376"
+            endingLineNumber = "376"
             landmarkName = "-handleTap:"
             landmarkType = "5">
          </BreakpointContent>
@@ -90,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1475"
-            endingLineNumber = "1475"
+            startingLineNumber = "1691"
+            endingLineNumber = "1691"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -106,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/Utils.m"
-            timestampString = "485361837.956915"
+            timestampString = "486097327.424543"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "428"
-            endingLineNumber = "428"
+            startingLineNumber = "432"
+            endingLineNumber = "432"
             landmarkName = "cfgEqnBySlctBlk()"
             landmarkType = "7">
          </BreakpointContent>
@@ -122,43 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "842"
-            endingLineNumber = "842"
-            landmarkName = "-handleTap:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "866"
-            endingLineNumber = "866"
-            landmarkName = "-handleDspViewSwipeRight:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "484677047.466355"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
+            startingLineNumber = "357"
+            endingLineNumber = "357"
             landmarkName = "-handleLongPress:"
             landmarkType = "5">
          </BreakpointContent>
@@ -170,11 +122,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/Equation.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "298"
-            endingLineNumber = "298"
+            startingLineNumber = "306"
+            endingLineNumber = "306"
             landmarkName = "-lookForElementByPoint::"
             landmarkType = "5">
          </BreakpointContent>
@@ -186,11 +138,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/WrapedEqTxtLyr.m"
-            timestampString = "485191141.740117"
+            timestampString = "486105772.059637"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "130"
-            endingLineNumber = "130"
+            startingLineNumber = "142"
+            endingLineNumber = "142"
             landmarkName = "-copyWithZone:"
             landmarkType = "5">
          </BreakpointContent>
@@ -202,11 +154,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484677047.466355"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "359"
-            endingLineNumber = "359"
+            startingLineNumber = "377"
+            endingLineNumber = "377"
             landmarkName = "-handleTap:"
             landmarkType = "5">
          </BreakpointContent>
@@ -218,11 +170,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "910"
-            endingLineNumber = "910"
+            startingLineNumber = "912"
+            endingLineNumber = "912"
             landmarkName = "-updateSize:"
             landmarkType = "5">
             <Locations>
@@ -266,11 +218,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484677047.466355"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "348"
-            endingLineNumber = "348"
+            startingLineNumber = "366"
+            endingLineNumber = "366"
             landmarkName = "-handleTap:"
             landmarkType = "5">
          </BreakpointContent>
@@ -282,12 +234,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "487185787.368158"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "269"
-            endingLineNumber = "269"
-            landmarkName = "-getTxtInsIdx:"
+            startingLineNumber = "322"
+            endingLineNumber = "322"
+            landmarkName = "-updateStrLenTbl"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -298,27 +250,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/Utils.m"
-            timestampString = "485361837.956915"
+            timestampString = "486097327.424543"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1205"
-            endingLineNumber = "1205"
-            landmarkName = "equationToString()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/Utils.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1072"
-            endingLineNumber = "1072"
+            startingLineNumber = "1232"
+            endingLineNumber = "1232"
             landmarkName = "calcParenth()"
             landmarkType = "7">
          </BreakpointContent>
@@ -329,12 +265,28 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "EasyCalc/Equation.m"
-            timestampString = "485361837.956915"
+            filePath = "EasyCalc/Utils.m"
+            timestampString = "486097327.424543"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1040"
-            endingLineNumber = "1040"
+            startingLineNumber = "1097"
+            endingLineNumber = "1097"
+            landmarkName = "cfgEqnBySlctBlk()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EasyCalc/Equation.m"
+            timestampString = "488646289.265541"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1046"
+            endingLineNumber = "1046"
             landmarkName = "-removeElement:"
             landmarkType = "5">
          </BreakpointContent>
@@ -346,11 +298,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488819550.682367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3252"
-            endingLineNumber = "3252"
+            startingLineNumber = "3469"
+            endingLineNumber = "3469"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -362,11 +314,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488819550.682367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3575"
-            endingLineNumber = "3575"
+            startingLineNumber = "3786"
+            endingLineNumber = "3786"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -378,12 +330,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/Equation.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "378"
-            endingLineNumber = "378"
-            landmarkName = "-removeElement:"
+            startingLineNumber = "386"
+            endingLineNumber = "386"
+            landmarkName = "-lookForElementByPoint::"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -394,11 +346,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "485885337.959164"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "701"
-            endingLineNumber = "701"
+            startingLineNumber = "706"
+            endingLineNumber = "706"
             landmarkName = "-updateFrameHeightS1:"
             landmarkType = "5">
          </BreakpointContent>
@@ -410,11 +362,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "485885337.959164"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "411"
-            endingLineNumber = "411"
+            startingLineNumber = "416"
+            endingLineNumber = "416"
             landmarkName = "-updateNumerTB"
             landmarkType = "5">
          </BreakpointContent>
@@ -426,11 +378,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3010"
-            endingLineNumber = "3010"
+            startingLineNumber = "2132"
+            endingLineNumber = "2132"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -442,59 +394,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488821004.687184"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2444"
-            endingLineNumber = "2444"
-            landmarkName = "-foreGroundInit:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1916"
-            endingLineNumber = "1916"
-            landmarkName = "-foreGroundInit:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "2793"
-            endingLineNumber = "2793"
-            landmarkName = "-foreGroundInit:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485367309.080261"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "4370"
-            endingLineNumber = "4370"
+            startingLineNumber = "4604"
+            endingLineNumber = "4604"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -506,11 +410,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "423"
-            endingLineNumber = "423"
+            startingLineNumber = "473"
+            endingLineNumber = "473"
             landmarkName = "-moveFrom::"
             landmarkType = "5">
          </BreakpointContent>
@@ -522,11 +426,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "466"
-            endingLineNumber = "466"
+            startingLineNumber = "516"
+            endingLineNumber = "516"
             landmarkName = "-moveCopy:"
             landmarkType = "5">
          </BreakpointContent>
@@ -538,11 +442,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1157"
-            endingLineNumber = "1157"
+            startingLineNumber = "1159"
+            endingLineNumber = "1159"
             landmarkName = "-adjustElementPosition"
             landmarkType = "5">
          </BreakpointContent>
@@ -554,11 +458,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "485355575.131733"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1456"
-            endingLineNumber = "1456"
+            startingLineNumber = "1465"
+            endingLineNumber = "1465"
             landmarkName = "-moveCopy:"
             landmarkType = "5">
          </BreakpointContent>
@@ -570,12 +474,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "427"
-            endingLineNumber = "427"
-            landmarkName = "-moveCopy:"
+            startingLineNumber = "477"
+            endingLineNumber = "477"
+            landmarkName = "-moveFrom::"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -618,11 +522,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484575144.94572"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "55"
-            endingLineNumber = "55"
+            startingLineNumber = "56"
+            endingLineNumber = "56"
             landmarkName = "-gestureRecognizer:shouldReceiveTouch:"
             landmarkType = "5">
          </BreakpointContent>
@@ -666,11 +570,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484243260.412072"
+            timestampString = "486312325.174162"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "33"
-            endingLineNumber = "33"
+            startingLineNumber = "34"
+            endingLineNumber = "34"
             landmarkName = "tbv"
             landmarkType = "19">
          </BreakpointContent>
@@ -682,11 +586,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1222"
-            endingLineNumber = "1222"
+            startingLineNumber = "1438"
+            endingLineNumber = "1438"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -698,11 +602,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1221"
-            endingLineNumber = "1221"
+            startingLineNumber = "1437"
+            endingLineNumber = "1437"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -714,11 +618,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/CalcBoard.m"
-            timestampString = "485106909.318399"
+            timestampString = "487457158.121527"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "142"
-            endingLineNumber = "142"
+            startingLineNumber = "143"
+            endingLineNumber = "143"
             landmarkName = "-reorganize:"
             landmarkType = "5">
          </BreakpointContent>
@@ -730,11 +634,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/CalcBoard.m"
-            timestampString = "485106909.318399"
+            timestampString = "487457158.121527"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "151"
-            endingLineNumber = "151"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
             landmarkName = "-reorganize:"
             landmarkType = "5">
          </BreakpointContent>
@@ -746,11 +650,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1921"
-            endingLineNumber = "1921"
+            startingLineNumber = "2137"
+            endingLineNumber = "2137"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -762,11 +666,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "484843522.313524"
+            timestampString = "485885337.959164"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "238"
-            endingLineNumber = "238"
+            startingLineNumber = "243"
+            endingLineNumber = "243"
             landmarkName = "-updateFrameWidth::"
             landmarkType = "5">
          </BreakpointContent>
@@ -778,11 +682,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488819550.682367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3213"
-            endingLineNumber = "3213"
+            startingLineNumber = "3430"
+            endingLineNumber = "3430"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -794,11 +698,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "484844218.538001"
+            timestampString = "486316241.203802"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "344"
-            endingLineNumber = "344"
+            startingLineNumber = "362"
+            endingLineNumber = "362"
             landmarkName = "-handleTap:"
             landmarkType = "5">
          </BreakpointContent>
@@ -810,12 +714,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "475"
-            endingLineNumber = "475"
-            landmarkName = "-updateFrameWidth::"
+            startingLineNumber = "525"
+            endingLineNumber = "525"
+            landmarkName = "-moveCopy:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -826,43 +730,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488646289.265541"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1058"
-            endingLineNumber = "1058"
-            landmarkName = "-foreGroundInit:"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/EquationBlock.m"
-            timestampString = "485355575.131733"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1515"
-            endingLineNumber = "1515"
-            landmarkName = "-updateCalcBoardInfo"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "3011"
-            endingLineNumber = "3011"
+            startingLineNumber = "1130"
+            endingLineNumber = "1130"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -874,11 +746,27 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/ViewController.m"
-            timestampString = "485361837.956915"
+            timestampString = "488819550.682367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1485"
-            endingLineNumber = "1485"
+            startingLineNumber = "3234"
+            endingLineNumber = "3234"
+            landmarkName = "-foreGroundInit:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "EasyCalc/ViewController.m"
+            timestampString = "488646289.265541"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1701"
+            endingLineNumber = "1701"
             landmarkName = "-foreGroundInit:"
             landmarkType = "5">
          </BreakpointContent>
@@ -890,12 +778,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/EquationTextLayer.m"
-            timestampString = "485191141.740117"
+            timestampString = "486485139.72435"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "137"
-            endingLineNumber = "137"
-            landmarkName = "-addNumStr:"
+            startingLineNumber = "152"
+            endingLineNumber = "152"
+            landmarkName = "-copyWithZone:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -906,11 +794,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "EasyCalc/WrapedEqTxtLyr.m"
-            timestampString = "485191141.740117"
+            timestampString = "487437966.674816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "248"
-            endingLineNumber = "248"
+            startingLineNumber = "258"
+            endingLineNumber = "258"
             landmarkName = "-reorganize::::"
             landmarkType = "5">
          </BreakpointContent>

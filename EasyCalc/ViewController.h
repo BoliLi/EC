@@ -30,6 +30,7 @@
 @property NSTimer *delBtnLongPressTmr;
 @property (nonatomic, strong) QBPopupMenu *popMenu;
 @property SaveTemplateDialog *saveTempDlg;
+@property UIView *thirdKbView;
 
 
 -(void)handleTap: (UITapGestureRecognizer *)gesture;

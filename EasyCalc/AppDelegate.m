@@ -12,6 +12,7 @@
 #import "ViewController.h"
 #import "CalcBoard.h"
 #import <ChameleonFramework/Chameleon.h>
+#import "DisplayView.h"
 
 @interface AppDelegate ()
 
@@ -30,9 +31,14 @@
     gBtnFontColor = [UIColor flatOrangeColorDark];
     NSLog(@"%s%i>~%.2f~%.2f~~~~~~~~~", __FUNCTION__, __LINE__, [[UIScreen mainScreen] bounds].size.width, [[UIScreen mainScreen] bounds].size.height);
     
+    gSettingMaxDecimal = [NSNumber numberWithDouble:1000000000];
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.backgroundColor = [UIColor whiteColor];
-    self.window.rootViewController = [[ViewController alloc]init];
+    ViewController *vc = [[ViewController alloc]init];
+    UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:vc];
+    [nvc setNavigationBarHidden:YES];
+    self.window.rootViewController = nvc;
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -56,18 +62,12 @@
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
-    [gCurCB.view.cursor removeAllAnimations];
-    CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
-    anim.fromValue = [NSNumber numberWithBool:YES];
-    anim.toValue = [NSNumber numberWithBool:NO];
-    anim.duration = 0.5;
-    anim.autoreverses = YES;
-    anim.repeatCount = HUGE_VALF;
-    [gCurCB.view.cursor addAnimation:anim forKey:nil];
+    [gCurCB.view refreshCursorAnim];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    [gCurCB.view refreshCursorAnim];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {

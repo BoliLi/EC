@@ -35,7 +35,8 @@
 
 -(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
 -(void) resetParam;
--(void) updateFontInfo: (int)lvl;
+-(void)updateFontInfo: (int)lvl :(int)settingFontLvl;
 -(void) reorganize : (ViewController *)vc;
 -(void) insertTemplate :(EquationBlock *)rootBlk :(ViewController *)vc;
+-(void)adjustEquationHistoryPostion;
 @end

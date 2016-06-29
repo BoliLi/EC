@@ -82,8 +82,9 @@ id locaLastLyr(Equation *e, id blk) {
             
             calcB.insertCIdx = layer.c_idx + 1;
             calcB.txtInsIdx = (int)layer.strLenTbl.count - 1;
+            calcB.allowInputBitMap = INPUT_ALL_BIT;
             
-            [calcB updateFontInfo:layer.fontLvl];
+            [calcB updateFontInfo:layer.fontLvl :gSettingMainFontLevel];
             
             if (layer.type == TEXTLAYER_EMPTY) {
                 calcB.view.cursor.frame = CGRectMake(layer.frame.origin.x, layer.frame.origin.y, CURSOR_W, calcB.curFontH);
@@ -106,8 +107,9 @@ id locaLastLyr(Equation *e, id blk) {
             
             calcB.insertCIdx = p.c_idx + 1;
             calcB.txtInsIdx = 1;
+            calcB.allowInputBitMap = INPUT_ALL_BIT;
             
-            [calcB updateFontInfo:p.fontLvl];
+            [calcB updateFontInfo:p.fontLvl :gSettingMainFontLevel];
             
             calcB.view.cursor.frame = CGRectMake(p.mainFrame.origin.x + p.mainFrame.size.width, p.mainFrame.origin.y, CURSOR_W, p.mainFrame.size.height);
         }
@@ -119,85 +121,85 @@ id locaLastLyr(Equation *e, id blk) {
     return blk;
 }
 
-void handlePrevBlk(Equation *e, id preBlk) {
-    BOOL needRemove = YES;
-    
-    do {
-        if ([preBlk isMemberOfClass:[EquationBlock class]]) {
-            EquationBlock *eb = preBlk;
-            preBlk = eb.children.lastObject;
-            needRemove = NO;
-        } else if ([preBlk isMemberOfClass:[RadicalBlock class]]) {
-            EquationBlock *eb = ((RadicalBlock *)preBlk).content;
-            preBlk = eb.children.lastObject;
-            needRemove = NO;
-        } else if ([preBlk isMemberOfClass:[FractionBarLayer class]]) {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return;
-        } else if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
-            EquationTextLayer *layer = preBlk;
-            if (layer.expo != nil) {
-                preBlk = layer.expo.children.lastObject;
-                needRemove = NO;
-            } else {
-                break;
-            }
-        } else if ([preBlk isMemberOfClass:[WrapedEqTxtLyr class]]) {
-            EquationBlock *eb = ((WrapedEqTxtLyr *)preBlk).content;
-            preBlk = eb.children.lastObject;
-            needRemove = NO;
-        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
-            Parentheses *p = preBlk;
-            if (p.expo != nil) {
-                preBlk = p.expo.children.lastObject;
-                needRemove = NO;
-            } else {
-                break;
-            }
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return;
-        }
-    } while (preBlk != nil);
-    
-    if (preBlk != nil) {
-        if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
-            EquationTextLayer *l = preBlk;
-            if (needRemove) {
-                if (l.type == TEXTLAYER_EMPTY) {
-                    cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
-                } else if (l.type == TEXTLAYER_OP) {
-                    [e removeElement:l];
-                } else {
-                    if (l.strLenTbl.count == 2) { // 1 char num
-                        [e removeElement:l];
-                    } else {
-                        CGFloat orgW = l.mainFrame.size.width;
-                        [l delNumCharAt:(int)l.strLenTbl.count - 1];
-                        CGFloat incrWidth = l.mainFrame.size.width - orgW;
-                        [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
-                        [e.root adjustElementPosition];
-                        cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
-                    }
-                }
-            } else {
-                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
-            }
-        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
-            Parentheses *p = preBlk;
-            if (needRemove) {
-                [e removeElement:p];
-            } else {
-                cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
-            }
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-        }
-    } else {
-        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-    }
-    return;
-}
+//void handlePrevBlk(Equation *e, id preBlk) {
+//    BOOL needRemove = YES;
+//    
+//    do {
+//        if ([preBlk isMemberOfClass:[EquationBlock class]]) {
+//            EquationBlock *eb = preBlk;
+//            preBlk = eb.children.lastObject;
+//            needRemove = NO;
+//        } else if ([preBlk isMemberOfClass:[RadicalBlock class]]) {
+//            EquationBlock *eb = ((RadicalBlock *)preBlk).content;
+//            preBlk = eb.children.lastObject;
+//            needRemove = NO;
+//        } else if ([preBlk isMemberOfClass:[FractionBarLayer class]]) {
+//            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+//            return;
+//        } else if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
+//            EquationTextLayer *layer = preBlk;
+//            if (layer.expo != nil) {
+//                preBlk = layer.expo.children.lastObject;
+//                needRemove = NO;
+//            } else {
+//                break;
+//            }
+//        } else if ([preBlk isMemberOfClass:[WrapedEqTxtLyr class]]) {
+//            EquationBlock *eb = ((WrapedEqTxtLyr *)preBlk).content;
+//            preBlk = eb.children.lastObject;
+//            needRemove = NO;
+//        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
+//            Parentheses *p = preBlk;
+//            if (p.expo != nil) {
+//                preBlk = p.expo.children.lastObject;
+//                needRemove = NO;
+//            } else {
+//                break;
+//            }
+//        } else {
+//            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+//            return;
+//        }
+//    } while (preBlk != nil);
+//    
+//    if (preBlk != nil) {
+//        if ([preBlk isMemberOfClass:[EquationTextLayer class]]) {
+//            EquationTextLayer *l = preBlk;
+//            if (needRemove) {
+//                if (l.type == TEXTLAYER_EMPTY) {
+//                    cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + 1.0, l.frame.origin.y + 1.0));
+//                } else if (l.type == TEXTLAYER_OP) {
+//                    [e removeElement:l];
+//                } else {
+//                    if (l.strLenTbl.count == 2) { // 1 char num
+//                        [e removeElement:l];
+//                    } else {
+//                        CGFloat orgW = l.mainFrame.size.width;
+//                        [l delNumCharAt:(int)l.strLenTbl.count - 1];
+//                        CGFloat incrWidth = l.mainFrame.size.width - orgW;
+//                        [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
+//                        [e.root adjustElementPosition];
+//                        cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+//                    }
+//                }
+//            } else {
+//                cfgEqnBySlctBlk(e, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+//            }
+//        } else if ([preBlk isMemberOfClass:[Parentheses class]]) {
+//            Parentheses *p = preBlk;
+//            if (needRemove) {
+//                [e removeElement:p];
+//            } else {
+//                cfgEqnBySlctBlk(e, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
+//            }
+//        } else {
+//            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+//        }
+//    } else {
+//        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+//    }
+//    return;
+//}
 
 id getPrevBlk(Equation *E, id curBlk) {
     if ([curBlk isMemberOfClass:[EquationBlock class]]) {
@@ -308,17 +310,17 @@ id getPrevBlk(Equation *E, id curBlk) {
         return [par.children objectAtIndex:bar.c_idx - 1];
     } else if ([curBlk isMemberOfClass:[EquationTextLayer class]]) {
         EquationTextLayer *layer = curBlk;
-        EquationBlock *par = layer.parent;
-        if (layer.c_idx == 0) {
+        id par = layer.parent;
+        if (layer.c_idx == 0) { //parent is rb, eb and p
             return getPrevBlk(E, par);
         } else {
-            id b = [par.children objectAtIndex:layer.c_idx - 1];
+            id b = [((EquationBlock *)par).children objectAtIndex:layer.c_idx - 1];
             
             if ([b isMemberOfClass:[FractionBarLayer class]]) {
                 if (layer.c_idx < 2) {
                     return nil;
                 } else {
-                    return [par.children objectAtIndex:layer.c_idx - 2];
+                    return [((EquationBlock *)par).children objectAtIndex:layer.c_idx - 2];
                 }
             } else {
                 return b;
@@ -425,14 +427,15 @@ id getPrevBlk(Equation *E, id curBlk) {
 //}
 
 void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
+    CalcBoard *calcB = e.par;
+    
     if ([b isMemberOfClass: [EquationBlock class]]) {
         EquationBlock *eBlock = b;
-        CalcBoard *calcB = e.par;
         if (eBlock.bar != nil && CGRectContainsPoint(eBlock.bar.frame, curPoint)) {
             FractionBarLayer *bar = eBlock.bar;
             EquationBlock *block = bar.parent;
             
-            [calcB updateFontInfo:eBlock.fontLvl];
+            [calcB updateFontInfo:eBlock.fontLvl :gSettingMainFontLevel];
             
             calcB.curTxtLyr = nil;
             calcB.curBlk = block;
@@ -515,7 +518,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else {
             id blk;
             
-            [calcB updateFontInfo:eBlock.fontLvl];
+            [calcB updateFontInfo:eBlock.fontLvl :gSettingMainFontLevel];
             
             if (curPoint.y >= eBlock.numerFrame.origin.y && curPoint.y <= eBlock.numerFrame.origin.y + eBlock.numerFrame.size.height) {
                 CGFloat centerX = eBlock.mainFrame.origin.x + eBlock.mainFrame.size.width / 2.0;
@@ -761,12 +764,11 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
             }
         }
         
-        
+        calcB.allowInputBitMap = INPUT_ALL_BIT;
     } else if ([b isMemberOfClass: [EquationTextLayer class]]) {
         EquationTextLayer *layer = b;
-        CalcBoard *calcB = e.par;
         
-        [calcB updateFontInfo:layer.fontLvl];
+        [calcB updateFontInfo:layer.fontLvl :gSettingMainFontLevel];
         
         if (layer.type == TEXTLAYER_OP) {
             calcB.txtInsIdx = [layer getTxtInsIdx:curPoint];
@@ -808,73 +810,107 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         
-        EquationBlock *block = layer.parent;
-        id lastBlock = [block.children lastObject];
-        if ([lastBlock isMemberOfClass: [EquationTextLayer class]] && layer == (EquationTextLayer *)lastBlock) {
-            if (calcB.txtInsIdx == 0) {
-                if (layer.type == TEXTLAYER_EMPTY) {
-                    calcB.insertCIdx = layer.c_idx + 1;
-                    calcB.curMode = MODE_INPUT;
-                } else {
+        id block = layer.parent;
+        if ([block isMemberOfClass:[EquationBlock class]]) {
+            EquationBlock *eb = block;
+            id lastBlock = [eb.children lastObject];
+            if ([lastBlock isMemberOfClass: [EquationTextLayer class]] && layer == (EquationTextLayer *)lastBlock) {
+                if (calcB.txtInsIdx == 0) {
                     calcB.insertCIdx = layer.c_idx;
                     calcB.curMode = MODE_INSERT;
+                } else {
+                    calcB.insertCIdx = layer.c_idx + 1;
+                    calcB.curMode = MODE_INPUT;
                 }
             } else {
-                calcB.insertCIdx = layer.c_idx + 1;
+                calcB.curMode = MODE_INSERT;
+                if (calcB.txtInsIdx == 0) {
+                    calcB.insertCIdx = layer.c_idx;
+                } else {
+                    calcB.insertCIdx = layer.c_idx + 1;
+                }
+            }
+        } else if ([block isMemberOfClass:[RadicalBlock class]]) {
+            if (calcB.txtInsIdx == 0) {
+                calcB.insertCIdx = 0;
+                calcB.curMode = MODE_INSERT;
+            } else {
+                calcB.insertCIdx = 1;
                 calcB.curMode = MODE_INPUT;
             }
         } else {
-            calcB.curMode = MODE_INSERT;
-            if (calcB.txtInsIdx == 0) {
-                if (layer.type == TEXTLAYER_EMPTY) {
-                    calcB.insertCIdx = layer.c_idx + 1;
-                } else {
-                    calcB.insertCIdx = layer.c_idx;
-                }
-            } else {
-                calcB.insertCIdx = layer.c_idx + 1;
-            }
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
+
         calcB.curRoll = layer.roll;
         calcB.curParent = block;
         calcB.curBlk = layer;
-    } else if ([b isMemberOfClass: [RadicalBlock class]]) {
-        RadicalBlock *block = b;
-        CalcBoard *calcB = e.par;
         
-        [calcB updateFontInfo:block.fontLvl];
+        if (layer.roll == ROLL_ROOT_NUM) {
+            calcB.allowInputBitMap = INPUT_NUM_BIT;
+        } else {
+            if (calcB.txtInsIdx == 0) { // Head of text
+                if (layer.type == TEXTLAYER_EMPTY) {
+                    if (layer.expo != nil) {
+                        calcB.allowInputBitMap = INPUT_DOT_BIT | INPUT_NUM_BIT;
+                    } else {
+                        calcB.allowInputBitMap = INPUT_ALL_BIT;
+                    }
+                } else {
+                    calcB.allowInputBitMap = INPUT_ALL_BIT;
+                }
+            } else if (calcB.txtInsIdx == layer.strLenTbl.count - 1) { // Tail of text
+                if (layer.expo != nil) {
+                    calcB.allowInputBitMap = INPUT_DOT_BIT | INPUT_NUM_BIT;
+                } else {
+                    calcB.allowInputBitMap = INPUT_ALL_BIT;
+                }
+            } else { // Middle of text
+                calcB.allowInputBitMap = INPUT_DOT_BIT | INPUT_NUM_BIT;
+            }
+        }
+    } else if ([b isMemberOfClass: [RadicalBlock class]]) {
+        
+        RadicalBlock *block = b;
+        
+        if (block.rootNum != nil && CGRectContainsPoint(block.rootNum.frame, curPoint)) {
+            cfgEqnBySlctBlk(e, block.rootNum, curPoint);
+            return;
+        }
+        
+        [calcB updateFontInfo:block.fontLvl :gSettingMainFontLevel];
         
         id lastBlock = [((EquationBlock *)block.parent).children lastObject];
         if ([lastBlock isMemberOfClass: [RadicalBlock class]] && block == (RadicalBlock *)lastBlock) {
-            if (curPoint.x < block.frame.origin.x + block.frame.size.width / 2.0) {
+            if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
                 calcB.curMode = MODE_INSERT;
                 calcB.insertCIdx = block.c_idx;
-                calcB.view.cursor.frame = CGRectMake(block.frame.origin.x, block.frame.origin.y, CURSOR_W, block.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
             } else {
                 calcB.curMode = MODE_INPUT;
                 calcB.insertCIdx = block.c_idx + 1;
-                calcB.view.cursor.frame = CGRectMake(block.frame.origin.x + block.frame.size.width, block.frame.origin.y, CURSOR_W, block.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
             }
         } else {
-            if (curPoint.x < block.frame.origin.x + block.frame.size.width / 2.0) {
+            if (curPoint.x < block.mainFrame.origin.x + block.mainFrame.size.width / 2.0) {
                 calcB.curMode = MODE_INSERT;
                 calcB.insertCIdx = block.c_idx;
-                calcB.view.cursor.frame = CGRectMake(block.frame.origin.x, block.frame.origin.y, CURSOR_W, block.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(block.mainFrame.origin.x, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
             } else {
                 calcB.curMode = MODE_INSERT;
                 calcB.insertCIdx = block.c_idx + 1;
-                calcB.view.cursor.frame = CGRectMake(block.frame.origin.x + block.frame.size.width, block.frame.origin.y, CURSOR_W, block.frame.size.height);
+                calcB.view.cursor.frame = CGRectMake(block.mainFrame.origin.x + block.mainFrame.size.width, block.mainFrame.origin.y, CURSOR_W, block.mainFrame.size.height);
             }
         }
         calcB.curParent = block.parent;
         calcB.curRoll = block.roll;
         calcB.curTxtLyr = nil;
         calcB.curBlk = block;
+        calcB.allowInputBitMap = INPUT_ALL_BIT;
     } else if ([b isMemberOfClass: [WrapedEqTxtLyr class]]) {
         WrapedEqTxtLyr *wetl = b;
-        CalcBoard *calcB = e.par;
         
-        [calcB updateFontInfo:wetl.fontLvl];
+        [calcB updateFontInfo:wetl.fontLvl :gSettingMainFontLevel];
         
         if (curPoint.x >= wetl.title.frame.origin.x && curPoint.x < wetl.left_parenth.frame.origin.x + wetl.left_parenth.frame.size.width / 2.0) {
             calcB.curMode = MODE_INSERT;
@@ -1017,9 +1053,9 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
+        calcB.allowInputBitMap = INPUT_ALL_BIT;
     } else if ([b isMemberOfClass: [Parentheses class]]) {
         Parentheses *p = b;
-        CalcBoard *calcB = e.par;
         
         if (![p.parent isMemberOfClass:[EquationBlock class]]) {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
@@ -1028,7 +1064,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         
         EquationBlock *par = p.parent;
         
-        [calcB updateFontInfo:par.fontLvl];
+        [calcB updateFontInfo:par.fontLvl :gSettingMainFontLevel];
         
         id lastBlock = [((EquationBlock *)p.parent).children lastObject];
         if ([lastBlock isMemberOfClass: [Parentheses class]] && p == (Parentheses *)lastBlock) {
@@ -1058,6 +1094,7 @@ void cfgEqnBySlctBlk(Equation *e, id b, CGPoint curPoint) {
         calcB.curRoll = p.roll;
         calcB.curTxtLyr = nil;
         calcB.curBlk = p;
+        calcB.allowInputBitMap = INPUT_ALL_BIT;
     } else if ([b isMemberOfClass: [FractionBarLayer class]]) {
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
     } else
@@ -1114,9 +1151,11 @@ NSMutableString *calcParenth(EquationBlock *parent, int *i) {
             }
             
             if (rb.rootNum != nil) {
-                [ret appendString:@"cuberoot("];
+                [ret appendString:@"nthroot("];
                 int j = 0;
                 [ret appendString:equationToString(rb.content, &j)];
+                [ret appendString:@","];
+                [ret appendString:[rb.rootNum string]];
                 [ret appendString:@")"];
             } else {
                 [ret appendString:@"sqrt("];
@@ -1227,13 +1266,13 @@ NSMutableString *equationToString(EquationBlock *parent, int *i) {
             
             if (l.expo != nil) {
                 [ret appendString:@"pow("];
-                [ret appendString:[l.string string]];
+                [ret appendString:l.pureStr];
                 [ret appendString:@","];
                 int j = 0;
                 [ret appendString:equationToString(l.expo, &j)];
                 [ret appendString:@")"];
             } else {
-                [ret appendString:[l.string string]];
+                [ret appendString:l.pureStr];
             }
             
             if (l.c_idx == parent.children.count - 1) {
@@ -1247,9 +1286,11 @@ NSMutableString *equationToString(EquationBlock *parent, int *i) {
             }
             
             if (rb.rootNum != nil) {
-                [ret appendString:@"cuberoot("];
+                [ret appendString:@"nthroot("];
                 int j = 0;
                 [ret appendString:equationToString(rb.content, &j)];
+                [ret appendString:@","];
+                [ret appendString:rb.rootNum.pureStr];
                 [ret appendString:@")"];
             } else {
                 [ret appendString:@"sqrt("];
@@ -1270,7 +1311,14 @@ NSMutableString *equationToString(EquationBlock *parent, int *i) {
                 [ret appendString:@"("];
             }
             
-            [ret appendString:[wetl.title.string string]];
+            NSString *tit = [wetl.title.string string];
+            
+            if ([tit isEqual:@"log10"]) {
+                [ret appendString:@"log"];
+            } else {
+                [ret appendString:tit];
+            }
+            
             [ret appendString:@"("];
             int j = 0;
             [ret appendString:equationToString(wetl.content, &j)];
@@ -1387,15 +1435,6 @@ BOOL isNumber(NSString *str) {
     return ([scan scanInt:&val] && [scan isAtEnd]) || ([scan scanFloat:&val1] && [scan isAtEnd]);
 }
 
-EquationTextLayer *lookForEmptyTxtLyr(EquationBlock *rootBlock) {
-    for (id b in rootBlock.children) {
-        if ([b isMemberOfClass:[EquationTextLayer class]] && ((EquationTextLayer *)b).type == TEXTLAYER_EMPTY) {
-            return b;
-        }
-    }
-    return nil;
-}
-
 UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont) {
     UIButton *bn = [UIButton buttonWithType:UIButtonTypeSystem];
     bn.titleLabel.font = buttonFont;
@@ -1407,4 +1446,23 @@ UIButton *makeButton(CGRect btmFrame, NSString *title, UIFont *buttonFont) {
     [bn setTitle:title forState:UIControlStateNormal];
     bn.frame = btmFrame;
     return bn;
+}
+
+UILabel *makeLabel(NSString *str) {
+    UILabel *ret = [[UILabel alloc] init];
+    
+    UIFont *font = getFont(gSettingMainFontLevel, 1);
+    NSMutableAttributedString *attStr;
+    CGSize newStrSize = CGSizeZero;
+    attStr = [[NSMutableAttributedString alloc] initWithString: str];
+    CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
+    [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, str.length)];
+    [attStr addAttribute:NSForegroundColorAttributeName value:gDspFontColor range:NSMakeRange(0,str.length)];
+    CFRelease(ctFont);
+    newStrSize = [attStr size];
+    
+    ret.frame = CGRectMake(0.0, 0.0, newStrSize.width, newStrSize.height);
+    ret.attributedText = attStr;
+    
+    return ret;
 }

@@ -24,9 +24,9 @@
 @property int fontLvl;
 @property BOOL isCopy;
 @property CGRect mainFrame;
+@property NSDate *timeStamp;
 
-//-(id) init :(Equation *)e :(ViewController *)vc;
--(id) init : (Equation *)e :(ViewController *)vc;
+-(id) init : (Equation *)e :(ViewController *)vc :(BOOL)hasRootNum;
 - (void)updateSize:(int)lvl;
 - (void)updateCopyBlock:(Equation *)e;
 -(void) updateFrame;
@@ -35,5 +35,8 @@
 -(void) updateFrameWidth : (CGFloat)incrWidth : (int)r;
 -(void) updateCalcBoardInfo;
 -(EquationTextLayer *) lookForEmptyTxtLyr;
+-(void) shake;
+-(BOOL) isAllowed;
+-(void) destroyWithAnim;
 -(void) destroy;
 @end

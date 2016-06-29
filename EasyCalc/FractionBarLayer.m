@@ -25,6 +25,7 @@
 @synthesize ancestor;
 @synthesize fontLvl;
 @synthesize isCopy;
+@synthesize timeStamp;
 
 -(id) init :(Equation *)e :(ViewController *)vc {
     self = [super init];
@@ -37,6 +38,7 @@
         self.delegate = vc;
         fontLvl = calcB.curFontLvl;
         self.isCopy = NO;
+        self.timeStamp = [NSDate date];
     }
     return self;
 }
@@ -48,6 +50,7 @@
         self.guid = [coder decodeIntForKey:@"guid"];
         self.fontLvl = [coder decodeIntForKey:@"fontLvl"];
         self.isCopy = NO;
+        self.timeStamp = [coder decodeObjectForKey:@"timeStamp"];
     }
     return self;
 }
@@ -57,6 +60,7 @@
     [super encodeWithCoder:coder];
     [coder encodeInt:self.guid forKey:@"guid"];
     [coder encodeInt:self.fontLvl forKey:@"fontLvl"];
+    [coder encodeObject:self.timeStamp forKey:@"timeStamp"];
 }
 
 - (id)copyWithZone:(NSZone *)zone {
@@ -69,6 +73,7 @@
     copy.hidden = NO;
     copy.fontLvl = self.fontLvl;
     copy.isCopy = YES;
+    copy.timeStamp = [NSDate date];
     return copy;
 }
 
@@ -121,7 +126,20 @@
     }
 }
 
--(void) destroy {
+-(void) shake {
+    CAKeyframeAnimation *shakeAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
+    shakeAnimation.values = @[[NSValue valueWithCGPoint:self.position], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x - 7.0, self.position.y)], [NSValue valueWithCGPoint:CGPointMake(self.position.x + 7.0, self.position.y)], [NSValue valueWithCGPoint:self.position]];
+    [shakeAnimation setTimingFunction:easeOutSine];
+    shakeAnimation.duration = 0.5;
+    shakeAnimation.removedOnCompletion = YES;
+    [self addAnimation:shakeAnimation forKey:nil];
+}
+
+-(BOOL) isAllowed {
+    return NO;
+}
+
+-(void) destroyWithAnim {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
     animation.fromValue = [NSNumber numberWithFloat:1.0];
     animation.toValue = [NSNumber numberWithFloat:0.0];
@@ -131,6 +149,10 @@
     animation.timingFunction=[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
     animation.delegate = self;
     [self addAnimation:animation forKey:@"remove"];
+}
+
+-(void) destroy {
+    [self removeFromSuperlayer];
 }
 
 @end

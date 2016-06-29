@@ -11,12 +11,12 @@
 @class ViewController;
 @class CalcBoard;
 
-@interface DisplayView : UIScrollView <NSCoding>
+@interface DisplayView : UIScrollView <NSCoding, UIScrollViewDelegate>
 @property CALayer *cursor;
-@property UIButton *swipLBtn;
-@property UIButton *swipRBtn;
 @property (weak) CalcBoard *par;
+//@property UIButton *swipLBtn;
 
 -(id) init : (CalcBoard *)calcB : (CGRect)dspFrame : (ViewController *)vc;
 - (void)updateContentView;
+- (void)refreshCursorAnim;
 @end

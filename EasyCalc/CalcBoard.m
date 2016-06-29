@@ -49,8 +49,8 @@
         curFontLvl = 0;
         allowInputBitMap = INPUT_ALL_BIT;
         
-        curFont = getFont(0);
-        curFontW = getCharWidth(0, @"_");
+        curFont = getFont(gSettingMainFontLevel, 0);
+        curFontW = getCharWidth(gSettingMainFontLevel, 0, @"_");
         curFontH = curFont.lineHeight;
         
         view = [[DisplayView alloc] init:self :dspFrame :vc];
@@ -71,8 +71,8 @@
     curFontLvl = 0;
     allowInputBitMap = INPUT_ALL_BIT;
     
-    curFont = getFont(0);
-    curFontW = getCharWidth(0, @"_");
+    curFont = getFont(gSettingMainFontLevel, 0);
+    curFontW = getCharWidth(gSettingMainFontLevel, 0, @"_");
     curFontH = curFont.lineHeight;
 }
 
@@ -124,16 +124,17 @@
     [coder encodeInt:self.allowInputBitMap forKey:@"allowInputBitMap"];
 }
 
--(void)updateFontInfo: (int)lvl {
+-(void)updateFontInfo: (int)lvl :(int)settingFontLvl {
 
-    if (self.curFontLvl == lvl) {
+    if (self.curFontLvl == lvl && self.curEq.mainFontLevel == settingFontLvl) {
         return;
     }
     
     curFontLvl = lvl;
-    curFont = getFont(lvl);
-    curFontW = getCharWidth(lvl, @"_");
+    curFont = getFont(settingFontLvl, lvl);
+    curFontW = getCharWidth(settingFontLvl, lvl, @"_");
     curFontH = curFont.lineHeight;
+    self.curEq.mainFontLevel = settingFontLvl;
 }
 
 -(void) reorganize : (ViewController *)vc {
@@ -145,13 +146,30 @@
         eq.result.opacity = 1.0;
         [self.view.layer addSublayer:eq.equalsign];
         [self.view.layer addSublayer:eq.result];
+        [self.view addSubview:eq.timeRec];
+        [self.view.layer addSublayer:eq.separator];
+        eq.separator.delegate = vc;
+        [eq.separator setNeedsDisplay];
     }
     
+    self.view.par = self;
     self.curEq.par = self;
     [self.curEq.root reorganize:self.curEq :vc :0 :nil];
 }
 
 -(void) insertTemplate :(EquationBlock *)tempRoot :(ViewController *)vc {
+    if (tempRoot.children.count == 1) {
+        if (![tempRoot.children.firstObject isAllowed]) {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    } else {
+        if (![tempRoot isAllowed]) {
+            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+            return;
+        }
+    }
+    
     id sltedBlock = nil;
     CGFloat incrWidth = 0.0;
     
@@ -209,7 +227,9 @@
         }
     }
     
-    [rootBlk updateSize:self.curFontLvl];
+    if (rootBlk.fontLvl != self.curFontLvl || self.curEq.mainFontLevel != gSettingMainFontLevel) {
+        [rootBlk updateSize:self.curFontLvl];
+    }
     
     incrWidth += rootBlk.mainFrame.size.width;
     
@@ -612,12 +632,18 @@
         [emptyTxtLyr updateCalcBoardInfo];
     }
     
-    if ((int)self.curEq.maxRootHeight < (int)self.curEq.root.mainFrame.size.height) {
-        CGFloat dis = self.curEq.root.mainFrame.size.height - self.curEq.maxRootHeight;
-        self.curEq.maxRootHeight = self.curEq.root.mainFrame.size.height;
-        for (Equation *eq in self.eqList) {
-            [eq moveUp:dis];
-        }
+    [self adjustEquationHistoryPostion];
+}
+
+-(void)adjustEquationHistoryPostion {
+    Equation *lastEq = [self.eqList lastObject];
+    CGFloat distance = self.curEq.root.mainFrame.origin.y - 5.0 - (lastEq.equalsign.frame.origin.y + lastEq.equalsign.frame.size.height);
+    
+    if (ABS(distance) < 1.0)
+        return;
+    
+    for (Equation *eq in self.eqList) {
+        [eq moveUpDown:distance];
     }
 }
 

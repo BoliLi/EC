@@ -21,14 +21,18 @@
 NSMutableArray *gCalcBoardList;
 NSInteger gCurCBIdx = 0;
 CalcBoard *gCurCB;
-CGFloat gCharWidthTbl[4][17];
-CGFloat gCharHeightTbl[4];
+CGFloat gCharWidthTbl[5][4][20];
+CGFloat gCharHeightTbl[5][4];
 NSMutableArray *gTemplateList;
 UIColor *gDspBGColor;
 UIColor *gDspFontColor;
 UIColor *gKbBGColor;
 UIColor *gBtnBGColor;
 UIColor *gBtnFontColor;
+BOOL gSettingThousandSeperator = YES;
+int gSettingMaxFractionDigits = 10;
+NSNumber *gSettingMaxDecimal;
+int gSettingMainFontLevel = 1;
 
 @implementation NSMutableArray (EasyCalc)
 - (void)reverse {
@@ -59,121 +63,159 @@ UIColor *gBtnFontColor;
 }
 @end
 
-UIFont *getFont(int lvl) {
-    return [UIFont fontWithName:@"AvenirNextCondensed-UltraLight" size:getFontSize(lvl)];
+UIFont *getFont(int settingFontLvl, int fontSizeLvl) {
+    return [UIFont fontWithName:@"AvenirNextCondensed-Regular" size:getFontSize(settingFontLvl, fontSizeLvl)];
+//    return [UIFont systemFontOfSize:getFontSize(lvl)];
 }
 
-int getFontSize(int level) {
-    if (level == 0) {
-        return 30;
-    } else if (level == 1) {
-        return 15;
-    } else if (level == 2) {
-        return 7;
+int getFontSize(int settingFontLvl, int fontSizeLvl) {
+    int baseFontSize;
+    
+    if (settingFontLvl >= 0 && settingFontLvl <= MAX_SETTING_FONT_LEVEL) {
+        baseFontSize = 20 + settingFontLvl * 5;
     } else {
-        return 4;
+        baseFontSize = 20 + MAX_SETTING_FONT_LEVEL * 5;
+    }
+    
+    if (fontSizeLvl == 0) {
+        return baseFontSize;
+    } else if (fontSizeLvl == 1) {
+        return baseFontSize / 2 + 1;
+    } else if (fontSizeLvl == 2) {
+        return baseFontSize / 4 + 1;
+    } else {
+        return baseFontSize / 6 + 1;
     }
 }
 
-CGFloat getLineWidth(int level) {
-    if (level == 0) {
-        return 2.0;
-    } else if (level == 1) {
-        return 1.0;
-    } else if (level == 2) {
-        return 0.5;
+CGFloat getLineWidth(int settingFontLvl, int fontSizeLvl) {
+    CGFloat baseLineWidth;
+    
+    if (settingFontLvl >= 0 && settingFontLvl <= MAX_SETTING_FONT_LEVEL) {
+        baseLineWidth = 1.0 + settingFontLvl * 0.3;
     } else {
-        return 0.5;
+        baseLineWidth = 1.0 + MAX_SETTING_FONT_LEVEL * 0.3;
+    }
+    
+    if (fontSizeLvl == 0) {
+        return baseLineWidth;
+    } else if (fontSizeLvl == 1) {
+        return baseLineWidth * 0.6;
+    } else if (fontSizeLvl == 2) {
+        return baseLineWidth * 0.3;
+    } else {
+        return baseLineWidth * 0.3;
     }
 }
 
 void initCharSizeTbl(void) {
-    for (int j = 0; j < 4; j++) {
-        int i;
-        UIFont *font = getFont(j);
-        
-        gCharHeightTbl[j] = font.lineHeight;
-        
-        CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
-        for (i = 0; i < 10; i++) {
-            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
+    for (int k = 0; k < 5; k++) {
+        for (int j = 0; j < 4; j++) {
+            int i;
+            UIFont *font = getFont(k, j);
+            
+            gCharHeightTbl[k][j] = font.lineHeight;
+            
+            CTFontRef ctFont = CTFontCreateWithName((CFStringRef)font.fontName, font.pointSize, NULL);
+            for (i = 0; i < 10; i++) {
+                NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"%d",i]];
+                [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+                gCharWidthTbl[k][j][i] = [attStr size].width;
+            }
+            
+            NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
             [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-            gCharWidthTbl[j][i] = [attStr size].width;
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"+"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"-"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"×"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"("];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@")"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"_"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"%"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@"!"];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            attStr = [[NSMutableAttributedString alloc] initWithString:@","];
+            [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
+            gCharWidthTbl[k][j][i++] = [attStr size].width;
+            
+            CFRelease(ctFont);
         }
-        
-        NSMutableAttributedString *attStr = [[NSMutableAttributedString alloc] initWithString:@"."];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"+"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"-"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"×"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"("];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@")"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        attStr = [[NSMutableAttributedString alloc] initWithString:@"_"];
-        [attStr addAttribute:(NSString *)kCTFontAttributeName value:(__bridge id)ctFont range:NSMakeRange(0, 1)];
-        gCharWidthTbl[j][i++] = [attStr size].width;
-        
-        CFRelease(ctFont);
     }
     
+    
     NSMutableString *str = [NSMutableString string];
-    for (int i = 0; i < 16; i++) {
-        [str appendString:[NSString stringWithFormat:@"%f ", gCharWidthTbl[0][i]]];
+    for (int i = 0; i < 20; i++) {
+        [str appendString:[NSString stringWithFormat:@"%f ", gCharWidthTbl[gSettingMainFontLevel][0][i]]];
     }
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, str);
 }
 
-CGFloat getCharWidth(int level, NSString *s) {
+CGFloat getCharWidth(int settingFontLvl, int fontSizeLvl, NSString *s) {
     if ([s isEqual:@"0"]) {
-        return gCharWidthTbl[level][0];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][0];
     } else if ([s isEqual:@"1"]) {
-        return gCharWidthTbl[level][1];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][1];
     } else if ([s isEqual:@"2"]) {
-        return gCharWidthTbl[level][2];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][2];
     } else if ([s isEqual:@"3"]) {
-        return gCharWidthTbl[level][3];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][3];
     } else if ([s isEqual:@"4"]) {
-        return gCharWidthTbl[level][4];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][4];
     } else if ([s isEqual:@"5"]) {
-        return gCharWidthTbl[level][5];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][5];
     } else if ([s isEqual:@"6"]) {
-        return gCharWidthTbl[level][6];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][6];
     } else if ([s isEqual:@"7"]) {
-        return gCharWidthTbl[level][7];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][7];
     } else if ([s isEqual:@"8"]) {
-        return gCharWidthTbl[level][8];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][8];
     } else if ([s isEqual:@"9"]) {
-        return gCharWidthTbl[level][9];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][9];
     } else if ([s isEqual:@"."]) {
-        return gCharWidthTbl[level][10];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][10];
     } else if ([s isEqual:@"+"]) {
-        return gCharWidthTbl[level][11];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][11];
     } else if ([s isEqual:@"-"]) {
-        return gCharWidthTbl[level][12];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][12];
     } else if ([s isEqual:@"×"]) {
-        return gCharWidthTbl[level][13];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][13];
     } else if ([s isEqual:@"("]) {
-        return gCharWidthTbl[level][14];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][14];
     } else if ([s isEqual:@")"]) {
-        return gCharWidthTbl[level][15];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][15];
     } else if ([s isEqual:@"_"]) {
-        return gCharWidthTbl[level][16];
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][16];
+    } else if ([s isEqual:@"%"]) {
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][17];
+    } else if ([s isEqual:@"!"]) {
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][18];
+    } else if ([s isEqual:@","]) {
+        return gCharWidthTbl[settingFontLvl][fontSizeLvl][19];
     } else {
         NSLog(@"%s%i>~%@~ERR~~~~~~~~~", __FUNCTION__, __LINE__, s);
         return 0.0;
@@ -263,10 +305,30 @@ void drawFrame(ViewController *vc, UIView *view, EquationBlock *parentBlock) {
             layer.contentsScale = [UIScreen mainScreen].scale;
             layer.name = @"drawframe";
             layer.backgroundColor = [UIColor clearColor].CGColor;
+            layer.frame = block.mainFrame;
+            layer.delegate = vc;
+            [view.layer addSublayer: layer];
+            [layer setNeedsDisplay];
+            
+            layer = [CALayer layer];
+            layer.contentsScale = [UIScreen mainScreen].scale;
+            layer.name = @"drawframe";
+            layer.backgroundColor = [UIColor clearColor].CGColor;
             layer.frame = block.frame;
             layer.delegate = vc;
             [view.layer addSublayer: layer];
             [layer setNeedsDisplay];
+            
+            if (block.rootNum != nil) {
+                layer = [CALayer layer];
+                layer.contentsScale = [UIScreen mainScreen].scale;
+                layer.name = @"drawframe";
+                layer.backgroundColor = [UIColor clearColor].CGColor;
+                layer.frame = block.rootNum.frame;
+                layer.delegate = vc;
+                [view.layer addSublayer: layer];
+                [layer setNeedsDisplay];
+            }
             
             drawFrame(vc, view, block.content);
         }

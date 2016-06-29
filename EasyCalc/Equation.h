@@ -20,7 +20,9 @@
 @property (weak) CalcBoard *par;
 @property EquationTextLayer *equalsign;
 @property EquationTextLayer *result;
-@property CGFloat maxRootHeight;
+@property UILabel *timeRec;
+@property CALayer *separator;
+@property int mainFontLevel;
 
 //-(id) init;
 //-(id) init : (CGPoint)downLeft : (CGRect)dspFrame : (ViewController *)vc;
@@ -29,6 +31,8 @@
 -(void) dumpEverything : (EquationBlock *)eb;
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point;
 -(void)removeElement:(id)blk;
--(void) moveUp : (CGFloat)distance;
+-(void) moveUpDown : (CGFloat)distance;
+-(void) formatResult:(NSNumber *)res;
+-(void) destroyWithAnim;
 -(void) destroy;
 @end
