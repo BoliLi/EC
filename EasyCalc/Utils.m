@@ -201,7 +201,7 @@ id locaLastLyr(Equation *e, id blk) {
 //    return;
 //}
 
-id getPrevBlk(Equation *E, id curBlk) {
+id getPrevBlk(id curBlk) {
     if ([curBlk isMemberOfClass:[EquationBlock class]]) {
         EquationBlock *eb = curBlk;
         if (eb.roll == ROLL_ROOT) {
@@ -211,7 +211,7 @@ id getPrevBlk(Equation *E, id curBlk) {
         if ([eb.parent isMemberOfClass:[EquationBlock class]]) {
             EquationBlock *par = eb.parent;
             if (eb.c_idx == 0) {
-                return getPrevBlk(E, par);
+                return getPrevBlk(par);
             } else {
                 id b = [par.children objectAtIndex:eb.c_idx - 1];
                 
@@ -229,7 +229,7 @@ id getPrevBlk(Equation *E, id curBlk) {
             RadicalBlock *rb = eb.parent;
             EquationBlock *par = rb.parent;
             if (rb.c_idx == 0) {
-                return getPrevBlk(E, par);
+                return getPrevBlk(par);
             } else {
                 id b = [par.children objectAtIndex:rb.c_idx - 1];
                 
@@ -247,7 +247,7 @@ id getPrevBlk(Equation *E, id curBlk) {
             WrapedEqTxtLyr *wetl = eb.parent;
             EquationBlock *par = wetl.parent;
             if (wetl.c_idx == 0) {
-                return getPrevBlk(E, par);
+                return getPrevBlk(par);
             } else {
                 id b = [par.children objectAtIndex:wetl.c_idx - 1];
                 
@@ -272,7 +272,7 @@ id getPrevBlk(Equation *E, id curBlk) {
         RadicalBlock *rb = curBlk;
         EquationBlock *par = rb.parent;
         if (rb.c_idx == 0) {
-            return getPrevBlk(E, par);
+            return getPrevBlk(par);
         } else {
             id b = [par.children objectAtIndex:rb.c_idx - 1];
             
@@ -290,7 +290,7 @@ id getPrevBlk(Equation *E, id curBlk) {
         WrapedEqTxtLyr *wetl = curBlk;
         EquationBlock *par = wetl.parent;
         if (wetl.c_idx == 0) {
-            return getPrevBlk(E, par);
+            return getPrevBlk(par);
         } else {
             id b = [par.children objectAtIndex:wetl.c_idx - 1];
             
@@ -310,17 +310,17 @@ id getPrevBlk(Equation *E, id curBlk) {
         return [par.children objectAtIndex:bar.c_idx - 1];
     } else if ([curBlk isMemberOfClass:[EquationTextLayer class]]) {
         EquationTextLayer *layer = curBlk;
-        id par = layer.parent;
-        if (layer.c_idx == 0) { //parent is rb, eb and p
-            return getPrevBlk(E, par);
+        EquationBlock *par = layer.parent;
+        if (layer.c_idx == 0) {
+            return getPrevBlk(par);
         } else {
-            id b = [((EquationBlock *)par).children objectAtIndex:layer.c_idx - 1];
+            id b = [par.children objectAtIndex:layer.c_idx - 1];
             
             if ([b isMemberOfClass:[FractionBarLayer class]]) {
                 if (layer.c_idx < 2) {
                     return nil;
                 } else {
-                    return [((EquationBlock *)par).children objectAtIndex:layer.c_idx - 2];
+                    return [par.children objectAtIndex:layer.c_idx - 2];
                 }
             } else {
                 return b;
@@ -330,7 +330,7 @@ id getPrevBlk(Equation *E, id curBlk) {
         Parentheses *p = curBlk;
         EquationBlock *par = p.parent;
         if (p.c_idx == 0) {
-            return getPrevBlk(E, par);
+            return getPrevBlk(par);
         } else {
             id b = [par.children objectAtIndex:p.c_idx - 1];
             

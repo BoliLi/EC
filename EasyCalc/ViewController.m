@@ -3808,67 +3808,7 @@ static UIView *testview;
 
 - (void)handleDelete {
     if ([gCurCB.curBlk isMemberOfClass:[EquationBlock class]]) {
-        EquationBlock *eb = gCurCB.curBlk;
-        if (gCurCB.insertCIdx == eb.c_idx) {
-            id pre = getPrevBlk(gCurCB.curEq, eb);
-            if (pre == nil) {
-                NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-                return;
-            }
-            
-            EquationBlock *par = eb.parent;
-            if (eb.c_idx == 0 || [[par.children objectAtIndex:eb.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) {
-                if ([pre isMemberOfClass:[EquationTextLayer class]]) {
-                    EquationTextLayer *layer = pre;
-                    if (layer.fontLvl == eb.fontLvl) {
-                        (void)locaLastLyr(gCurCB.curEq, pre);
-                    } else { //Switch from expo to base in a same text layer
-                        cfgEqnBySlctBlk(gCurCB.curEq, layer, CGPointMake(layer.frame.origin.x + layer.frame.size.width - 1.0, layer.frame.origin.y + 1.0));
-                    }
-                } else if ([pre isMemberOfClass:[Parentheses class]]) {
-                    Parentheses *p = pre;
-                    if (p.fontLvl == eb.fontLvl) {
-                        (void)locaLastLyr(gCurCB.curEq, pre);
-                    } else { //Switch from expo to base in a same text layer
-                        cfgEqnBySlctBlk(gCurCB.curEq, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
-                    }
-                } else {
-                    (void)locaLastLyr(gCurCB.curEq, pre);
-                }
-            } else {
-                if ([pre isMemberOfClass:[EquationTextLayer class]]) {
-                    EquationTextLayer *l = pre;
-                    if (l.expo != nil) {
-                        (void)locaLastLyr(gCurCB.curEq, l);
-                    } else {
-                        if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) { // 1 char num/op/empty
-                            [gCurCB.curEq removeElement:l];
-                        } else {
-                            CGFloat orgW = l.mainFrame.size.width;
-                            [l delNumCharAt:(int)l.strLenTbl.count - 1];
-                            CGFloat incrWidth = l.mainFrame.size.width - orgW;
-                            [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
-                            [gCurCB.curEq.root adjustElementPosition];
-                            cfgEqnBySlctBlk(gCurCB.curEq, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
-                        }
-                    }
-                } else if ([pre isMemberOfClass:[Parentheses class]]) {
-                    Parentheses *p = pre;
-                    if (p.expo == nil) {
-                        [gCurCB.curEq removeElement:pre];
-                    } else {
-                        (void)locaLastLyr(gCurCB.curEq, pre);
-                    }
-                } else {
-                    (void)locaLastLyr(gCurCB.curEq, pre);
-                }
-            }
-        } else if (gCurCB.insertCIdx == eb.c_idx + 1) {
-            (void)locaLastLyr(gCurCB.curEq, eb);
-        } else {
-            NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
-            return;
-        }
+        
     } else if ([gCurCB.curBlk isMemberOfClass:[RadicalBlock class]]) {
         RadicalBlock *rb = gCurCB.curBlk;
         if (gCurCB.insertCIdx == rb.c_idx) {

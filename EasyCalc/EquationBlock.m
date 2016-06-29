@@ -15,6 +15,7 @@
 #import "WrapedEqTxtLyr.h"
 #import "Parentheses.h"
 #import "CalcBoard.h"
+#import "Utils.h"
 
 @implementation EquationBlock
 @synthesize children;
@@ -1611,6 +1612,85 @@
     
     [self.children removeAllObjects];
     bar = nil;
+}
+
+-(void) handleDelete {
+    Equation *equation = self.ancestor;
+    CalcBoard *calcBoard = equation.par;
+    
+    
+    if (calcBoard.insertCIdx == self.c_idx) {
+        if (self.roll == ROLL_ROOT) { //Do nothing
+            return;
+        } else if (self.roll == ROLL_ROOT_ROOT || self.roll == ROLL_WRAP_ROOT) { // Get parent's previous block
+            id pre = getPrevBlk(self.parent);
+            if (pre == nil) {
+                return;
+            }
+            
+            (void)locaLastLyr(equation, pre);
+            return;
+        } else if (self.roll == ROLL_EXPO_ROOT) { // Get parent text layer or parenth
+            if ([self.parent isMemberOfClass:[EquationTextLayer class]]) { // Text layer
+                EquationTextLayer *l = self.parent;
+                cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                return;
+            } else { // Parenth, get previous block
+                Parentheses *p = self.parent;
+                id pre = getPrevBlk(p);
+                if (pre == nil) {
+                    return;
+                }
+                
+                (void)locaLastLyr(equation, pre);
+            }
+            return;
+        }
+        
+        id pre = getPrevBlk(self);
+        if (pre == nil) {
+            return;
+        }
+        
+        EquationBlock *par = self.parent; // Parent can only be EB as self is not ROLL_ROOT_ROOT
+        
+        if (self.c_idx == 0 || [[par.children objectAtIndex:self.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) { // Locate last text layer in previous block, no need to delete
+            (void)locaLastLyr(equation, pre);
+            return;
+        } else { // If previous block is text layer or parenth may need to delete character. Otherwise just locate last text layer in previous block.
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                if (l.expo != nil) {
+                    (void)locaLastLyr(equation, l);
+                } else {
+                    if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) { // 1 char num/op/empty
+                        [equation removeElement:l];
+                    } else {
+                        CGFloat orgW = l.mainFrame.size.width;
+                        [l delNumCharAt:(int)l.strLenTbl.count - 1];
+                        CGFloat incrWidth = l.mainFrame.size.width - orgW;
+                        [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
+                        [equation.root adjustElementPosition];
+                        cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                    }
+                }
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                if (p.expo == nil) {
+                    [equation removeElement:pre];
+                } else {
+                    (void)locaLastLyr(equation, pre);
+                }
+            } else {
+                (void)locaLastLyr(equation, pre);
+            }
+        }
+    } else if (calcBoard.insertCIdx == self.c_idx + 1) {
+        (void)locaLastLyr(equation, self);
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
+    }
 }
 
 -(void) destroy {
