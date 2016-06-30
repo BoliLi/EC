@@ -399,7 +399,7 @@
         }
     }
     
-    return false;
+    return NO;
 }
 
 - (void)updateCopyBlock:(Equation *)e {
@@ -691,6 +691,126 @@
     }
     
     return YES;
+}
+
+-(void) handlDelete {
+    Equation *equation = self.ancestor;
+    CalcBoard *calcBoard = equation.par;
+
+    if (calcBoard.insertCIdx == self.c_idx) {
+        if (self.type == TEXTLAYER_EMPTY) { // If expo != empty, then get previous block, otherwise remove self
+            if ([self isExpoEmpty]) {
+                [equation removeElement:self];
+            } else {
+                id pre = getPrevBlk(self);
+                if (pre == nil) {
+                    return;
+                }
+                (void)locaLastLyr(equation, pre);
+            }
+            return;
+        }
+
+        if (self.roll == ROLL_ROOT_NUM) { // Root number, get parent's(Radical block) previous block
+            id pre = getPrevBlk(self.parent);
+            if (pre == nil) {
+                return;
+            }
+            
+            (void)locaLastLyr(equation, pre);
+            return;
+        }
+
+        id pre = getPrevBlk(self);
+        if (pre == nil) {
+            return;
+        }
+
+        EquationBlock *par = self.parent; // Parent can only be EB as self is not ROLL_ROOT_NUM
+
+        if (self.c_idx == 0) { // Consider the cases that from expo switch to base
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                if (l.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, l);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                }
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                if (p.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, p);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
+                }
+            } else {
+                (void)locaLastLyr(equation, pre);
+            }
+            return;
+        } else if ([[par.children objectAtIndex:self.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) { // Locate last text layer in previous block, no need to delete
+            (void)locaLastLyr(equation, pre);
+            return;
+        } else { // If previous block is text layer or parenth may need to delete character. Otherwise just locate last text layer in previous block.
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                calcBoard.insertCIdx = l.c_idx + 1;
+                [l handleDelete];
+                return;
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                calcBoard.insertCIdx = p.c_idx + 1;
+                [p handleDelete];
+                return;
+            } else {
+                (void)locaLastLyr(equation, pre);
+                return;
+            }
+        }
+    } else if (calcBoard.insertCIdx == self.c_idx + 1) {
+        if (self.expo != nil && calcBoard.curTxtLyr == nil) { // Expo != nil, Not at base
+            (void)locaLastLyr(equation, self);
+            return;
+        } else if (self.expo != nil && calcBoard.curTxtLyr != nil) { // Expo != nil, At base
+            if (self.strLenTbl.count == 2 && calcBoard.txtInsIdx == 1) { // Number 1 char, replace base and keep expo
+                CGFloat incrWidth = [self replaceWithEmpty];
+                [par updateFrameWidth:incrWidth :self.roll];
+                [equation.root adjustElementPosition];
+                calcBoard.view.cursor.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CURSOR_W, calcBoard.curFontH);
+                calcBoard.txtInsIdx = 0;
+                return;
+            } else { // Number > 1 char
+                CGFloat orgW = self.mainFrame.size.width;
+                CGFloat offset = [self delNumCharAt:calcBoard.txtInsIdx--];
+                CGFloat incrWidth = self.mainFrame.size.width - orgW;
+                [(EquationBlock *)calcBoard.curParent updateFrameWidth:incrWidth :calcBoard.curRoll];
+                [calcBoard.curEq.root adjustElementPosition];
+                calcBoard.view.cursor.frame = CGRectMake(self.frame.origin.x + offset, self.frame.origin.y, CURSOR_W, calcBoard.curFontH);
+                if (calcBoard.txtInsIdx == 0) {
+                    calcBoard.insertCIdx = self.c_idx;
+                }
+                return;
+            }
+        } else { // Expo == nil
+            if (self.strLenTbl.count == 2 || self.strLenTbl.count == 1) { // 1 char num/op, normally count should not == 1
+                [equation removeElement:self];
+                return;
+            } else { // Number > 1 char
+                CGFloat orgW = self.mainFrame.size.width;
+                CGFloat offset = [self delNumCharAt:calcBoard.txtInsIdx--];
+                CGFloat incrWidth = self.mainFrame.size.width - orgW;
+                [self.parent updateFrameWidth:incrWidth :self.roll];
+                [equation.root adjustElementPosition];
+                calcBoard.view.cursor.frame = CGRectMake(self.frame.origin.x + offset, self.frame.origin.y, CURSOR_W, calcBoard.curFontH);
+                if (calcBoard.txtInsIdx == 0) {
+                    calcBoard.insertCIdx = self.c_idx;
+                }
+                return;
+            }
+        }
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
+    }
 }
 
 -(void) destroyWithAnim {

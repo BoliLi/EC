@@ -1654,33 +1654,37 @@
         
         EquationBlock *par = self.parent; // Parent can only be EB as self is not ROLL_ROOT_ROOT
         
-        if (self.c_idx == 0 || [[par.children objectAtIndex:self.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) { // Locate last text layer in previous block, no need to delete
+        if (self.c_idx == 0) { // Consider the cases that from expo switch to base
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                if (l.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, l);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                }
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                if (p.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, p);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
+                }
+            } else {
+                (void)locaLastLyr(equation, pre);
+            }
+            return;
+        } else if ([[par.children objectAtIndex:self.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) { // Locate last text layer in previous block, no need to delete
             (void)locaLastLyr(equation, pre);
             return;
         } else { // If previous block is text layer or parenth may need to delete character. Otherwise just locate last text layer in previous block.
             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                 EquationTextLayer *l = pre;
-                if (l.expo != nil) {
-                    (void)locaLastLyr(equation, l);
-                } else {
-                    if (l.strLenTbl.count == 2 || l.strLenTbl.count == 1) { // 1 char num/op/empty
-                        [equation removeElement:l];
-                    } else {
-                        CGFloat orgW = l.mainFrame.size.width;
-                        [l delNumCharAt:(int)l.strLenTbl.count - 1];
-                        CGFloat incrWidth = l.mainFrame.size.width - orgW;
-                        [(EquationBlock *)l.parent updateFrameWidth:incrWidth :l.roll];
-                        [equation.root adjustElementPosition];
-                        cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
-                    }
-                }
+                calcBoard.insertCIdx = l.c_idx + 1;
+                [l handleDelete];
             } else if ([pre isMemberOfClass:[Parentheses class]]) {
                 Parentheses *p = pre;
-                if (p.expo == nil) {
-                    [equation removeElement:pre];
-                } else {
-                    (void)locaLastLyr(equation, pre);
-                }
+                calcBoard.insertCIdx = p.c_idx + 1;
+                [p handleDelete];
             } else {
                 (void)locaLastLyr(equation, pre);
             }

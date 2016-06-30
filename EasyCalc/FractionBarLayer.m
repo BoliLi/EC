@@ -139,6 +139,10 @@
     return NO;
 }
 
+-(void) handlDelete {
+    return;
+}
+
 -(void) destroyWithAnim {
     CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"opacity"];
     animation.fromValue = [NSNumber numberWithFloat:1.0];

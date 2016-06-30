@@ -333,6 +333,61 @@
     return YES;
 }
 
+-(void) handlDelete {
+    Equation *equation = self.ancestor;
+    CalcBoard *calcBoard = equation.par;
+
+    if (calcBoard.insertCIdx == self.c_idx) {
+        id pre = getPrevBlk(self);
+        if (pre == nil) {
+            return;
+        }
+
+        EquationBlock *par = self.parent; // Parent can only be EB
+
+        if (self.c_idx == 0) { // Consider the cases that from expo switch to base
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                if (l.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, l);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, l, CGPointMake(l.frame.origin.x + l.frame.size.width - 1.0, l.frame.origin.y + 1.0));
+                }
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                if (p.fontLvl == self.fontLvl) { // pre is with the same parent
+                    (void)locaLastLyr(equation, p);
+                } else { //Switch from expo to base in a same text layer
+                    cfgEqnBySlctBlk(equation, p, CGPointMake(p.frame.origin.x + p.frame.size.width - 1.0, p.frame.origin.y + 1.0));
+                }
+            } else {
+                (void)locaLastLyr(equation, pre);
+            }
+            return;
+        } else if ([[par.children objectAtIndex:self.c_idx - 1] isMemberOfClass:[FractionBarLayer class]]) { // Locate last text layer in previous block, no need to delete
+            (void)locaLastLyr(equation, pre);
+            return;
+        } else { // If previous block is text layer or parenth may need to delete character. Otherwise just locate last text layer in previous block.
+            if ([pre isMemberOfClass:[EquationTextLayer class]]) {
+                EquationTextLayer *l = pre;
+                calcBoard.insertCIdx = l.c_idx + 1;
+                [l handleDelete];
+            } else if ([pre isMemberOfClass:[Parentheses class]]) {
+                Parentheses *p = pre;
+                calcBoard.insertCIdx = p.c_idx + 1;
+                [p handleDelete];
+            } else {
+                (void)locaLastLyr(equation, pre);
+            }
+        }
+    } else if (calcBoard.insertCIdx == self.c_idx + 1) {
+        (void)locaLastLyr(equation, self);
+    } else {
+        NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
+        return;
+    }
+}
+
 -(void) destroyWithAnim {
     [self.content destroyWithAnim];
     
