@@ -49,6 +49,8 @@
 -(void) shake;
 -(CGFloat) replaceWithEmpty;
 -(BOOL) isAllowed;
+-(void) handleDelete;
+
 -(void) destroyWithAnim;
 -(void) destroy;
 

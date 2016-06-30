@@ -37,7 +37,8 @@
     } else if (term.type == DDParserTermTypeGroup) {
         return [self _resolveGroupTerm:(_DDGroupTerm *)term error:error];
     } else {
-        [NSException raise:NSInternalInconsistencyException format:@"Attempting to resolve unknown term: %@", term];
+        return NO;
+        //[NSException raise:NSInternalInconsistencyException format:@"Attempting to resolve unknown term: %@", term];
     }
     
     return NO;

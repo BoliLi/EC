@@ -307,7 +307,7 @@
 -(id) lookForElementByPoint : (EquationBlock *)rootB : (CGPoint) point {
     
     if (!CGRectContainsPoint(rootB.mainFrame, point)) {
-        if (self.result != nil && CGRectContainsPoint(self.result.frame, point) && isNumber([self.result.string string])) {
+        if (self.result != nil && CGRectContainsPoint(self.result.frame, point) && isNumber(self.result.pureStr)) {
             return self.result;
         } else {
             return nil;
@@ -926,7 +926,7 @@
                     if (parent.roll == ROLL_ROOT) {
                         return;  // Do nothing
                     } else {
-                        id pre = getPrevBlk(self, l);
+                        id pre = getPrevBlk(l);
                         if (pre != nil) {
                             if ([pre isMemberOfClass:[EquationTextLayer class]]) {
                                 EquationTextLayer *layer = pre;
@@ -1772,6 +1772,8 @@
     }
     
     self.result = [[EquationTextLayer alloc] init:[formatter stringFromNumber:res] :gCurCB.curEq :TEXTLAYER_NUM];
+    formatter.numberStyle = NSNumberFormatterNoStyle;
+    self.result.pureStr = [NSMutableString stringWithString:[formatter stringFromNumber:res]];
     return;
 }
 

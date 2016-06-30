@@ -16,6 +16,7 @@
 #import "Parentheses.h"
 #import "CalcBoard.h"
 #import "UIView+Easing.h"
+#import "Utils.h"
 
 @implementation WrapedEqTxtLyr
 @synthesize guid;
@@ -333,7 +334,7 @@
     return YES;
 }
 
--(void) handlDelete {
+-(void) handleDelete {
     Equation *equation = self.ancestor;
     CalcBoard *calcBoard = equation.par;
 

@@ -1285,7 +1285,7 @@ static UIView *testview;
     curX += btnGridWidth;
     
     btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
-    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    btn = makeButton(btnFrame, @"time", buttonFont);
     [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
     [secondKbView addSubview:btn];
     curX = 0.0;
@@ -1686,6 +1686,11 @@ static UIView *testview;
     NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, self.view.subviews);
     
     [self foreGroundInit:gCurCB];
+    NSDateFormatter *format = [[NSDateFormatter alloc] init];
+    [format setDateFormat:@"MM-dd HH:mm:ss:SSS"];
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, [format stringFromDate:[NSDate date]]);
+    NSString *myString = [NSString stringWithFormat:@"Stop:%@", [format stringFromDate:[NSDate date]]];
+    [gTimeTable addObject:myString];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -4223,6 +4228,13 @@ static UIView *testview;
         [user setObject:@"1.0" forKey:@"version"];
         [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
         [user setObject:gTemplateListData forKey:@"gTemplateList"];
+        
+        NSMutableArray *orgArr = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTimeTable"]];
+        if (orgArr != nil) {
+            gTimeTable = [NSMutableArray arrayWithArray:[orgArr arrayByAddingObjectsFromArray:gTimeTable]];
+        }
+        NSData *gTimeTableData = [NSKeyedArchiver archivedDataWithRootObject:gTimeTable];
+        [user setObject:gTimeTableData forKey:@"gTimeTable"];
         NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
     } else if([[btn currentTitle]  isEqual: @"load"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
@@ -4252,7 +4264,11 @@ static UIView *testview;
         } else {
             NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
         }
-        
+    } else if([[btn currentTitle]  isEqual: @"time"]) {
+        NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
+        NSMutableArray *timeTable = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTimeTable"]];
+        for (NSString *str in timeTable)
+            NSLog(@"%@", str);
     } else if([[btn currentTitle]  isEqual: @"reset"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
         NSDictionary *dictionary = [user dictionaryRepresentation];

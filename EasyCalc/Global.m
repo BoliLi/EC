@@ -33,6 +33,7 @@ BOOL gSettingThousandSeperator = YES;
 int gSettingMaxFractionDigits = 10;
 NSNumber *gSettingMaxDecimal;
 int gSettingMainFontLevel = 1;
+NSMutableArray *gTimeTable;
 
 @implementation NSMutableArray (EasyCalc)
 - (void)reverse {

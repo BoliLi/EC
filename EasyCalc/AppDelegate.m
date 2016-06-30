@@ -23,6 +23,13 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     gCalcBoardList = [NSMutableArray array];
+    gTimeTable = [NSMutableArray array];
+    
+    NSDateFormatter *format = [[NSDateFormatter alloc] init];
+    [format setDateFormat:@"MM-dd HH:mm:ss:SSS"];
+    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, [format stringFromDate:[NSDate date]]);
+    NSString *myString = [NSString stringWithFormat:@"Start:%@", [format stringFromDate:[NSDate date]]];
+    [gTimeTable addObject:myString];
     
     gDspBGColor = [UIColor flatMintColorDark];
     gDspFontColor = [UIColor colorWithContrastingBlackOrWhiteColorOn:(UIColor *)gDspBGColor isFlat:YES];
@@ -57,6 +64,13 @@
     [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
     NSData *gTemplateListData = [NSKeyedArchiver archivedDataWithRootObject:gTemplateList];
     [user setObject:gTemplateListData forKey:@"gTemplateList"];
+    
+    NSMutableArray *orgArr = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTimeTable"]];
+    if (orgArr != nil) {
+        gTimeTable = [NSMutableArray arrayWithArray:[orgArr arrayByAddingObjectsFromArray:gTimeTable]];
+    }
+    NSData *gTimeTableData = [NSKeyedArchiver archivedDataWithRootObject:gTimeTable];
+    [user setObject:gTimeTableData forKey:@"gTimeTable"];
     [user synchronize];
 }
 
@@ -77,6 +91,15 @@
     [user setInteger:gCurCBIdx forKey:@"gCurCBIdx"];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
     [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
+    NSData *gTemplateListData = [NSKeyedArchiver archivedDataWithRootObject:gTemplateList];
+    [user setObject:gTemplateListData forKey:@"gTemplateList"];
+    
+    NSMutableArray *orgArr = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTimeTable"]];
+    if (orgArr != nil) {
+        gTimeTable = [NSMutableArray arrayWithArray:[orgArr arrayByAddingObjectsFromArray:gTimeTable]];
+    }
+    NSData *gTimeTableData = [NSKeyedArchiver archivedDataWithRootObject:gTimeTable];
+    [user setObject:gTimeTableData forKey:@"gTimeTable"];
     [user synchronize];
     [self saveContext];
 }

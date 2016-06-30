@@ -34,6 +34,7 @@
 -(EquationTextLayer *) lookForEmptyTxtLyr;
 -(void) shake;
 -(BOOL) isAllowed;
+-(void) handleDelete;
 -(void) destroy;
 -(void) destroyWithAnim;
 @end

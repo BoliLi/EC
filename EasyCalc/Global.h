@@ -93,6 +93,7 @@ extern BOOL gSettingThousandSeperator;
 extern int gSettingMaxFractionDigits;
 extern NSNumber *gSettingMaxDecimal;
 extern int gSettingMainFontLevel;
+extern NSMutableArray *gTimeTable;
 
 @interface NSMutableArray (EasyCalc)
 - (void)reverse;

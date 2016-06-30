@@ -61,6 +61,7 @@
         rootB.mainFrame = CGRectMake(gCurCB.downLeftBasePoint.x, gCurCB.downLeftBasePoint.y - rootB.mainFrame.size.height, rootB.mainFrame.size.width, rootB.mainFrame.size.height);
         [rootB adjustElementPosition];
         [gCurCB.curBlk updateCalcBoardInfo];
+        [gCurCB adjustEquationHistoryPostion];
     }
 }
 

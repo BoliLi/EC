@@ -17,6 +17,7 @@
 #import "CalcBoard.h"
 #import "UIView+Easing.h"
 #import <ChameleonFramework/Chameleon.h>
+#import "Utils.h"
 
 @implementation EquationTextLayer
 @synthesize parent;
@@ -693,7 +694,7 @@
     return YES;
 }
 
--(void) handlDelete {
+-(void) handleDelete {
     Equation *equation = self.ancestor;
     CalcBoard *calcBoard = equation.par;
 
@@ -773,7 +774,7 @@
         } else if (self.expo != nil && calcBoard.curTxtLyr != nil) { // Expo != nil, At base
             if (self.strLenTbl.count == 2 && calcBoard.txtInsIdx == 1) { // Number 1 char, replace base and keep expo
                 CGFloat incrWidth = [self replaceWithEmpty];
-                [par updateFrameWidth:incrWidth :self.roll];
+                [self.parent updateFrameWidth:incrWidth :self.roll];
                 [equation.root adjustElementPosition];
                 calcBoard.view.cursor.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, CURSOR_W, calcBoard.curFontH);
                 calcBoard.txtInsIdx = 0;

@@ -16,6 +16,7 @@
 #import "Parentheses.h"
 #import "CalcBoard.h"
 #import "UIView+Easing.h"
+#import "Utils.h"
 
 @implementation RadicalBlock
 @synthesize content;
@@ -355,7 +356,7 @@
     [self addAnimation:animation forKey:@"remove"];
 }
 
--(void) handlDelete {
+-(void) handleDelete {
     Equation *equation = self.ancestor;
     CalcBoard *calcBoard = equation.par;
 

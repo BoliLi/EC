@@ -139,7 +139,7 @@
     return NO;
 }
 
--(void) handlDelete {
+-(void) handleDelete {
     return;
 }
 
