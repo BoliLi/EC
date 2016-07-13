@@ -71,6 +71,7 @@
         clayer.frame = CGRectMake(rootPos.x, rootPos.y, 3.0, calcB.curFontH);
         clayer.delegate = vc;
         [self.layer addSublayer:clayer];
+        [clayer setNeedsDisplay];
         
         CABasicAnimation *anim = [CABasicAnimation animationWithKeyPath:@"hidden"];
         anim.fromValue = [NSNumber numberWithBool:YES];
@@ -79,7 +80,6 @@
         anim.autoreverses = YES;
         anim.repeatCount = HUGE_VALF;
         [clayer addAnimation:anim forKey:nil];
-        [clayer setNeedsDisplay];
         
         self.cursor = clayer;
     }

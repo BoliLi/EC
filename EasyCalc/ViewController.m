@@ -27,6 +27,7 @@
 #import "MGSwipeButton.h"
 #import "EquationTemplate.h"
 #import "SettingViewController.h"
+#import <AudioToolbox/AudioToolbox.h>
 
 static UIView *testview;
 
@@ -901,29 +902,30 @@ static UIView *testview;
         gCurCBIdx = 15;
     }
     gCurCB = [gCalcBoardList objectAtIndex:gCurCBIdx];
-    [gCurCB.view refreshCursorAnim];
+    
     [UIView transitionFromView:orgView toView:gCurCB.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromLeft completion:^(BOOL finished) {
         // What to do when its finished.
     }];
+    [gCurCB.view refreshCursorAnim];
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
 -(void)handleDspViewSwipeLeft: (UISwipeGestureRecognizer *)gesture {
     NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:gCurCB];
     [user setObject:data forKey:[NSString stringWithFormat:@"calcboard%li", (long)gCurCBIdx]];
-    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, dspConView.subviews);
+    //NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, dspConView.subviews);
     DisplayView *orgView = gCurCB.view;
     gCurCBIdx++;
     gCurCBIdx %= 16;
     gCurCB = [gCalcBoardList objectAtIndex:gCurCBIdx];
     
-    [gCurCB.view refreshCursorAnim];
-    
-    NSLog(@"%s%i>~%@~%@~%@~%@~%@~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.cursor.frame), orgView, gCurCB.view, gCurCB.view.subviews, gCurCB.view.layer.sublayers);
+    //NSLog(@"%s%i>~%@~%@~%@~%@~%@~~~~~", __FUNCTION__, __LINE__, NSStringFromCGRect(gCurCB.view.cursor.frame), orgView, gCurCB.view, gCurCB.view.subviews, gCurCB.view.layer.sublayers);
     [UIView transitionFromView:orgView toView:gCurCB.view duration:0.4 options:UIViewAnimationOptionTransitionFlipFromRight completion:^(BOOL finished) {
         // What to do when its finished.
     }];
-    NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, dspConView.subviews);
+    [gCurCB.view refreshCursorAnim];
+    NSLog(@"%s%i>~~~~~~~~~~~", __FUNCTION__, __LINE__);
 }
 
 -(void)handleKbViewSwipeRight: (UISwipeGestureRecognizer *)gesture {
@@ -1186,7 +1188,7 @@ static UIView *testview;
     curX += btnGridWidth;
     
     btnFrame = CGRectMake(curX + 1.0, curY + 1.0, btnGridWidth - 2.0, btnGridHeight - 2.0);
-    btn = makeButton(btnFrame, @"TBD", buttonFont);
+    btn = makeButton(btnFrame, @"KB", buttonFont);
     [btn addTarget:self action:@selector(btnClicked:) forControlEvents:UIControlEventTouchUpInside];
     [secondKbView addSubview:btn];
     curX += btnGridWidth;
@@ -4163,6 +4165,7 @@ static UIView *testview;
 }
 
 -(void)btnClicked: (UIButton *)btn {
+    AudioServicesPlaySystemSound(1105);
     
     if([[btn currentTitle]  isEqual: @"DUMP"]) {
         NSLog(@"-----------curEq--------------");
@@ -4235,6 +4238,8 @@ static UIView *testview;
         }
         NSData *gTimeTableData = [NSKeyedArchiver archivedDataWithRootObject:gTimeTable];
         [user setObject:gTimeTableData forKey:@"gTimeTable"];
+        [gTimeTable removeAllObjects];
+        
         NSLog(@"%s%i>~%i~~~~~~~~~~", __FUNCTION__, __LINE__, [user synchronize]);
     } else if([[btn currentTitle]  isEqual: @"load"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
@@ -4268,6 +4273,8 @@ static UIView *testview;
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
         NSMutableArray *timeTable = [NSKeyedUnarchiver unarchiveObjectWithData:[user objectForKey:@"gTimeTable"]];
         for (NSString *str in timeTable)
+            NSLog(@"%@", str);
+        for (NSString *str in gTimeTable)
             NSLog(@"%@", str);
     } else if([[btn currentTitle]  isEqual: @"reset"]) {
         NSUserDefaults *user = [NSUserDefaults standardUserDefaults];
@@ -4307,6 +4314,10 @@ static UIView *testview;
         [self handleWETLInput:@"log2"];
     } else if([[btn currentTitle]  isEqual: @"ln"]) {
         [self handleWETLInput:@"ln"];
+    } else if([[btn currentTitle]  isEqual: @"KB"]) {
+        for (id subv in mainKbView.subviews) {
+            NSLog(@"%s%i>~%@~~~~~~~~~~", __FUNCTION__, __LINE__, subv);
+        }
     } else
         NSLog(@"%s%i>~~ERR~~~~~~~~~", __FUNCTION__, __LINE__);
 }

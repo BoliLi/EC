@@ -21,6 +21,7 @@
 		A91D825B1CD7A1C9005D82B8 /* HTPressableButtonPrefs.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82551CD7A1C9005D82B8 /* HTPressableButtonPrefs.m */; };
 		A91D825C1CD7A1C9005D82B8 /* UIColor+HTColor.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82571CD7A1C9005D82B8 /* UIColor+HTColor.m */; };
 		A91D825D1CD7A1C9005D82B8 /* UIImage+HTButton.m in Sources */ = {isa = PBXBuildFile; fileRef = A91D82591CD7A1C9005D82B8 /* UIImage+HTButton.m */; };
+		A92142411D3686CD0008C4F9 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A92142401D3686CD0008C4F9 /* AudioToolbox.framework */; };
 		A9256DDA1D09CC4D008A743B /* TableViewCellSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = A9256DD91D09CC4D008A743B /* TableViewCellSlider.m */; };
 		A92A07241CDA616A00FA7FEC /* SaveTemplateDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = A92A07231CDA616A00FA7FEC /* SaveTemplateDialog.m */; };
 		A93F7CB21C62579900B994B4 /* WrapedEqTxtLyr.m in Sources */ = {isa = PBXBuildFile; fileRef = A93F7CB11C62579900B994B4 /* WrapedEqTxtLyr.m */; };
@@ -118,6 +119,8 @@
 		A91D82571CD7A1C9005D82B8 /* UIColor+HTColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+HTColor.m"; sourceTree = "<group>"; };
 		A91D82581CD7A1C9005D82B8 /* UIImage+HTButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+HTButton.h"; sourceTree = "<group>"; };
 		A91D82591CD7A1C9005D82B8 /* UIImage+HTButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+HTButton.m"; sourceTree = "<group>"; };
+		A921423E1D36864B0008C4F9 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		A92142401D3686CD0008C4F9 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		A9256DD81D09CC4D008A743B /* TableViewCellSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewCellSlider.h; sourceTree = "<group>"; };
 		A9256DD91D09CC4D008A743B /* TableViewCellSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewCellSlider.m; sourceTree = "<group>"; };
 		A92A07221CDA616A00FA7FEC /* SaveTemplateDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SaveTemplateDialog.h; sourceTree = "<group>"; };
@@ -227,6 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A92142411D3686CD0008C4F9 /* AudioToolbox.framework in Frameworks */,
 				4A767EAA5DE488F02810F539 /* Pods.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -251,6 +255,8 @@
 		2B1F0EC1EBD9F54DEE2EB94E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A92142401D3686CD0008C4F9 /* AudioToolbox.framework */,
+				A921423E1D36864B0008C4F9 /* AVFoundation.framework */,
 				28768C22723CAE3D32D013DA /* Pods.framework */,
 			);
 			name = Frameworks;
