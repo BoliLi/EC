@@ -4165,7 +4165,8 @@ static UIView *testview;
 }
 
 -(void)btnClicked: (UIButton *)btn {
-    AudioServicesPlaySystemSound(1105);
+    if (gSettingClickSound)
+        AudioServicesPlaySystemSound(1105);
     
     if([[btn currentTitle]  isEqual: @"DUMP"]) {
         NSLog(@"-----------curEq--------------");

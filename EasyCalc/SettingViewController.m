@@ -19,6 +19,7 @@
 @end
 
 @implementation SettingViewController
+@synthesize prevVC;
 
 -(void)segmentAction:(UISegmentedControl *)Seg{
     NSInteger Index = Seg.selectedSegmentIndex;
@@ -34,11 +35,12 @@
 }
 
 -(void)soundsSetting:(UISwitch *)sw{
-    NSLog(@"section:%i,switch:%i",sw.tag, sw.on);
+    NSLog(@"section:%li,switch:%i",(long)sw.tag, sw.on);
+    gSettingClickSound = sw.on;
 }
 
 -(void)handsSetting:(UISwitch *)sw{
-    NSLog(@"section:%i,switch:%i",sw.tag, sw.on);
+    NSLog(@"section:%li,switch:%i",(long)sw.tag, sw.on);
 }
 
 -(void)selectRightAction:(id)sender

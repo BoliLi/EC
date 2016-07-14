@@ -94,6 +94,8 @@ extern int gSettingMaxFractionDigits;
 extern NSNumber *gSettingMaxDecimal;
 extern int gSettingMainFontLevel;
 extern NSMutableArray *gTimeTable;
+extern BOOL gSettingLeftHanded;
+extern BOOL gSettingClickSound;
 
 @interface NSMutableArray (EasyCalc)
 - (void)reverse;

@@ -34,6 +34,8 @@ int gSettingMaxFractionDigits = 10;
 NSNumber *gSettingMaxDecimal;
 int gSettingMainFontLevel = 1;
 NSMutableArray *gTimeTable;
+BOOL gSettingLeftHanded = NO;
+BOOL gSettingClickSound = YES;
 
 @implementation NSMutableArray (EasyCalc)
 - (void)reverse {

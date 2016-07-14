@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ViewController.h"
 
 @interface SettingViewController : UITableViewController
-
+@property ViewController *prevVC;
 @end
